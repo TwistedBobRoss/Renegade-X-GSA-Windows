@@ -22,12 +22,15 @@
     },
     "image": {
       "name": "ghcr.io/twistedbobross/renegade-x-gsa-windows",
-      "tag": "1.0.1022-ltsc2022-r1"
+      "tag": "1.0.1022-ltsc2022-r2"
     },
     "envs": {
       "RENX_SERVER_NAME": "{gameserver.list_name}",
       "RENX_MAP": "{config_parameter id=\"map\"}",
       "RENX_GAME_CLASS": "{config_parameter id=\"game_class\"}",
+      "RENX_MAP_CYCLE_CLASS": "{config_parameter id=\"map_cycle_class\"}",
+      "RENX_MAP_ROTATION": "{config_parameter id=\"map_rotation\"}",
+      "RENX_MUTATORS": "{config_parameter id=\"mutators\"}",
       "RENX_MAX_PLAYERS": "{gameserver.slot_limit}",
       "RENX_GAME_PORT": "{gameserver.game_port}",
       "RENX_PEER_PORT": "{gameserver.raw_port}",
@@ -36,6 +39,18 @@
       "RENX_WEB_PORT": "{config_parameter id=\"web_port\"}",
       "RENX_ADMIN_PASSWORD": "{config_parameter id=\"admin_password\"}",
       "RENX_SERVER_PASSWORD": "{config_parameter id=\"server_password\"}",
+      "RENX_MOTD": "{config_parameter id=\"motd\"}",
+      "RENX_LISTED": "{config_parameter id=\"listed\"}",
+      "RENX_FIXED_MAP_ROTATION": "{config_parameter id=\"fixed_map_rotation\"}",
+      "RENX_BOTS_DISABLED": "{config_parameter id=\"bots_disabled\"}",
+      "RENX_GDI_BOTS": "{config_parameter id=\"gdi_bots\"}",
+      "RENX_NOD_BOTS": "{config_parameter id=\"nod_bots\"}",
+      "RENX_ALLOW_DOWNLOADS": "{config_parameter id=\"allow_downloads\"}",
+      "RENX_REDIRECT_URL": "{config_parameter id=\"redirect_url\"}",
+      "RENX_REDIRECT_USE_COMPRESSION": "{config_parameter id=\"redirect_use_compression\"}",
+      "RENX_CONTENT_URLS": "{config_parameter id=\"content_urls\"}",
+      "RENX_REFRESH_CONTENT_DOWNLOADS": "{config_parameter id=\"refresh_content_downloads\"}",
+      "RENX_MULTIHOME": "{config_parameter id=\"multihome\"}",
       "RENX_EXTRA_ARGS": "{config_parameter id=\"extra_args\"}"
     },
     "mounts": {
@@ -47,6 +62,16 @@
       "path": "\\renx-data",
       "create": true,
       "type": "normal"
+    },
+    "RenX Custom Content": {
+      "path": "\\renx-data\\CustomContent",
+      "create": true,
+      "type": "normal"
+    },
+    "RenX Logs": {
+      "path": "\\renx-data\\Logs",
+      "create": true,
+      "type": "log"
     }
   },
   "game": {
@@ -64,19 +89,37 @@
       "parameters": {
         "map": {
           "name": "Starting Map",
-          "info": "Initial map to load. Example: CNC-Field, CNC-Walls, DEF-DarkNight, TDM-Deck.",
+          "info": "Initial map to load. Examples: CNC-Field, DEF-DarkNight, TDM-Deck.",
           "type": "text",
           "content": "CNC-Field"
         },
         "game_class": {
-          "name": "Game Class",
-          "info": "RenX_Game.Rx_Game for Command & Conquer maps. RenX_Coop.Rx_Game_Survival for DEF survival maps.",
+          "name": "Game Class Override",
+          "info": "Optional. Leave blank for normal prefix-based Renegade X map loading. Example override: RenX_Coop.Rx_Game_Survival.",
           "type": "text",
-          "content": "RenX_Game.Rx_Game"
+          "content": ""
+        },
+        "map_cycle_class": {
+          "name": "Map Cycle Class",
+          "info": "Class name used in UDKGame.ini map rotation. Default for normal CnC maps is Rx_Game.",
+          "type": "text",
+          "content": "Rx_Game"
+        },
+        "map_rotation": {
+          "name": "Map Rotation",
+          "info": "Comma-separated map names without .udk. Leave blank to keep the existing/default rotation.",
+          "type": "text",
+          "content": "CNC-Field,CNC-Walls,CNC-GoldRush,CNC-Whiteout,CNC-Islands,CNC-LakeSide,CNC-Mesa,CNC-Volcano,CNC-Xmountain,CNC-Canyon,CNC-Complex,CNC-Under"
+        },
+        "mutators": {
+          "name": "Mutators",
+          "info": "Optional comma-separated mutator classes. Example: RenX_ExampleMutators.InfiniteAmmo,RenX_ExampleMutators.SuddenDeath.",
+          "type": "text",
+          "content": ""
         },
         "admin_password": {
-          "name": "Admin Password",
-          "info": "Optional admin password passed into the UDK server URL.",
+          "name": "Admin/RCON Password",
+          "info": "Optional admin password written to UDKGame.ini.",
           "type": "text",
           "content": ""
         },
@@ -86,11 +129,83 @@
           "type": "text",
           "content": ""
         },
+        "motd": {
+          "name": "Message Of The Day",
+          "info": "Optional. The Wiki notes MOTD may be bugged in Renegade X.",
+          "type": "text",
+          "content": ""
+        },
+        "listed": {
+          "name": "List Server",
+          "info": "true shows the server in the launcher/server browser when networking is otherwise correct.",
+          "type": "text",
+          "content": "true"
+        },
+        "fixed_map_rotation": {
+          "name": "Fixed Map Rotation",
+          "info": "true enforces the map list instead of normal voting behavior.",
+          "type": "text",
+          "content": "false"
+        },
+        "bots_disabled": {
+          "name": "Disable Bots",
+          "info": "false allows bots. true disables bots.",
+          "type": "text",
+          "content": "false"
+        },
+        "gdi_bots": {
+          "name": "GDI Bot Count",
+          "info": "Optional launch-time GDI bot count. Leave blank for game default.",
+          "type": "text",
+          "content": ""
+        },
+        "nod_bots": {
+          "name": "NOD Bot Count",
+          "info": "Optional launch-time NOD bot count. Leave blank for game default.",
+          "type": "text",
+          "content": ""
+        },
+        "allow_downloads": {
+          "name": "Allow Downloads",
+          "info": "true allows channel fallback downloads for custom server content.",
+          "type": "text",
+          "content": "true"
+        },
+        "redirect_url": {
+          "name": "HTTP Redirect URL",
+          "info": "Fast custom content download URL. Must have trailing slash and normally must be served from port 80.",
+          "type": "text",
+          "content": "https://community-content.totemarts.services/"
+        },
+        "redirect_use_compression": {
+          "name": "Redirect Uses Compression",
+          "info": "Set true only if your HTTP redirect files are compressed in the format Renegade X expects.",
+          "type": "text",
+          "content": "false"
+        },
+        "content_urls": {
+          "name": "Custom Content URLs",
+          "info": "Optional direct public URLs to .zip, .udk, .u, .upk, .ini, or .int files. Use one URL per line or separate with semicolons.",
+          "type": "text",
+          "content": ""
+        },
+        "refresh_content_downloads": {
+          "name": "Refresh Content Downloads",
+          "info": "false uses cached downloaded content. true redownloads and re-extracts custom content on startup.",
+          "type": "text",
+          "content": "false"
+        },
         "web_port": {
           "name": "Web Port",
           "info": "Renegade X web server listen port inside the container. Default game config uses 6969.",
           "type": "text",
           "content": "6969"
+        },
+        "multihome": {
+          "name": "Multihome IP",
+          "info": "Optional local interface IP passed as -MULTIHOME. Leave blank to bind normally.",
+          "type": "text",
+          "content": ""
         },
         "extra_args": {
           "name": "Extra Launch Args",
