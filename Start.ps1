@@ -96,6 +96,29 @@ function Set-MapRotation {
     Set-IniValue $Path "UTGame.UTGame" "GameSpecificMapCycles" "(GameClassName=`"$CycleClass`",Maps=($escapedMaps))"
 }
 
+function Copy-CustomContentFile {
+    param(
+        [string]$File,
+        [string]$InstallRoot
+    )
+
+    $cookedTarget = Join-Path $InstallRoot "UDKGame\CookedPC"
+    $mapTarget = Join-Path $cookedTarget "Maps\RenX"
+    $configTarget = Join-Path $InstallRoot "UDKGame\Config"
+    $localizationTarget = Join-Path $InstallRoot "UDKGame\Localization\INT"
+
+    New-Item -ItemType Directory -Force -Path $cookedTarget, $mapTarget, $configTarget, $localizationTarget | Out-Null
+
+    $extension = [System.IO.Path]::GetExtension($File).ToLowerInvariant()
+    switch ($extension) {
+        ".udk" { Copy-Item -LiteralPath $File -Destination $mapTarget -Force; break }
+        ".u" { Copy-Item -LiteralPath $File -Destination $cookedTarget -Force; break }
+        ".upk" { Copy-Item -LiteralPath $File -Destination $cookedTarget -Force; break }
+        ".ini" { Copy-Item -LiteralPath $File -Destination $configTarget -Force; break }
+        ".int" { Copy-Item -LiteralPath $File -Destination $localizationTarget -Force; break }
+    }
+}
+
 function Sync-CustomContent {
     param(
         [string]$SourceRoot,
@@ -106,38 +129,56 @@ function Sync-CustomContent {
         return
     }
 
-    $cookedTarget = Join-Path $InstallRoot "UDKGame\CookedPC"
-    $mapTarget = Join-Path $cookedTarget "Maps\RenX"
-    $configTarget = Join-Path $InstallRoot "UDKGame\Config"
+    Get-ChildItem -LiteralPath $SourceRoot -File -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+        Copy-CustomContentFile $_.FullName $InstallRoot
+    }
+}
 
-    New-Item -ItemType Directory -Force -Path $cookedTarget, $mapTarget, $configTarget | Out-Null
+function Invoke-CustomContentDownloads {
+    param(
+        [string]$Urls,
+        [string]$DestinationRoot,
+        [bool]$Refresh
+    )
 
-    $cookedSource = Join-Path $SourceRoot "CookedPC"
-    if (Test-Path -LiteralPath $cookedSource) {
-        Get-ChildItem -LiteralPath $cookedSource -Force | ForEach-Object {
-            Copy-Item -LiteralPath $_.FullName -Destination $cookedTarget -Recurse -Force
-        }
+    if ([string]::IsNullOrWhiteSpace($Urls)) {
+        return
     }
 
-    $mapSource = Join-Path $SourceRoot "Maps"
-    if (Test-Path -LiteralPath $mapSource) {
-        Get-ChildItem -LiteralPath $mapSource -Force | ForEach-Object {
-            Copy-Item -LiteralPath $_.FullName -Destination $mapTarget -Recurse -Force
-        }
-    }
+    New-Item -ItemType Directory -Force -Path $DestinationRoot | Out-Null
 
-    $configSource = Join-Path $SourceRoot "Config"
-    if (Test-Path -LiteralPath $configSource) {
-        Get-ChildItem -LiteralPath $configSource -Force | ForEach-Object {
-            Copy-Item -LiteralPath $_.FullName -Destination $configTarget -Recurse -Force
-        }
-    }
+    $urlList = @(
+        $Urls -split "[`r`n;]+" |
+            ForEach-Object { $_.Trim() } |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    )
 
-    Get-ChildItem -LiteralPath $SourceRoot -File -ErrorAction SilentlyContinue | ForEach-Object {
-        switch -Regex ($_.Extension.ToLowerInvariant()) {
-            "\.udk" { Copy-Item -LiteralPath $_.FullName -Destination $mapTarget -Force; break }
-            "\.(u|upk)" { Copy-Item -LiteralPath $_.FullName -Destination $cookedTarget -Force; break }
-            "\.ini" { Copy-Item -LiteralPath $_.FullName -Destination $configTarget -Force; break }
+    foreach ($url in $urlList) {
+        $uri = [Uri]$url
+        $fileName = [System.IO.Path]::GetFileName($uri.AbsolutePath)
+        if ([string]::IsNullOrWhiteSpace($fileName)) {
+            $fileName = "renx-content-{0}.bin" -f ([Guid]::NewGuid().ToString("N"))
+        }
+
+        $downloadPath = Join-Path $DestinationRoot $fileName
+        if ($Refresh -or -not (Test-Path -LiteralPath $downloadPath)) {
+            Write-Host "Downloading custom content: $url"
+            Invoke-WebRequest -Uri $url -OutFile $downloadPath -UseBasicParsing
+        }
+        else {
+            Write-Host "Using cached custom content: $fileName"
+        }
+
+        if ([System.IO.Path]::GetExtension($downloadPath).ToLowerInvariant() -eq ".zip") {
+            $extractPath = Join-Path $DestinationRoot ([System.IO.Path]::GetFileNameWithoutExtension($fileName))
+            if ($Refresh -and (Test-Path -LiteralPath $extractPath)) {
+                Remove-Item -LiteralPath $extractPath -Recurse -Force
+            }
+
+            if (-not (Test-Path -LiteralPath $extractPath)) {
+                New-Item -ItemType Directory -Force -Path $extractPath | Out-Null
+                Expand-Archive -LiteralPath $downloadPath -DestinationPath $extractPath -Force
+            }
         }
     }
 }
@@ -194,6 +235,8 @@ $botsDisabled = Get-Setting "RENX_BOTS_DISABLED" "false"
 $allowDownloads = Get-Setting "RENX_ALLOW_DOWNLOADS" "true"
 $redirectUrl = Get-Setting "RENX_REDIRECT_URL" "https://community-content.totemarts.services/"
 $redirectUseCompression = Get-Setting "RENX_REDIRECT_USE_COMPRESSION" "false"
+$contentUrls = Get-Setting "RENX_CONTENT_URLS" ""
+$refreshContentDownloads = [System.Convert]::ToBoolean((Get-Setting "RENX_REFRESH_CONTENT_DOWNLOADS" "false"))
 $gdiBots = Get-Setting "RENX_GDI_BOTS" ""
 $nodBots = Get-Setting "RENX_NOD_BOTS" ""
 $multihome = Get-Setting "RENX_MULTIHOME" ""
@@ -202,6 +245,7 @@ $extraArgs = Get-Setting "RENX_EXTRA_ARGS" ""
 $installConfigDir = Join-Path $root "UDKGame\Config"
 $configDir = Join-Path $dataRoot "Config"
 $customContentDir = Join-Path $dataRoot "CustomContent"
+$downloadedContentDir = Join-Path $customContentDir "_Downloaded"
 $logDir = Join-Path $dataRoot "Logs"
 
 New-Item -ItemType Directory -Force -Path $configDir, $customContentDir, $logDir | Out-Null
@@ -237,6 +281,7 @@ Set-IniValue $udkRenegadeX "RenX_Game.Rx_Rcon" "RconPort" $rconPort
 Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "ListenPort" $webPort
 
 Copy-Item -Path (Join-Path $configDir "*") -Destination $installConfigDir -Force
+Invoke-CustomContentDownloads $contentUrls $downloadedContentDir $refreshContentDownloads
 Sync-CustomContent $customContentDir $root
 
 $env:RENX_MAP = $map
