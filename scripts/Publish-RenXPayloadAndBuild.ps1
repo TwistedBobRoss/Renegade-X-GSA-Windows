@@ -4,7 +4,7 @@ param(
     [string]$Repo = "Renegade-X-GSA-Windows",
     [string]$PayloadPartsDir = ".\payload-parts",
     [string]$PayloadReleaseTag = "renx-payload-1.0.1022",
-    [string]$ImageTag = "1.0.1022-ltsc2022-r2",
+    [string]$ImageTag = "1.0.1022-ltsc2022-r3",
     [string]$Workflow = "build.yml",
     [switch]$ClobberAssets
 )
@@ -49,7 +49,7 @@ $releaseExists = ($LASTEXITCODE -eq 0)
 
 if (-not $releaseExists) {
     Write-Host "Creating payload release $PayloadReleaseTag..."
-    $notes = "Renegade X server payload split into GitHub-release-safe parts for the Windows container image build."
+    $notes = "Renegade X server payload split into GitHub-release-safe parts for the Windows bootstrap container."
     & gh release create $PayloadReleaseTag --repo $repoFull --title $PayloadReleaseTag --notes $notes
     if ($LASTEXITCODE -ne 0) {
         throw "Failed to create GitHub Release $PayloadReleaseTag."
@@ -72,14 +72,19 @@ foreach ($asset in $assets) {
     }
 }
 
-Write-Host "Starting GitHub Actions image build..."
-& gh workflow run $Workflow --repo $repoFull -f "payload_release_tag=$PayloadReleaseTag" -f "image_tag=$ImageTag"
+Write-Host "Starting GitHub Actions bootstrap image build..."
+& gh workflow run $Workflow --repo $repoFull -f "image_tag=$ImageTag"
 if ($LASTEXITCODE -ne 0) {
     throw "Failed to dispatch workflow $Workflow."
 }
 
 Write-Host "Build dispatched. Watch it with:"
 Write-Host "  gh run list --repo $repoFull --workflow $Workflow --limit 3"
+Write-Host ""
+Write-Host "Payload release URLs can be used in the GSA Server Payload URLs field:"
+foreach ($asset in $assets) {
+    Write-Host "  https://github.com/$repoFull/releases/download/$PayloadReleaseTag/$($asset.Name)"
+}
 Write-Host ""
 Write-Host "If it succeeds, the image will be:"
 Write-Host "  ghcr.io/$($repoFull.ToLower()):$ImageTag"
