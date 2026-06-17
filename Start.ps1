@@ -1,6 +1,7 @@
 $ErrorActionPreference = "Stop"
 
-$root = if ($env:RENX_ROOT) { $env:RENX_ROOT } else { "C:\serverfiles" }
+$bootstrapRoot = if ($env:RENX_BOOTSTRAP_ROOT) { $env:RENX_BOOTSTRAP_ROOT } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$root = if ($env:RENX_ROOT) { $env:RENX_ROOT } else { "C:\renx-data\ServerFiles" }
 $dataRoot = if ($env:RENX_DATA_ROOT) { $env:RENX_DATA_ROOT } else { "C:\renx-data" }
 $launcher = Join-Path $root "LaunchRenegadeXServer.bat"
 
@@ -116,6 +117,20 @@ function Set-MapRotation {
     Set-IniValue $Path "UTGame.UTGame" "GameSpecificMapCycles" "(GameClassName=`"$CycleClass`",Maps=($escapedMaps))"
 }
 
+function Split-SettingList {
+    param([string]$Value)
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        return @()
+    }
+
+    return @(
+        $Value -split "[`r`n;]+" |
+            ForEach-Object { $_.Trim() } |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    )
+}
+
 function Copy-CustomContentFile {
     param(
         [string]$File,
@@ -149,8 +164,48 @@ function Sync-CustomContent {
         return
     }
 
+    $structuredRoots = [System.Collections.Generic.List[string]]::new()
+    $cookedTarget = Join-Path $InstallRoot "UDKGame\CookedPC"
+    $configTarget = Join-Path $InstallRoot "UDKGame\Config"
+    $localizationTarget = Join-Path $InstallRoot "UDKGame\Localization\INT"
+    New-Item -ItemType Directory -Force -Path $cookedTarget, $configTarget, $localizationTarget | Out-Null
+
+    Get-ChildItem -LiteralPath $SourceRoot -Directory -Recurse -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -eq "CookedPC" } |
+        ForEach-Object {
+            Write-Host "Syncing structured CookedPC content from $($_.FullName)"
+            Copy-Item -Path (Join-Path $_.FullName "*") -Destination $cookedTarget -Recurse -Force
+            $structuredRoots.Add($_.FullName.TrimEnd('\') + '\')
+        }
+
+    Get-ChildItem -LiteralPath $SourceRoot -Directory -Recurse -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -eq "Config" -and $_.FullName -notmatch '\\UDKGame\\CookedPC\\' } |
+        ForEach-Object {
+            Write-Host "Syncing structured Config content from $($_.FullName)"
+            Copy-Item -Path (Join-Path $_.FullName "*") -Destination $configTarget -Recurse -Force
+            $structuredRoots.Add($_.FullName.TrimEnd('\') + '\')
+        }
+
+    Get-ChildItem -LiteralPath $SourceRoot -Directory -Recurse -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -eq "INT" -and (Split-Path -Leaf (Split-Path -Parent $_.FullName)) -eq "Localization" } |
+        ForEach-Object {
+            Write-Host "Syncing structured localization content from $($_.FullName)"
+            Copy-Item -Path (Join-Path $_.FullName "*") -Destination $localizationTarget -Recurse -Force
+            $structuredRoots.Add($_.FullName.TrimEnd('\') + '\')
+        }
+
     Get-ChildItem -LiteralPath $SourceRoot -File -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
-        Copy-CustomContentFile $_.FullName $InstallRoot
+        $insideStructuredRoot = $false
+        foreach ($structuredRoot in $structuredRoots) {
+            if ($_.FullName.StartsWith($structuredRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+                $insideStructuredRoot = $true
+                break
+            }
+        }
+
+        if (-not $insideStructuredRoot) {
+            Copy-CustomContentFile $_.FullName $InstallRoot
+        }
     }
 }
 
@@ -158,20 +213,16 @@ function Invoke-CustomContentDownloads {
     param(
         [string]$Urls,
         [string]$DestinationRoot,
-        [bool]$Refresh
+        [bool]$Refresh,
+        [string]$Label = "custom content"
     )
 
-    if ([string]::IsNullOrWhiteSpace($Urls)) {
+    $urlList = Split-SettingList $Urls
+    if ($urlList.Count -eq 0) {
         return
     }
 
     New-Item -ItemType Directory -Force -Path $DestinationRoot | Out-Null
-
-    $urlList = @(
-        $Urls -split "[`r`n;]+" |
-            ForEach-Object { $_.Trim() } |
-            Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
-    )
 
     foreach ($url in $urlList) {
         $uri = [Uri]$url
@@ -182,11 +233,11 @@ function Invoke-CustomContentDownloads {
 
         $downloadPath = Join-Path $DestinationRoot $fileName
         if ($Refresh -or -not (Test-Path -LiteralPath $downloadPath)) {
-            Write-Host "Downloading custom content: $url"
+            Write-Host "Downloading ${Label}: $url"
             Invoke-WebRequest -Uri $url -OutFile $downloadPath -UseBasicParsing
         }
         else {
-            Write-Host "Using cached custom content: $fileName"
+            Write-Host "Using cached ${Label}: $fileName"
         }
 
         if ([System.IO.Path]::GetExtension($downloadPath).ToLowerInvariant() -eq ".zip") {
@@ -200,6 +251,148 @@ function Invoke-CustomContentDownloads {
                 Expand-Archive -LiteralPath $downloadPath -DestinationPath $extractPath -Force
             }
         }
+    }
+}
+
+function Find-ServerPayloadRoot {
+    param([string]$ExtractRoot)
+
+    $udk = Get-ChildItem -LiteralPath $ExtractRoot -Filter "UDK.exe" -File -Recurse -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -match '\\Binaries\\Win64\\UDK\.exe$' } |
+        Select-Object -First 1
+
+    if (-not $udk) {
+        return $null
+    }
+
+    $win64Dir = Split-Path -Parent $udk.FullName
+    $binariesDir = Split-Path -Parent $win64Dir
+    return Split-Path -Parent $binariesDir
+}
+
+function Install-ServerPayload {
+    param(
+        [string]$Urls,
+        [string]$InstallRoot,
+        [string]$PersistentRoot,
+        [string]$BootstrapRoot,
+        [bool]$Refresh
+    )
+
+    $udkPath = Join-Path $InstallRoot "Binaries\Win64\UDK.exe"
+    $bootstrapLauncher = Join-Path $BootstrapRoot "LaunchRenegadeXServer.bat"
+    $installLauncher = Join-Path $InstallRoot "LaunchRenegadeXServer.bat"
+
+    if ((Test-Path -LiteralPath $udkPath) -and -not $Refresh) {
+        if ((Test-Path -LiteralPath $bootstrapLauncher) -and -not (Test-Path -LiteralPath $installLauncher)) {
+            Copy-Item -LiteralPath $bootstrapLauncher -Destination $installLauncher -Force
+        }
+        return
+    }
+
+    $urlList = Split-SettingList $Urls
+    if ($urlList.Count -eq 0) {
+        throw "Renegade X server files are not installed at $InstallRoot and RENX_SERVER_PAYLOAD_URLS is empty. Provide a direct .zip URL or split .zip.001/.002 URLs."
+    }
+
+    $cacheRoot = Join-Path $PersistentRoot "PayloadCache"
+    $downloadRoot = Join-Path $cacheRoot "Downloads"
+    $extractRoot = Join-Path $cacheRoot "Extracted"
+    New-Item -ItemType Directory -Force -Path $downloadRoot, $extractRoot, $InstallRoot | Out-Null
+
+    foreach ($url in $urlList) {
+        $uri = [Uri]$url
+        $fileName = [System.IO.Path]::GetFileName($uri.AbsolutePath)
+        if ([string]::IsNullOrWhiteSpace($fileName)) {
+            $fileName = "renx-payload-{0}.bin" -f ([Guid]::NewGuid().ToString("N"))
+        }
+
+        $downloadPath = Join-Path $downloadRoot $fileName
+        if ($Refresh -or -not (Test-Path -LiteralPath $downloadPath)) {
+            Write-Host "Downloading Renegade X server payload: $url"
+            Invoke-WebRequest -Uri $url -OutFile $downloadPath -UseBasicParsing
+        }
+        else {
+            Write-Host "Using cached Renegade X server payload: $fileName"
+        }
+    }
+
+    $zipParts = Get-ChildItem -LiteralPath $downloadRoot -Filter "*.zip.*" -File |
+        Where-Object { $_.Name -match '\.\d+$' } |
+        Sort-Object Name
+
+    $zipFiles = @(Get-ChildItem -LiteralPath $downloadRoot -Filter "*.zip" -File | Sort-Object Name)
+    $payloadZip = $null
+
+    if ($zipParts.Count -gt 0) {
+        $payloadZip = Join-Path $cacheRoot "renx-server-payload.zip"
+        if ($Refresh -or -not (Test-Path -LiteralPath $payloadZip)) {
+            if (Test-Path -LiteralPath $payloadZip) {
+                Remove-Item -LiteralPath $payloadZip -Force
+            }
+
+            Write-Host "Reassembling Renegade X split payload parts..."
+            $out = [System.IO.File]::Create($payloadZip)
+            try {
+                foreach ($part in $zipParts) {
+                    Write-Host "Appending $($part.Name)"
+                    $input = [System.IO.File]::OpenRead($part.FullName)
+                    try {
+                        $input.CopyTo($out)
+                    }
+                    finally {
+                        $input.Dispose()
+                    }
+                }
+            }
+            finally {
+                $out.Dispose()
+            }
+        }
+    }
+    elseif ($zipFiles.Count -eq 1) {
+        $payloadZip = $zipFiles[0].FullName
+    }
+    elseif ($zipFiles.Count -gt 1) {
+        throw "Multiple .zip payload files were found in $downloadRoot. Use one payload zip, or split parts named .zip.001, .zip.002, etc."
+    }
+    else {
+        throw "No Renegade X payload .zip or split .zip.### files were found after download."
+    }
+
+    if ($Refresh -and (Test-Path -LiteralPath $extractRoot)) {
+        Remove-Item -LiteralPath $extractRoot -Recurse -Force
+    }
+
+    if (-not (Test-Path -LiteralPath (Join-Path $extractRoot ".extracted"))) {
+        if (Test-Path -LiteralPath $extractRoot) {
+            Get-ChildItem -LiteralPath $extractRoot -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
+        }
+
+        New-Item -ItemType Directory -Force -Path $extractRoot | Out-Null
+        Write-Host "Extracting Renegade X server payload..."
+        Expand-Archive -LiteralPath $payloadZip -DestinationPath $extractRoot -Force
+        New-Item -ItemType File -Force -Path (Join-Path $extractRoot ".extracted") | Out-Null
+    }
+
+    $payloadRoot = Find-ServerPayloadRoot $extractRoot
+    if (-not $payloadRoot) {
+        throw "The extracted payload does not contain Binaries\Win64\UDK.exe."
+    }
+
+    if ($Refresh -and (Test-Path -LiteralPath $InstallRoot)) {
+        Get-ChildItem -LiteralPath $InstallRoot -Force -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
+    }
+
+    Write-Host "Installing Renegade X server runtime to $InstallRoot"
+    Copy-Item -Path (Join-Path $payloadRoot "*") -Destination $InstallRoot -Recurse -Force
+
+    if (Test-Path -LiteralPath $bootstrapLauncher) {
+        Copy-Item -LiteralPath $bootstrapLauncher -Destination $installLauncher -Force
+    }
+
+    if (-not (Test-Path -LiteralPath $udkPath)) {
+        throw "Renegade X payload install failed. Missing $udkPath"
     }
 }
 
@@ -258,6 +451,9 @@ $botsDisabled = Get-BoolSetting "RENX_BOTS_DISABLED" "false"
 $allowDownloads = Get-BoolSetting "RENX_ALLOW_DOWNLOADS" "true"
 $redirectUrl = Get-Setting "RENX_REDIRECT_URL" "https://community-content.totemarts.services/"
 $redirectUseCompression = Get-BoolSetting "RENX_REDIRECT_USE_COMPRESSION" "false"
+$serverPayloadUrls = Get-Setting "RENX_SERVER_PAYLOAD_URLS" ""
+$refreshServerPayload = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_REFRESH_SERVER_PAYLOAD" "false"))
+$requiredContentUrls = Get-Setting "RENX_REQUIRED_CONTENT_URLS" ""
 $contentUrls = Get-Setting "RENX_CONTENT_URLS" ""
 $refreshContentDownloads = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_REFRESH_CONTENT_DOWNLOADS" "false"))
 $gdiBots = Get-Setting "RENX_GDI_BOTS" ""
@@ -289,10 +485,14 @@ $nodAttackPercent = Get-Setting "RENX_NOD_ATTACK_PERCENT" "50"
 $multihome = Get-Setting "RENX_MULTIHOME" ""
 $extraArgs = Get-Setting "RENX_EXTRA_ARGS" ""
 
+Install-ServerPayload $serverPayloadUrls $root $dataRoot $bootstrapRoot $refreshServerPayload
+$launcher = Join-Path $root "LaunchRenegadeXServer.bat"
+
 $installConfigDir = Join-Path $root "UDKGame\Config"
 $configDir = Join-Path $dataRoot "Config"
 $customContentDir = Join-Path $dataRoot "CustomContent"
 $downloadedContentDir = Join-Path $customContentDir "_Downloaded"
+$requiredContentDir = Join-Path $customContentDir "_Required"
 $logDir = Join-Path $dataRoot "Logs"
 
 New-Item -ItemType Directory -Force -Path $configDir, $customContentDir, $logDir | Out-Null
@@ -336,47 +536,4 @@ Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "CnCModeTimeLimit" $cncTimeLimit
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "DMModeTimeLimit" $dmTimeLimit
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "TeamMode" $teamMode
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "MaxMapVoteSize" $maxMapVoteSize
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "RecentMapsToExclude" $recentMapsToExclude
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "SpawnCrates" $spawnCrates
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "NodDifficulty" $nodBotDifficulty
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "GDIDifficulty" $gdiBotDifficulty
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "NODAttackingValue" $nodAttackPercent
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "GDIAttackingValue" $gdiAttackPercent
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Rcon" "bEnableRcon" $enableRcon
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Rcon" "RconPort" $rconPort
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Rcon" "SubscriberLimit" $rconSubscriberLimit
-
-Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "bEnabled" $webEnabled
-Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "ListenPort" $webPort
-Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "MaxConnections" $webMaxConnections
-
-Copy-Item -Path (Join-Path $configDir "*") -Destination $installConfigDir -Force
-Invoke-CustomContentDownloads $contentUrls $downloadedContentDir $refreshContentDownloads
-Sync-CustomContent $customContentDir $root
-
-$env:RENX_MAP = $map
-$env:RENX_GAME_CLASS = $gameClass
-$env:RENX_MAX_PLAYERS = $maxPlayers
-$env:RENX_GAME_PORT = $gamePort
-$env:RENX_MUTATORS = $mutators
-$env:RENX_GDI_BOTS = $gdiBots
-$env:RENX_NOD_BOTS = $nodBots
-$env:RENX_MULTIHOME = $multihome
-$env:RENX_EXTRA_ARGS = $extraArgs
-$env:RENX_LOG_FILE = Join-Path $logDir "RenegadeXServer.log"
-
-if (-not (Test-Path -LiteralPath $launcher)) {
-    throw "Renegade X launcher not found: $launcher"
-}
-
-Write-Host "Launching Renegade X server"
-Write-Host "Install root: $root"
-Write-Host "Data root: $dataRoot"
-Write-Host "Map: $map"
-Write-Host "Server name: $serverName"
-Write-Host "Max players: $maxPlayers"
-Write-Host "Ports: game=$gamePort peer=$peerPort query=$queryPort rcon=$rconPort web=$webPort"
-Write-Host "Custom content root: $customContentDir"
-
-& cmd.exe /c "`"$launcher`""
-exit $LASTEXITCODE
+Set-IniValue $udkRenegX "RenX_Game.Rx_Game" "RecentMapsToExclude" $recentMapsToExclude
