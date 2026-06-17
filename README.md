@@ -23,11 +23,19 @@ UDKGame\Config\UDKWeb.ini
 
 This wrapper seeds those runtime files from the bundled defaults on first boot, stores editable copies under `C:\renx-data\Config`, applies GSA parameters, then copies them back into the game install before launch.
 
-## What The Headless Image Needs
+## Bootstrap Hosting Model
 
 There does not appear to be a separate tiny dedicated-server-only package. Current community tooling and forum examples still launch `UDK.exe server` from a Renegade X install folder.
 
-The safe server-focused payload keeps:
+This container is now a bootstrap image. The Docker image contains only the launch scripts. The Renegade X server runtime is downloaded during first start into the persistent GSA mount:
+
+```text
+C:\renx-data\ServerFiles
+```
+
+This keeps the published image small and avoids baking multi-gigabyte cooked client content into GHCR.
+
+The runtime payload URL should point at a prepared Renegade X server zip or split zip parts. A safe server-focused payload keeps:
 
 - `Binaries\Win64`
 - `UDKGame\Config`
@@ -41,77 +49,65 @@ The default payload script removes likely client-only pieces:
 - `UDKGame\Movies`
 - `PreviewVids`
 
-Do not blindly remove shared `UDKGame\CookedPC` packages. Even headless UDK servers load map, actor, weapon, vehicle, sound, and mutator packages. The script can include only selected `.udk` map files, but it keeps shared packages because package dependency discovery is safer to prove by live testing than by filename guesses.
+Do not blindly remove all shared `UDKGame\CookedPC` packages. Even headless UDK servers may load packages referenced by maps, actors, weapons, vehicles, and mutators. The better approach is to host a small tested runtime zip plus required map/content packs and let the container download them on install/startup.
 
 ## Image
 
 Planned image name:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r2
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r3
 ```
 
 This is a Windows container image intended for Windows Server 2022 / LTSC 2022 Windows container hosts.
 
-## Prepare Payload
-
-Do not commit Renegade X game files directly into this repository. Use a GitHub Release payload asset instead.
-
-Full server-focused payload:
-
-```powershell
-.\scripts\Prepare-RenXPayload.ps1 `
-  -SourceZip "C:\Users\imgon\Downloads\renegade_x_Release_1.0.1022_3.zip" `
-  -OutputDir ".\payload-parts"
-```
-
-Smaller first-test payload with one stock map file plus shared packages:
-
-```powershell
-.\scripts\Prepare-RenXPayload.ps1 `
-  -SourceZip "C:\Users\imgon\Downloads\renegade_x_Release_1.0.1022_3.zip" `
-  -OutputDir ".\payload-parts-field" `
-  -Maps CNC-Field
-```
-
-Upload the generated assets to a GitHub Release, for example tag:
-
-```text
-renx-payload-1.0.1022
-```
-
-Assets to upload:
-
-```text
-renx-server-payload.zip.001
-renx-server-payload.zip.002
-...
-renx-server-payload-manifest.json
-```
-
 ## Build Image
 
-The easiest path is to upload the split payload and dispatch the GitHub build workflow with:
-
-```powershell
-.\scripts\Publish-RenXPayloadAndBuild.ps1 `
-  -Owner TwistedBobRoss `
-  -Repo Renegade-X-GSA-Windows `
-  -PayloadPartsDir ".\payload-parts" `
-  -PayloadReleaseTag "renx-payload-1.0.1022" `
-  -ImageTag "1.0.1022-ltsc2022-r2"
-```
-
-You can also run the `Build Renegade X Windows Image` workflow manually and provide:
+Run the `Build Renegade X Bootstrap Windows Image` workflow manually and provide:
 
 ```text
-payload_release_tag = renx-payload-1.0.1022
-image_tag = 1.0.1022-ltsc2022-r2
+image_tag = 1.0.1022-ltsc2022-r3
 ```
 
-If the GitHub-hosted Windows runner runs out of disk space, use a self-hosted Windows Server 2022 runner with Docker configured for Windows containers.
+The workflow no longer downloads or embeds the Renegade X payload. It builds the small bootstrap image directly from this repository.
 
-See `BUILD_IMAGE.md` for the full build and publishing process.
+## Runtime Payload URLs
+
+In the GSA blueprint, set `Server Payload URLs` to a direct public URL for the Renegade X server runtime zip, or to split zip parts:
+
+```text
+https://example.com/renx-server-payload.zip
+```
+
+or:
+
+```text
+https://example.com/renx-server-payload.zip.001
+https://example.com/renx-server-payload.zip.002
+https://example.com/renx-server-payload.zip.003
+```
+
+The helper script `scripts\Publish-RenXPayloadAndBuild.ps1` can upload split payload parts to a GitHub Release and print URLs in this format.
+
+On first start, `Start.ps1` downloads and extracts the payload into:
+
+```text
+C:\renx-data\ServerFiles
+```
+
+Set `Refresh Server Payload` to true only when you intentionally want to redownload and reinstall the runtime.
+
+## Required Content URLs
+
+Use `Required Content URLs` for map packs or packages that must be installed before launch. Zip files may contain full folder structure such as:
+
+```text
+UDKGame\CookedPC\Maps\RenX\CNC-Field.udk
+UDKGame\CookedPC\RenX\...
+UDKGame\Config\...
+```
+
+Loose `.udk`, `.u`, `.upk`, `.ini`, and `.int` files are also supported. Optional content can go in `Custom Content URLs`.
 
 ## GameServerApp Setup
 
@@ -138,6 +134,8 @@ C:\renx-data
 Useful persistent folders:
 
 ```text
+C:\renx-data\ServerFiles
+C:\renx-data\PayloadCache
 C:\renx-data\Config
 C:\renx-data\CustomContent
 C:\renx-data\Logs
@@ -172,7 +170,7 @@ Upload server custom content into:
 \renx-data\CustomContent
 ```
 
-You can also paste direct public download links into the `Custom Content URLs` parameter. Use one URL per line or separate URLs with semicolons. Supported direct files are `.zip`, `.udk`, `.u`, `.upk`, `.ini`, and `.int`. Zip files are extracted into `CustomContent\_Downloaded`, then synced using the same rules as uploaded files.
+Paste required map/package links into `Required Content URLs`, and optional links into `Custom Content URLs`. Use one URL per line or separate URLs with semicolons. Supported direct files are `.zip`, `.udk`, `.u`, `.upk`, `.ini`, and `.int`. Zip files are extracted, then synced using the same rules as uploaded files.
 
 Startup sync rules:
 
@@ -180,6 +178,7 @@ Startup sync rules:
 CustomContent\CookedPC\*  -> UDKGame\CookedPC
 CustomContent\Maps\*      -> UDKGame\CookedPC\Maps\RenX
 CustomContent\Config\*    -> UDKGame\Config
+Zip-contained UDKGame\CookedPC structure is preserved
 Loose *.udk files         -> UDKGame\CookedPC\Maps\RenX
 Loose *.u and *.upk files -> UDKGame\CookedPC
 Loose *.ini files         -> UDKGame\Config
@@ -203,6 +202,8 @@ Starting Map
 Game Class Override
 Map Cycle Class
 Map Rotation
+Server Payload URLs
+Refresh Server Payload
 Mutators
 Admin/RCON Password
 Server Password
@@ -215,6 +216,7 @@ NOD Bot Count
 Allow Downloads
 HTTP Redirect URL
 Redirect Uses Compression
+Required Content URLs
 Web Port
 Multihome IP
 Custom Content URLs
@@ -262,7 +264,9 @@ docker run -d --name renx-test `
   -e RENX_PEER_PORT="7778" `
   -e RENX_QUERY_PORT="27015" `
   -e RENX_RCON_PORT="37015" `
-  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r2
+  -e RENX_SERVER_PAYLOAD_URLS="https://example.com/renx-server-payload.zip" `
+  -e RENX_REQUIRED_CONTENT_URLS="https://example.com/renx-required-maps.zip" `
+  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r3
 ```
 
 ## References
