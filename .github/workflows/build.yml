@@ -1,0 +1,81 @@
+name: Build Renegade X Windows Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      payload_release_tag:
+        description: "GitHub Release tag containing renx-server-payload.zip.* assets"
+        required: true
+        default: "renx-payload-1.0.1022"
+      image_tag:
+        description: "Container image tag to publish"
+        required: true
+        default: "1.0.1022-ltsc2022-r1"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Renegade X payload parts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PAYLOAD_RELEASE_TAG: ${{ inputs.payload_release_tag }}
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path payload-parts | Out-Null
+          gh release download $env:PAYLOAD_RELEASE_TAG --pattern "renx-server-payload.zip.*" --dir payload-parts
+
+      - name: Reassemble and extract payload
+        shell: powershell
+        run: |
+          $parts = Get-ChildItem -LiteralPath payload-parts -Filter "renx-server-payload.zip.*" -File | Sort-Object Name
+          if (-not $parts) { throw "No payload parts downloaded" }
+
+          $payloadZip = Join-Path $PWD "renx-server-payload.zip"
+          if (Test-Path -LiteralPath $payloadZip) { Remove-Item -LiteralPath $payloadZip -Force }
+
+          $out = [System.IO.File]::Create($payloadZip)
+          try {
+            foreach ($part in $parts) {
+              Write-Host "Appending $($part.Name)"
+              $in = [System.IO.File]::OpenRead($part.FullName)
+              try { $in.CopyTo($out) } finally { $in.Dispose() }
+            }
+          } finally {
+            $out.Dispose()
+          }
+
+          New-Item -ItemType Directory -Force -Path renx_payload | Out-Null
+          Expand-Archive -LiteralPath $payloadZip -DestinationPath renx_payload -Force
+
+          if (-not (Test-Path -LiteralPath "renx_payload\Binaries\Win64\UDK.exe")) {
+            throw "Payload did not extract to expected Renegade X layout"
+          }
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Windows container image
+        shell: powershell
+        run: |
+          $repo = "${{ github.repository }}".ToLower()
+          $image = "ghcr.io/$repo:${{ inputs.image_tag }}"
+          docker build -t $image .
+
+      - name: Push Windows container image
+        shell: powershell
+        run: |
+          $repo = "${{ github.repository }}".ToLower()
+          $image = "ghcr.io/$repo:${{ inputs.image_tag }}"
+          docker push $image
