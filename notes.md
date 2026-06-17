@@ -7,12 +7,19 @@ This draft is based on the inspected archive:
 Observed server-relevant files:
 
 - `Binaries\Win64\UDK.exe`
-- `Binaries\Win32\UDK.exe`
 - `UDKGame\Config\DefaultGame.ini`
 - `UDKGame\Config\DefaultEngine.ini`
 - `UDKGame\Config\DefaultMapList.ini`
 - `UDKGame\Config\DefaultRenegadeX.ini`
 - `UDKGame\Config\DefaultWeb.ini`
+- `UDKGame\CookedPC`
+
+The Totem Wiki documents runtime config names instead of only default config names:
+
+- `UDKGame\Config\UDKGame.ini`
+- `UDKGame\Config\UDKEngine.ini`
+- `UDKGame\Config\UDKRenegadeX.ini`
+- `UDKGame\Config\UDKWeb.ini`
 
 Observed default ports/settings:
 
@@ -24,10 +31,12 @@ Observed default ports/settings:
 - RCON port defaults to `-1`
 - RCON logging is enabled with `bLogRcon=true`
 
-Likely dedicated launch pattern:
+Confirmed dedicated launch pattern from Totem forum/wiki examples:
 
 ```bat
-UDK.exe server CNC-Field?Game=RenX_Game.Rx_Game?MaxPlayers=40?Port=7777 -log=RenegadeXServer.log -unattended
+UDK.exe server CNC-Field?maxplayers=64 -port=7777
+UDK.exe server CNC-Field?NODBotCount=8?GDIBotCount=8
+UDK.exe server CNC-Field -MULTIHOME=192.168.1.96
 ```
 
 Main game classes found:
@@ -54,3 +63,12 @@ Good text-field candidates:
 - Extra launch args
 - Custom map name
 - Custom map rotation
+
+Custom content notes:
+
+- Totem Wiki `Downloads` page says clients download loaded packages from the server or from HTTP redirect.
+- Channel download uses `UDKEngine.ini` `[IpDrv.TcpNetDriver] AllowDownloads=True`.
+- HTTP redirect uses `UDKEngine.ini` `[IpDrv.HTTPDownload] RedirectToURL=` and `UseCompression=`.
+- HTTP redirect files must be flat at the web root, URL needs a trailing slash, and the webserver normally must run on port 80.
+- Mutators load by command line with `?mutator=Package.Class,Package.OtherClass`.
+- Mutator `.u` packages belong under `UDKGame\CookedPC`; map `.udk` files belong under `UDKGame\CookedPC\Maps\RenX`.
