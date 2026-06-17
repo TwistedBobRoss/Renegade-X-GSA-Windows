@@ -1,0 +1,11 @@
+.git
+.github
+payload
+payload-parts
+renx-server-payload.zip
+renx-server-payload.zip.*
+*.zip
+*.7z
+*.rar
+*.log
+*.tmp
