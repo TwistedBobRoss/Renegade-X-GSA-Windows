@@ -105,6 +105,11 @@
       "create": true,
       "type": "normal"
     },
+    "RenX Payload Downloads": {
+      "path": "\\renx-data\\PayloadCache\\Downloads",
+      "create": true,
+      "type": "normal"
+    },
     "RenX Custom Content": {
       "path": "\\renx-data\\CustomContent",
       "create": true,
@@ -182,7 +187,7 @@
         },
         "server_payload_urls": {
           "name": "Server Payload URLs",
-          "info": "Default split payload URLs for Renegade X 1.0.1022. These are passed to Docker as an environment variable, so keep them on one line separated by semicolons. Do not use line breaks here.",
+          "info": "Default split payload URLs for Renegade X 1.0.1022. Automatic download is used unless matching files were preloaded by FTP into renx-data/PayloadCache/Downloads. Keep URLs on one line separated by semicolons.",
           "section": "Install",
           "type": "text",
           "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022-headless-r2/renx-server-payload.zip.001;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022-headless-r2/renx-server-payload.zip.002;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022-headless-r2/renx-server-payload.zip.003;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022-headless-r2/renx-server-payload.zip.004;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022-headless-r2/renx-server-payload.zip.005"

@@ -53,10 +53,10 @@ Do not blindly remove all shared `UDKGame\CookedPC` packages. Even headless UDK 
 
 ## Image
 
-Planned image name:
+Image name:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r3
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r4
 ```
 
 This is a Windows container image intended for Windows Server 2022 / LTSC 2022 Windows container hosts.
@@ -66,7 +66,7 @@ This is a Windows container image intended for Windows Server 2022 / LTSC 2022 W
 Run the `Build Renegade X Bootstrap Windows Image` workflow manually and provide:
 
 ```text
-image_tag = 1.0.1022-ltsc2022-r3
+image_tag = 1.0.1022-ltsc2022-r4
 ```
 
 The workflow no longer downloads or embeds the Renegade X payload. It builds the small bootstrap image directly from this repository.
@@ -96,6 +96,36 @@ C:\renx-data\ServerFiles
 ```
 
 Set `Refresh Server Payload` to true only when you intentionally want to redownload and reinstall the runtime.
+
+## Optional FTP Payload Preload
+
+The blueprint creates this persistent folder during GSA installation and exposes it through FTP:
+
+```text
+\renx-data\PayloadCache\Downloads
+```
+
+You may preload the release assets before starting the server. This is optional and can avoid a long first-start download or a GSA startup timeout.
+
+1. Install the server from the GSA blueprint, but do not start it yet.
+2. Download all numbered payload parts from the release linked by `Server Payload URLs`.
+3. Upload the files by FTP into `\renx-data\PayloadCache\Downloads`.
+4. Keep every filename unchanged, including `.zip.001`, `.zip.002`, and the remaining numbered suffixes.
+5. Return to GSA and start the server normally.
+
+The current release requires:
+
+```text
+renx-server-payload.zip.001
+renx-server-payload.zip.002
+renx-server-payload.zip.003
+renx-server-payload.zip.004
+renx-server-payload.zip.005
+```
+
+The manifest file is useful for checksum reference but is not required by the runtime installer. On startup, the container finds the preloaded parts, skips their GitHub downloads, joins them into one zip, extracts the runtime, validates `UDK.exe`, configuration folders, and maps, then launches Renegade X.
+
+Do not rename the parts, extract them manually, or upload the large combined zip alongside the numbered files. If a part is missing, the container downloads only the missing filename from its configured URL. If an FTP upload was interrupted, replace that incomplete part before starting.
 
 ## Required Content URLs
 
@@ -136,6 +166,7 @@ Useful persistent folders:
 ```text
 C:\renx-data\ServerFiles
 C:\renx-data\PayloadCache
+C:\renx-data\PayloadCache\Downloads
 C:\renx-data\Config
 C:\renx-data\CustomContent
 C:\renx-data\Logs
@@ -266,7 +297,7 @@ docker run -d --name renx-test `
   -e RENX_RCON_PORT="37015" `
   -e RENX_SERVER_PAYLOAD_URLS="https://example.com/renx-server-payload.zip" `
   -e RENX_REQUIRED_CONTENT_URLS="https://example.com/renx-required-maps.zip" `
-  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r3
+  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r4
 ```
 
 ## References
