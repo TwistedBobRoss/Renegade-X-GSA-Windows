@@ -1,6 +1,15 @@
 name: Build Renegade X Bootstrap Windows Image
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - Dockerfile
+      - Start.ps1
+      - LaunchRenegadeXServer.bat
+      - blueprints/renegade-x-gsa-windows.json
+      - .github/workflows/build.yml
   workflow_dispatch:
     inputs:
       image_tag:
@@ -15,6 +24,8 @@ permissions:
 jobs:
   build:
     runs-on: windows-2022
+    env:
+      IMAGE_TAG: ${{ github.event.inputs.image_tag || '1.0.1022-ltsc2022-r3' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,13 +40,13 @@ jobs:
       - name: Build bootstrap Windows container image
         shell: powershell
         run: |
-          $repo = "${{ github.repository }}".ToLower()
-          $image = "ghcr.io/$repo:${{ inputs.image_tag }}"
+          $repo = "${{ github.repository }}".ToLowerInvariant()
+          $image = "ghcr.io/${repo}:$env:IMAGE_TAG"
           docker build -t $image .
 
       - name: Push bootstrap Windows container image
         shell: powershell
         run: |
-          $repo = "${{ github.repository }}".ToLower()
-          $image = "ghcr.io/$repo:${{ inputs.image_tag }}"
+          $repo = "${{ github.repository }}".ToLowerInvariant()
+          $image = "ghcr.io/${repo}:$env:IMAGE_TAG"
           docker push $image
