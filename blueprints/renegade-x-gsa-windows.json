@@ -182,10 +182,10 @@
         },
         "server_payload_urls": {
           "name": "Server Payload URLs",
-          "info": "Default split payload URLs for Renegade X 1.0.1022. These point to this repository's renx-payload-1.0.1022 GitHub Release and must exist/public. Replace with your own one-URL-per-line payload host if needed.",
+          "info": "Default split payload URLs for Renegade X 1.0.1022. These are passed to Docker as an environment variable, so keep them on one line separated by semicolons. Do not use line breaks here.",
           "section": "Install",
-          "type": "textarea",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022/renx-server-payload.zip.001\nhttps://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022/renx-server-payload.zip.002\nhttps://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022/renx-server-payload.zip.003\nhttps://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022/renx-server-payload.zip.004\nhttps://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022/renx-server-payload.zip.005"
+          "type": "text",
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022/renx-server-payload.zip.001;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022/renx-server-payload.zip.002;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022/renx-server-payload.zip.003;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022/renx-server-payload.zip.004;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022/renx-server-payload.zip.005"
         },
         "refresh_server_payload": {
           "name": "Refresh Server Payload",
@@ -296,15 +296,15 @@
         },
         "required_content_urls": {
           "name": "Required Content URLs",
-          "info": "Base game maps are expected to be included in the server payload above. Add separate required map/package URLs here only for extra mandatory content. Use one public .zip, .udk, .u, .upk, .ini, or .int URL per line or separate entries with semicolons.",
+          "info": "Base game maps are expected to be included in the server payload above. Add separate required map/package URLs only for extra mandatory content. Use semicolon-separated public .zip, .udk, .u, .upk, .ini, or .int URLs; do not use line breaks.",
           "section": "Install",
-          "type": "textarea",
+          "type": "text",
           "content": ""
         },
         "content_urls": {
           "name": "Custom Content URLs",
-          "info": "Optional extra client-download content. Base maps should already come from the server payload. Use one public .zip, .udk, .u, .upk, .ini, or .int URL per line or separate entries with semicolons.",
-          "type": "textarea",
+          "info": "Optional extra client-download content. Base maps should already come from the server payload. Use semicolon-separated public .zip, .udk, .u, .upk, .ini, or .int URLs; do not use line breaks.",
+          "type": "text",
           "content": ""
         },
         "refresh_content_downloads": {
