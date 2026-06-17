@@ -5,10 +5,9 @@ SHELL ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
 WORKDIR C:/renx-bootstrap
 
 COPY Start.ps1 C:/renx-bootstrap/Start.ps1
-COPY Start.tail.ps1 C:/renx-bootstrap/Start.tail.ps1
 COPY LaunchRenegadeXServer.bat C:/renx-bootstrap/LaunchRenegadeXServer.bat
 
-RUN $main = Get-Content -LiteralPath C:/renx-bootstrap/Start.ps1; $tail = Get-Content -LiteralPath C:/renx-bootstrap/Start.tail.ps1; Set-Content -LiteralPath C:/renx-bootstrap/Start.ps1 -Value ($main[0..($main.Count - 2)] + $tail) -Encoding UTF8; $parseErrors = $null; $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/Start.ps1), [ref]$parseErrors); if ($parseErrors) { throw ($parseErrors | Out-String) }
+RUN $parseErrors = $null; $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/Start.ps1), [ref]$parseErrors); if ($parseErrors) { throw ($parseErrors | Out-String) }
 
 RUN New-Item -ItemType Directory -Force -Path C:/renx-data/ServerFiles, C:/renx-data/Config, C:/renx-data/CustomContent, C:/renx-data/Logs, C:/renx-data/PayloadCache | Out-Null
 
