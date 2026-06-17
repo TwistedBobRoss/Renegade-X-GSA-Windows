@@ -91,7 +91,18 @@ renx-server-payload-manifest.json
 
 ## Build Image
 
-Run the `Build Renegade X Windows Image` workflow manually and provide:
+The easiest path is to upload the split payload and dispatch the GitHub build workflow with:
+
+```powershell
+.\scripts\Publish-RenXPayloadAndBuild.ps1 `
+  -Owner TwistedBobRoss `
+  -Repo Renegade-X-GSA-Windows `
+  -PayloadPartsDir ".\payload-parts" `
+  -PayloadReleaseTag "renx-payload-1.0.1022" `
+  -ImageTag "1.0.1022-ltsc2022-r2"
+```
+
+You can also run the `Build Renegade X Windows Image` workflow manually and provide:
 
 ```text
 payload_release_tag = renx-payload-1.0.1022
@@ -99,6 +110,8 @@ image_tag = 1.0.1022-ltsc2022-r2
 ```
 
 If the GitHub-hosted Windows runner runs out of disk space, use a self-hosted Windows Server 2022 runner with Docker configured for Windows containers.
+
+See `BUILD_IMAGE.md` for the full build and publishing process.
 
 ## GameServerApp Setup
 
