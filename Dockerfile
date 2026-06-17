@@ -17,8 +17,8 @@ EXPOSE 27015/udp
 EXPOSE 37015/tcp
 EXPOSE 6969/tcp
 
-ENV RENX_BOOTSTRAP_ROOT=C:\renx-bootstrap
-ENV RENX_ROOT=C:\renx-data\ServerFiles
-ENV RENX_DATA_ROOT=C:\renx-data
+ENV RENX_BOOTSTRAP_ROOT=C:/renx-bootstrap
+ENV RENX_ROOT=C:/renx-data/ServerFiles
+ENV RENX_DATA_ROOT=C:/renx-data
 
 ENTRYPOINT ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$launcher='C:/renx-data/ServerFiles/LaunchRenegadeXServer.bat'; New-Item -ItemType Directory -Force -Path (Split-Path -Parent $launcher) | Out-Null; Copy-Item -LiteralPath 'C:/renx-bootstrap/LaunchRenegadeXServer.bat' -Destination $launcher -Force; Write-Host \"Prepared Renegade X launcher: $launcher\"; & 'C:/renx-bootstrap/Start.ps1'; exit $LASTEXITCODE"]
