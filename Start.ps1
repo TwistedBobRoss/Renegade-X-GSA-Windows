@@ -18,6 +18,26 @@ function Get-Setting {
     return $value.Trim()
 }
 
+function Get-BoolSetting {
+    param(
+        [string]$Name,
+        [string]$Default
+    )
+
+    $value = (Get-Setting $Name $Default).ToLowerInvariant()
+    switch ($value) {
+        "1" { return "true" }
+        "true" { return "true" }
+        "yes" { return "true" }
+        "on" { return "true" }
+        "0" { return "false" }
+        "false" { return "false" }
+        "no" { return "false" }
+        "off" { return "false" }
+        default { return $Default.ToLowerInvariant() }
+    }
+}
+
 function Set-IniValue {
     param(
         [string]$Path,
@@ -218,6 +238,9 @@ function Initialize-RuntimeConfig {
 $serverName = Get-Setting "RENX_SERVER_NAME" "Renegade X Server"
 $map = Get-Setting "RENX_MAP" "CNC-Field"
 $gameClass = Get-Setting "RENX_GAME_CLASS" ""
+if ($gameClass -eq "none") {
+    $gameClass = ""
+}
 $mapCycleClass = Get-Setting "RENX_MAP_CYCLE_CLASS" "Rx_Game"
 $mapRotation = Get-Setting "RENX_MAP_ROTATION" ""
 $mutators = Get-Setting "RENX_MUTATORS" ""
@@ -229,16 +252,40 @@ $rconPort = Get-Setting "RENX_RCON_PORT" "-1"
 $webPort = Get-Setting "RENX_WEB_PORT" "6969"
 $adminPassword = Get-Setting "RENX_ADMIN_PASSWORD" ""
 $serverPassword = Get-Setting "RENX_SERVER_PASSWORD" ""
-$listed = Get-Setting "RENX_LISTED" "true"
-$fixedMapRotation = Get-Setting "RENX_FIXED_MAP_ROTATION" "false"
-$botsDisabled = Get-Setting "RENX_BOTS_DISABLED" "false"
-$allowDownloads = Get-Setting "RENX_ALLOW_DOWNLOADS" "true"
+$listed = Get-BoolSetting "RENX_LISTED" "true"
+$fixedMapRotation = Get-BoolSetting "RENX_FIXED_MAP_ROTATION" "false"
+$botsDisabled = Get-BoolSetting "RENX_BOTS_DISABLED" "false"
+$allowDownloads = Get-BoolSetting "RENX_ALLOW_DOWNLOADS" "true"
 $redirectUrl = Get-Setting "RENX_REDIRECT_URL" "https://community-content.totemarts.services/"
-$redirectUseCompression = Get-Setting "RENX_REDIRECT_USE_COMPRESSION" "false"
+$redirectUseCompression = Get-BoolSetting "RENX_REDIRECT_USE_COMPRESSION" "false"
 $contentUrls = Get-Setting "RENX_CONTENT_URLS" ""
-$refreshContentDownloads = [System.Convert]::ToBoolean((Get-Setting "RENX_REFRESH_CONTENT_DOWNLOADS" "false"))
+$refreshContentDownloads = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_REFRESH_CONTENT_DOWNLOADS" "false"))
 $gdiBots = Get-Setting "RENX_GDI_BOTS" ""
 $nodBots = Get-Setting "RENX_NOD_BOTS" ""
+$enableRcon = Get-BoolSetting "RENX_ENABLE_RCON" "true"
+$rconSubscriberLimit = Get-Setting "RENX_RCON_SUBSCRIBER_LIMIT" "8"
+$webEnabled = Get-BoolSetting "RENX_WEB_ENABLED" "false"
+$webMaxConnections = Get-Setting "RENX_WEB_MAX_CONNECTIONS" "32"
+$netWait = Get-Setting "RENX_NET_WAIT" "15"
+$minNetPlayers = Get-Setting "RENX_MIN_NET_PLAYERS" "1"
+$waitForNetPlayers = Get-BoolSetting "RENX_WAIT_FOR_NET_PLAYERS" "false"
+$forceRespawn = Get-BoolSetting "RENX_FORCE_RESPAWN" "true"
+$playersMustBeReady = Get-BoolSetting "RENX_PLAYERS_MUST_BE_READY" "false"
+$restartWait = Get-Setting "RENX_RESTART_WAIT" "30"
+$initialCredits = Get-Setting "RENX_INITIAL_CREDITS" "0"
+$cncTimeLimit = Get-Setting "RENX_CNC_TIME_LIMIT" "30"
+$dmTimeLimit = Get-Setting "RENX_DM_TIME_LIMIT" "20"
+$teamMode = Get-Setting "RENX_TEAM_MODE" "All"
+$maxMapVoteSize = Get-Setting "RENX_MAX_MAP_VOTE_SIZE" "5"
+$recentMapsToExclude = Get-Setting "RENX_RECENT_MAPS_TO_EXCLUDE" "2"
+$spawnCrates = Get-BoolSetting "RENX_SPAWN_CRATES" "true"
+$maxClientRate = Get-Setting "RENX_MAX_CLIENT_RATE" "15000"
+$maxInternetClientRate = Get-Setting "RENX_MAX_INTERNET_CLIENT_RATE" "10000"
+$serverTickRate = Get-Setting "RENX_SERVER_TICK_RATE" "30"
+$gdiBotDifficulty = Get-Setting "RENX_GDI_BOT_DIFFICULTY" "1.0"
+$nodBotDifficulty = Get-Setting "RENX_NOD_BOT_DIFFICULTY" "1.0"
+$gdiAttackPercent = Get-Setting "RENX_GDI_ATTACK_PERCENT" "50"
+$nodAttackPercent = Get-Setting "RENX_NOD_ATTACK_PERCENT" "50"
 $multihome = Get-Setting "RENX_MULTIHOME" ""
 $extraArgs = Get-Setting "RENX_EXTRA_ARGS" ""
 
@@ -261,6 +308,12 @@ Set-IniValue $udkGame "Engine.GameReplicationInfo" "MessageOfTheDay" (Get-Settin
 Set-IniValue $udkGame "Engine.GameInfo" "MaxPlayers" $maxPlayers
 Set-IniValue $udkGame "Engine.AccessControl" "AdminPassword" $adminPassword
 Set-IniValue $udkGame "Engine.AccessControl" "GamePassword" $serverPassword
+Set-IniValue $udkGame "UTGame.UTGame" "bForceRespawn" $forceRespawn
+Set-IniValue $udkGame "UTGame.UTGame" "bPlayersMustBeReady" $playersMustBeReady
+Set-IniValue $udkGame "UTGame.UTGame" "NetWait" $netWait
+Set-IniValue $udkGame "UTGame.UTGame" "MinNetPlayers" $minNetPlayers
+Set-IniValue $udkGame "UTGame.UTGame" "bWaitForNetPlayers" $waitForNetPlayers
+Set-IniValue $udkGame "UTGame.UTGame" "RestartWait" $restartWait
 Set-MapRotation $udkGame $mapCycleClass $mapRotation
 
 Set-IniValue $udkEngine "URL" "Port" $gamePort
@@ -268,6 +321,9 @@ Set-IniValue $udkEngine "URL" "PeerPort" $peerPort
 Set-IniValue $udkEngine "URL" "LocalMap" "$map.udk"
 Set-IniValue $udkEngine "OnlineSubsystemSteamworks.OnlineSubsystemSteamworks" "QueryPort" $queryPort
 Set-IniValue $udkEngine "IpDrv.TcpNetDriver" "AllowDownloads" $allowDownloads
+Set-IniValue $udkEngine "IpDrv.TcpNetDriver" "MaxClientRate" $maxClientRate
+Set-IniValue $udkEngine "IpDrv.TcpNetDriver" "MaxInternetClientRate" $maxInternetClientRate
+Set-IniValue $udkEngine "IpDrv.TcpNetDriver" "NetServerMaxTickRate" $serverTickRate
 Set-IniValue $udkEngine "IpDrv.HTTPDownload" "RedirectToURL" $redirectUrl
 Set-IniValue $udkEngine "IpDrv.HTTPDownload" "UseCompression" $redirectUseCompression
 
@@ -275,10 +331,24 @@ Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bListed" $listed
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bFixedMapRotation" $fixedMapRotation
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bBotsDisabled" $botsDisabled
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bLogRcon" "true"
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Rcon" "bEnableRcon" "True"
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "InitialCredits" $initialCredits
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "CnCModeTimeLimit" $cncTimeLimit
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "DMModeTimeLimit" $dmTimeLimit
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "TeamMode" $teamMode
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "MaxMapVoteSize" $maxMapVoteSize
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "RecentMapsToExclude" $recentMapsToExclude
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "SpawnCrates" $spawnCrates
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "NodDifficulty" $nodBotDifficulty
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "GDIDifficulty" $gdiBotDifficulty
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "NODAttackingValue" $nodAttackPercent
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "GDIAttackingValue" $gdiAttackPercent
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Rcon" "bEnableRcon" $enableRcon
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Rcon" "RconPort" $rconPort
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Rcon" "SubscriberLimit" $rconSubscriberLimit
 
+Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "bEnabled" $webEnabled
 Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "ListenPort" $webPort
+Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "MaxConnections" $webMaxConnections
 
 Copy-Item -Path (Join-Path $configDir "*") -Destination $installConfigDir -Force
 Invoke-CustomContentDownloads $contentUrls $downloadedContentDir $refreshContentDownloads
