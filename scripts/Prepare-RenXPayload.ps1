@@ -10,7 +10,9 @@ param(
 
     [switch]$IncludePreviewVideos,
 
-    [switch]$IncludeWin32
+    [switch]$IncludeWin32,
+
+    [string[]]$Maps = @()
 )
 
 $ErrorActionPreference = "Stop"
@@ -54,6 +56,10 @@ function Should-IncludeEntry {
 
     if ((-not $IncludePreviewVideos) -and $Path -like "renegadex_beta/PreviewVids/*") {
         return $false
+    }
+
+    if ($Maps.Count -gt 0 -and $Path -match '^renegadex_beta/UDKGame/CookedPC/Maps/RenX/([^/]+)\.udk$') {
+        return $Maps -contains $Matches[1]
     }
 
     return $true
@@ -119,6 +125,7 @@ $manifest = [ordered]@{
     include_movies = [bool]$IncludeMovies
     include_preview_videos = [bool]$IncludePreviewVideos
     include_win32 = [bool]$IncludeWin32
+    maps = @($Maps)
     part_size_mb = $PartSizeMB
     parts = @(Get-ChildItem -LiteralPath $outputRoot -Filter "renx-server-payload.zip.*" -File | Sort-Object Name | ForEach-Object {
         [ordered]@{
