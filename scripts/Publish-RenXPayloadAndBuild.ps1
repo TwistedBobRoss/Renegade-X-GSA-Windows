@@ -3,8 +3,8 @@ param(
     [string]$Owner = "TwistedBobRoss",
     [string]$Repo = "Renegade-X-GSA-Windows",
     [string]$PayloadPartsDir = ".\payload-parts",
-    [string]$PayloadReleaseTag = "renx-payload-1.0.1022",
-    [string]$ImageTag = "1.0.1022-ltsc2022-r3",
+    [string]$PayloadReleaseTag = "renx-payload-1.0.1022-headless-r2",
+    [string]$ImageTag = "1.0.1022-ltsc2022-r4",
     [string]$Workflow = "build.yml",
     [switch]$ClobberAssets
 )
@@ -49,7 +49,7 @@ $releaseExists = ($LASTEXITCODE -eq 0)
 
 if (-not $releaseExists) {
     Write-Host "Creating payload release $PayloadReleaseTag..."
-    $notes = "Renegade X server payload split into GitHub-release-safe parts for the Windows bootstrap container."
+    $notes = "Renegade X server payload split into GitHub-release-safe parts for the Windows container image build."
     & gh release create $PayloadReleaseTag --repo $repoFull --title $PayloadReleaseTag --notes $notes
     if ($LASTEXITCODE -ne 0) {
         throw "Failed to create GitHub Release $PayloadReleaseTag."

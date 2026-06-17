@@ -270,6 +270,39 @@ function Find-ServerPayloadRoot {
     return Split-Path -Parent $binariesDir
 }
 
+function Test-ServerRuntime {
+    param(
+        [string]$InstallRoot,
+        [switch]$RequireLauncher
+    )
+
+    $requiredPaths = @(
+        "Binaries\Win64\UDK.exe"
+        "UDKGame\Config"
+        "UDKGame\CookedPC"
+        "UDKGame\CookedPC\Maps\RenX"
+    )
+
+    if ($RequireLauncher) {
+        $requiredPaths += "LaunchRenegadeXServer.bat"
+    }
+
+    foreach ($relativePath in $requiredPaths) {
+        if (-not (Test-Path -LiteralPath (Join-Path $InstallRoot $relativePath))) {
+            Write-Host "Renegade X runtime validation missing: $relativePath"
+            return $false
+        }
+    }
+
+    $mapCount = @(Get-ChildItem -LiteralPath (Join-Path $InstallRoot "UDKGame\CookedPC\Maps\RenX") -Filter "*.udk" -File -ErrorAction SilentlyContinue).Count
+    if ($mapCount -lt 1) {
+        Write-Host "Renegade X runtime validation found no maps."
+        return $false
+    }
+
+    return $true
+}
+
 function Install-ServerPayload {
     param(
         [string]$Urls,
@@ -283,11 +316,15 @@ function Install-ServerPayload {
     $bootstrapLauncher = Join-Path $BootstrapRoot "LaunchRenegadeXServer.bat"
     $installLauncher = Join-Path $InstallRoot "LaunchRenegadeXServer.bat"
 
-    if ((Test-Path -LiteralPath $udkPath) -and -not $Refresh) {
+    if ((Test-ServerRuntime $InstallRoot) -and -not $Refresh) {
         if ((Test-Path -LiteralPath $bootstrapLauncher) -and -not (Test-Path -LiteralPath $installLauncher)) {
             Copy-Item -LiteralPath $bootstrapLauncher -Destination $installLauncher -Force
         }
-        return
+
+        if (Test-ServerRuntime $InstallRoot -RequireLauncher) {
+            Write-Host "Renegade X server runtime is already installed; skipping payload download."
+            return
+        }
     }
 
     $urlList = Split-SettingList $Urls
@@ -391,9 +428,16 @@ function Install-ServerPayload {
         Copy-Item -LiteralPath $bootstrapLauncher -Destination $installLauncher -Force
     }
 
-    if (-not (Test-Path -LiteralPath $udkPath)) {
-        throw "Renegade X payload install failed. Missing $udkPath"
+    if (-not (Test-ServerRuntime $InstallRoot -RequireLauncher)) {
+        throw "Renegade X payload install failed runtime validation at $InstallRoot"
     }
+
+    $installManifest = [ordered]@{
+        installed_at_utc = [DateTime]::UtcNow.ToString("o")
+        map_count = @(Get-ChildItem -LiteralPath (Join-Path $InstallRoot "UDKGame\CookedPC\Maps\RenX") -Filter "*.udk" -File).Count
+        udk_path = $udkPath
+    }
+    $installManifest | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $InstallRoot ".renx-install.json") -Encoding UTF8
 }
 
 function Initialize-RuntimeConfig {

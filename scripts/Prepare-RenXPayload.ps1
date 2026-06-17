@@ -58,6 +58,28 @@ function Should-IncludeEntry {
         return $false
     }
 
+    if ($Path -like "renegadex_beta/UDKGame/Splash/*") {
+        return $false
+    }
+
+    if ($Path -match '^renegadex_beta/Engine/Localization/(CHN|JPN|KOR)/') {
+        return $false
+    }
+
+    if ($Path -like "renegadex_beta/Binaries/Win64/UDK_dx9debug.exe" -or
+        $Path -like "renegadex_beta/Binaries/Win64/UDK_d3d9.log" -or
+        $Path -like "renegadex_beta/Binaries/Win64/UnrealLightmass.exe" -or
+        $Path -like "renegadex_beta/Binaries/Win64/UE3ShaderCompileWorker.exe") {
+        return $false
+    }
+
+    if ($Path -match '^renegadex_beta/Binaries/(MobileShaderAnalyzer|RPCUtility|ShaderKeyTool|UDKLift|UnSetup)(\.|$)' -or
+        $Path -like "renegadex_beta/Binaries/P4API.dll" -or
+        $Path -like "renegadex_beta/Binaries/Ionic.Zip.Reduced.dll" -or
+        $Path -like "renegadex_beta/Binaries/UnSetup.Manifests*.xml") {
+        return $false
+    }
+
     if ($Maps.Count -gt 0 -and $Path -match '^renegadex_beta/UDKGame/CookedPC/Maps/RenX/([^/]+)\.udk$') {
         return $Maps -contains $Matches[1]
     }
@@ -125,9 +147,23 @@ $manifest = [ordered]@{
     include_movies = [bool]$IncludeMovies
     include_preview_videos = [bool]$IncludePreviewVideos
     include_win32 = [bool]$IncludeWin32
+    headless_exclusions = @(
+        "UDKGame/Splash"
+        "Engine/Localization/CHN"
+        "Engine/Localization/JPN"
+        "Engine/Localization/KOR"
+        "Binaries/Win64/UDK_dx9debug.exe"
+        "Binaries/Win64/UDK_d3d9.log"
+        "Binaries/Win64/UnrealLightmass.exe"
+        "Binaries/Win64/UE3ShaderCompileWorker.exe"
+        "Binaries setup and editor utilities"
+    )
     maps = @($Maps)
     part_size_mb = $PartSizeMB
-    parts = @(Get-ChildItem -LiteralPath $outputRoot -Filter "renx-server-payload.zip.*" -File | Sort-Object Name | ForEach-Object {
+    parts = @(Get-ChildItem -LiteralPath $outputRoot -Filter "renx-server-payload.zip.*" -File |
+        Where-Object { $_.Name -match '\.\d+$' } |
+        Sort-Object Name |
+        ForEach-Object {
         [ordered]@{
             name = $_.Name
             bytes = $_.Length
