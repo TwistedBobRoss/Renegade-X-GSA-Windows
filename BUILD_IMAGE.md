@@ -1,63 +1,91 @@
-# Build The Renegade X Windows Image
+# Build The Renegade X Bootstrap Windows Image
 
-This repository contains the Dockerfile and GitHub Actions workflow needed to build the Windows container image:
+This repository builds a small Windows bootstrap image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r2
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r3
 ```
 
-The image cannot be built from only the GitHub source files. Renegade X does not provide a separate tiny dedicated-server package, so the build also needs a prepared server payload from the Renegade X distribution.
+The image does not bake Renegade X game files into GHCR. It contains only:
 
-## One Command Build Path
+- `Start.ps1`
+- `LaunchRenegadeXServer.bat`
+- Windows Server Core LTSC 2022 runtime
 
-From the repository folder, prepare the payload:
+The actual Renegade X server runtime is downloaded during GSA install/first start into:
 
-```powershell
-.\scripts\Prepare-RenXPayload.ps1 `
-  -SourceZip "C:\Users\imgon\Downloads\renegade_x_Release_1.0.1022_3.zip" `
-  -OutputDir ".\payload-parts"
+```text
+C:\renx-data\ServerFiles
 ```
 
-Then upload the split payload parts to a GitHub Release and start the GitHub Actions build:
+## Build In GitHub
+
+Run the `Build Renegade X Bootstrap Windows Image` workflow and provide:
+
+```text
+image_tag = 1.0.1022-ltsc2022-r3
+```
+
+No payload release is required for the image build.
+
+If you want to host the runtime zip parts on this repository's GitHub Releases, you can still use:
 
 ```powershell
 .\scripts\Publish-RenXPayloadAndBuild.ps1 `
-  -Owner TwistedBobRoss `
-  -Repo Renegade-X-GSA-Windows `
   -PayloadPartsDir ".\payload-parts" `
   -PayloadReleaseTag "renx-payload-1.0.1022" `
-  -ImageTag "1.0.1022-ltsc2022-r2"
+  -ImageTag "1.0.1022-ltsc2022-r3"
 ```
 
-If you are replacing existing release assets, add:
+The script uploads the payload release assets, dispatches the bootstrap image workflow, and prints release download URLs that can be pasted into GSA's `Server Payload URLs` field.
 
-```powershell
--ClobberAssets
-```
+## Required GSA Fields
 
-## Requirements
+In the blueprint/server settings, provide `Server Payload URLs`.
 
-- GitHub CLI installed from `https://cli.github.com/`
-- `gh auth login` completed with access to `TwistedBobRoss/Renegade-X-GSA-Windows`
-- GitHub Packages enabled for the repository
-- GitHub Actions enabled for the repository
-
-The split payload parts are intentionally below GitHub's 2 GiB per-release-asset limit.
-
-## Manual Build Path
-
-If you do not want to use the publishing script:
-
-1. Run `scripts\Prepare-RenXPayload.ps1`.
-2. Create a GitHub Release named `renx-payload-1.0.1022`.
-3. Upload every `renx-server-payload.zip.###` file from `payload-parts`.
-4. Open Actions in GitHub.
-5. Run `Build Renegade X Windows Image`.
-6. Use:
+Use one direct public zip URL:
 
 ```text
-payload_release_tag = renx-payload-1.0.1022
-image_tag = 1.0.1022-ltsc2022-r2
+https://example.com/renx-server-payload.zip
 ```
 
-If the GitHub-hosted `windows-2022` runner runs out of disk space while expanding the payload or building Windows layers, move this workflow to a self-hosted Windows Server 2022 runner with Docker configured for Windows containers.
+or split zip parts:
+
+```text
+https://example.com/renx-server-payload.zip.001
+https://example.com/renx-server-payload.zip.002
+https://example.com/renx-server-payload.zip.003
+```
+
+The startup script downloads those files into:
+
+```text
+C:\renx-data\PayloadCache
+```
+
+Then it extracts the payload and finds the folder containing:
+
+```text
+Binaries\Win64\UDK.exe
+```
+
+## Required Maps And Content
+
+Use `Required Content URLs` for stock map packs, map dependency packs, or other files that must exist before launch. Zip files may include normal Renegade X folder structure such as:
+
+```text
+UDKGame\CookedPC\Maps\RenX\CNC-Field.udk
+UDKGame\CookedPC\RenX\...
+UDKGame\Config\...
+```
+
+Loose `.udk`, `.u`, `.upk`, `.ini`, and `.int` files are also supported.
+
+Use `Custom Content URLs` for optional mods/maps that are not required for the base launch.
+
+## Refreshing Files
+
+- `Refresh Server Payload` redownloads and reinstalls the runtime payload.
+- `Refresh Content Downloads` redownloads required/custom content.
+
+Leave both off for normal operation so GSA uses the persistent cache.
