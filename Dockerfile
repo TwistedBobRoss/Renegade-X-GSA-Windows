@@ -2,14 +2,12 @@ FROM mcr.microsoft.com/windows/servercore:ltsc2022
 
 SHELL ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
 
-WORKDIR C:/serverfiles
+WORKDIR C:/renx-bootstrap
 
-COPY renx_payload/ C:/serverfiles/
-COPY Start.ps1 C:/serverfiles/Start.ps1
-COPY LaunchRenegadeXServer.bat C:/serverfiles/LaunchRenegadeXServer.bat
+COPY Start.ps1 C:/renx-bootstrap/Start.ps1
+COPY LaunchRenegadeXServer.bat C:/renx-bootstrap/LaunchRenegadeXServer.bat
 
-RUN if (-not (Test-Path 'C:/serverfiles/Binaries/Win64/UDK.exe')) { throw 'Renegade X Win64 UDK.exe not found in image payload'; }; \
-    New-Item -ItemType Directory -Force -Path C:/renx-data/Config, C:/renx-data/CustomContent, C:/renx-data/Logs | Out-Null
+RUN New-Item -ItemType Directory -Force -Path C:/renx-data/ServerFiles, C:/renx-data/Config, C:/renx-data/CustomContent, C:/renx-data/Logs, C:/renx-data/PayloadCache | Out-Null
 
 EXPOSE 7777/udp
 EXPOSE 7778/udp
@@ -17,7 +15,8 @@ EXPOSE 27015/udp
 EXPOSE 37015/tcp
 EXPOSE 6969/tcp
 
-ENV RENX_ROOT=C:\serverfiles
+ENV RENX_BOOTSTRAP_ROOT=C:\renx-bootstrap
+ENV RENX_ROOT=C:\renx-data\ServerFiles
 ENV RENX_DATA_ROOT=C:\renx-data
 
-ENTRYPOINT ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "C:/serverfiles/Start.ps1"]
+ENTRYPOINT ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "C:/renx-bootstrap/Start.ps1"]
