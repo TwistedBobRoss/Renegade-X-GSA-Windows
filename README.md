@@ -4,52 +4,60 @@ Unofficial GameServerApp blueprint and Windows container wrapper for hosting Ren
 
 Renegade X is a free tactical shooter from Totem Arts inspired by Command & Conquer: Renegade. This project is intended to make community server hosting easier through GameServerApp, Windows containers, and a repeatable GitHub Actions build flow.
 
-## Current Status
+## Hosting Model
 
-This is a first-pass package based on inspection of `renegade_x_Release_1.0.1022_3.zip`.
-
-Known server-relevant files found in the release:
-
-- `Binaries\Win64\UDK.exe`
-- `UDKGame\Config\DefaultGame.ini`
-- `UDKGame\Config\DefaultEngine.ini`
-- `UDKGame\Config\DefaultMapList.ini`
-- `UDKGame\Config\DefaultRenegadeX.ini`
-- `UDKGame\Config\DefaultWeb.ini`
-
-The launch wrapper uses the standard UDK dedicated server pattern:
+Renegade X uses the Unreal Development Kit server pattern. A dedicated server is launched from the Renegade X game distribution with the Win64 UDK binary:
 
 ```text
-UDK.exe server CNC-Field?Game=RenX_Game.Rx_Game?MaxPlayers=40?Port=7777 -log=RenegadeXServer.log -unattended
+Binaries\Win64\UDK.exe server CNC-Field?maxplayers=40 -port=7777
 ```
 
-RCON and Steam/Source-style query support still need live testing before marketplace copy should promise an RCON console or query monitoring.
+The Totem Arts wiki documents server settings in runtime config files such as:
+
+```text
+UDKGame\Config\UDKGame.ini
+UDKGame\Config\UDKEngine.ini
+UDKGame\Config\UDKRenegadeX.ini
+UDKGame\Config\UDKWeb.ini
+```
+
+This wrapper seeds those runtime files from the bundled defaults on first boot, stores editable copies under `C:\renx-data\Config`, applies GSA parameters, then copies them back into the game install before launch.
+
+## What The Headless Image Needs
+
+There does not appear to be a separate tiny dedicated-server-only package. Current community tooling and forum examples still launch `UDK.exe server` from a Renegade X install folder.
+
+The safe server-focused payload keeps:
+
+- `Binaries\Win64`
+- `UDKGame\Config`
+- `UDKGame\CookedPC`
+- root and support files needed by the UDK build
+
+The default payload script removes likely client-only pieces:
+
+- `Binaries\Win32`
+- `Binaries\InstallData`
+- `UDKGame\Movies`
+- `PreviewVids`
+
+Do not blindly remove shared `UDKGame\CookedPC` packages. Even headless UDK servers load map, actor, weapon, vehicle, sound, and mutator packages. The script can include only selected `.udk` map files, but it keeps shared packages because package dependency discovery is safer to prove by live testing than by filename guesses.
 
 ## Image
 
 Planned image name:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r1
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r2
 ```
 
 This is a Windows container image intended for Windows Server 2022 / LTSC 2022 Windows container hosts.
 
-## Why Payload Release Assets
-
-Do not commit Renegade X server files directly into the repository. The release is too large for normal GitHub source control and contains files over normal GitHub file-size limits.
-
-Recommended flow:
-
-1. Use `scripts\Prepare-RenXPayload.ps1` locally to extract a server-focused payload from the official Renegade X release zip.
-2. Upload the generated `renx-server-payload.zip.*` parts to a GitHub Release.
-3. Run the GitHub Actions workflow.
-4. The workflow downloads the payload parts, reconstructs the zip, extracts it into the Docker build context, builds the Windows image, and pushes it to GHCR.
-5. GSA users install the blueprint and only pull the finished GHCR image.
-
 ## Prepare Payload
 
-From PowerShell:
+Do not commit Renegade X game files directly into this repository. Use a GitHub Release payload asset instead.
+
+Full server-focused payload:
 
 ```powershell
 .\scripts\Prepare-RenXPayload.ps1 `
@@ -57,22 +65,16 @@ From PowerShell:
   -OutputDir ".\payload-parts"
 ```
 
-Default trimming excludes:
-
-- `Binaries\Win32`
-- `Binaries\InstallData`
-- `UDKGame\Movies`
-- `PreviewVids`
-
-Those are likely unnecessary for a headless server image. If testing shows a missing dependency, rerun the script with:
+Smaller first-test payload with one stock map file plus shared packages:
 
 ```powershell
--IncludeMovies
--IncludePreviewVideos
--IncludeWin32
+.\scripts\Prepare-RenXPayload.ps1 `
+  -SourceZip "C:\Users\imgon\Downloads\renegade_x_Release_1.0.1022_3.zip" `
+  -OutputDir ".\payload-parts-field" `
+  -Maps CNC-Field
 ```
 
-Upload these generated assets to a GitHub Release, for example tag:
+Upload the generated assets to a GitHub Release, for example tag:
 
 ```text
 renx-payload-1.0.1022
@@ -93,7 +95,7 @@ Run the `Build Renegade X Windows Image` workflow manually and provide:
 
 ```text
 payload_release_tag = renx-payload-1.0.1022
-image_tag = 1.0.1022-ltsc2022-r1
+image_tag = 1.0.1022-ltsc2022-r2
 ```
 
 If the GitHub-hosted Windows runner runs out of disk space, use a self-hosted Windows Server 2022 runner with Docker configured for Windows containers.
@@ -106,7 +108,7 @@ Use:
 blueprints/renegade-x-gsa-windows.json
 ```
 
-The first version uses container monitoring because it is the safest known baseline. Query and RCON can be added after live testing confirms the correct GSA implementation type.
+The first version uses container monitoring because it is the safest known baseline. Query and the GSA RCON command panel should not be promised until live testing confirms the correct GSA implementation type. The server-side RCON port is still configured by this blueprint.
 
 The blueprint mounts persistent data at:
 
@@ -120,17 +122,11 @@ Inside the container this is:
 C:\renx-data
 ```
 
-On first startup, `Start.ps1` seeds editable config files into:
+Useful persistent folders:
 
 ```text
 C:\renx-data\Config
-```
-
-Then it applies GSA environment values and copies those configs into the game install before launching.
-
-Logs are written to:
-
-```text
+C:\renx-data\CustomContent
 C:\renx-data\Logs
 ```
 
@@ -142,98 +138,97 @@ Observed/default ports:
 7777/UDP  = game
 7778/UDP  = peer/raw
 27015/UDP = Steam/query
-37015/TCP = proposed RCON test port
-6969/TCP  = Renegade X web server, if used
+37015/TCP = RCON default test port
+6969/TCP  = Renegade X web server, if exposed separately
 ```
+
+Renegade X documents `RconPort=-1` as meaning RCON runs on the game port. This blueprint instead reserves a separate GSA `rcon` port and writes that allocated port into `UDKRenegadeX.ini`. If you want the game-port behavior, change `RENX_RCON_PORT` to `-1` in your forked blueprint or container environment.
+
+## Custom Maps And Mods
+
+Renegade X clients download loaded packages from the server or from an HTTP redirect. The Wiki describes two download paths:
+
+- Channel downloading, controlled by `AllowDownloads=True` under `[IpDrv.TcpNetDriver]`.
+- HTTP downloading, controlled by `RedirectToURL` and `UseCompression` under `[IpDrv.HTTPDownload]`.
+
+HTTP redirect is the practical path for public custom content. The redirect webserver must serve files from the root path, include a trailing slash in the URL, and normally run on port 80. Keep the redirect files synchronized with the server files.
+
+Upload server custom content into:
+
+```text
+\renx-data\CustomContent
+```
+
+You can also paste direct public download links into the `Custom Content URLs` parameter. Use one URL per line or separate URLs with semicolons. Supported direct files are `.zip`, `.udk`, `.u`, `.upk`, `.ini`, and `.int`. Zip files are extracted into `CustomContent\_Downloaded`, then synced using the same rules as uploaded files.
+
+Startup sync rules:
+
+```text
+CustomContent\CookedPC\*  -> UDKGame\CookedPC
+CustomContent\Maps\*      -> UDKGame\CookedPC\Maps\RenX
+CustomContent\Config\*    -> UDKGame\Config
+Loose *.udk files         -> UDKGame\CookedPC\Maps\RenX
+Loose *.u and *.upk files -> UDKGame\CookedPC
+Loose *.ini files         -> UDKGame\Config
+Loose *.int files         -> UDKGame\Localization\INT
+```
+
+To load mutators, set the GSA `Mutators` parameter to comma-separated class names, for example:
+
+```text
+RenX_ExampleMutators.InfiniteAmmo,RenX_ExampleMutators.SuddenDeath
+```
+
+Most mutators need their package on both server and client. Place the `.u` package in `CustomContent`, and configure HTTP redirect if you expect public players to download it cleanly.
 
 ## GSA Parameters
 
-The blueprint currently uses text parameters because the public dropdown JSON schema was not available during drafting. These are good candidates to convert to dropdowns in the GSA editor:
+Key parameters:
 
 ```text
 Starting Map
-Game Class
-Max Players / slot presets
+Game Class Override
+Map Cycle Class
+Map Rotation
+Mutators
+Admin/RCON Password
+Server Password
+Message Of The Day
+List Server
+Fixed Map Rotation
+Disable Bots
+GDI Bot Count
+NOD Bot Count
+Allow Downloads
+HTTP Redirect URL
+Redirect Uses Compression
+Web Port
+Multihome IP
+Custom Content URLs
+Refresh Content Downloads
+Extra Launch Args
 ```
 
-Recommended starting values:
+Recommended first test:
 
 ```text
 Starting Map = CNC-Field
-Game Class = RenX_Game.Rx_Game
+Game Class Override = blank
+Map Cycle Class = Rx_Game
 Max Players = 40
-Admin Password = blank for first test
-Server Password = blank for public access
-Extra Launch Args = blank
+List Server = true
+Fixed Map Rotation = false
+Disable Bots = false
+RCON Port = GSA allocated rcon port
+HTTP Redirect URL = https://community-content.totemarts.services/
 ```
 
 Survival test:
 
 ```text
 Starting Map = DEF-DarkNight
-Game Class = RenX_Coop.Rx_Game_Survival
-```
-
-## Maps Found In The Release
-
-Command & Conquer:
-
-```text
-CNC-Arctic_Stronghold
-CNC-Canyon
-CNC-City
-CNC-CliffSide
-CNC-Complex
-CNC-Crash_Site
-CNC-DarkSide
-CNC-Daybreak
-CNC-Desolation
-CNC-Eyes
-CNC-Field
-CNC-Field_2025
-CNC-Field_Winter
-CNC-Field_X
-CNC-Forest
-CNC-Forest_Winter
-CNC-GoldRush
-CNC-HeXmountain
-CNC-Hourglass
-CNC-Islands
-CNC-LakeSide
-CNC-LakeSide_Winter
-CNC-Mesa
-CNC-Mines
-CNC-Oasis
-CNC-Outposts
-CNC-Reservoir
-CNC-Reservoir_Winter
-CNC-Snow
-CNC-Steppe
-CNC-Tomb
-CNC-Toxicity
-CNC-Tunnels
-CNC-Under
-CNC-Uphill
-CNC-Volcano
-CNC-Walls
-CNC-Walls_Winter
-CNC-Whiteout
-CNC-Xmountain
-```
-
-Defense Survival:
-
-```text
-DEF-DarkNight
-DEF-HillSide
-```
-
-Team Deathmatch:
-
-```text
-TDM-Caves
-TDM-Deck
-TDM-UndergroundNetwork
+Game Class Override = RenX_Coop.Rx_Game_Survival
+Map Cycle Class = Rx_Game_Survival
 ```
 
 ## Docker Run Example
@@ -249,14 +244,21 @@ docker run -d --name renx-test `
   -v C:\renx-test\data:C:\renx-data `
   -e RENX_SERVER_NAME="Renegade X Test Server" `
   -e RENX_MAP="CNC-Field" `
-  -e RENX_GAME_CLASS="RenX_Game.Rx_Game" `
   -e RENX_MAX_PLAYERS="40" `
   -e RENX_GAME_PORT="7777" `
   -e RENX_PEER_PORT="7778" `
   -e RENX_QUERY_PORT="27015" `
   -e RENX_RCON_PORT="37015" `
-  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r1
+  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r2
 ```
+
+## References
+
+- Totem Arts Wiki: Server Settings
+- Totem Arts Wiki: Downloads
+- Totem Arts Wiki: Mutator
+- Totem Arts forum: Private LAN Server Creation
+- Totem Arts forum: RenegadeX Server Loader
 
 ## Credits
 
