@@ -9,7 +9,7 @@ COPY Start.ps1 C:/serverfiles/Start.ps1
 COPY LaunchRenegadeXServer.bat C:/serverfiles/LaunchRenegadeXServer.bat
 
 RUN if (-not (Test-Path 'C:/serverfiles/Binaries/Win64/UDK.exe')) { throw 'Renegade X Win64 UDK.exe not found in image payload'; }; \
-    New-Item -ItemType Directory -Force -Path C:/renx-data/Config, C:/renx-data/Logs | Out-Null
+    New-Item -ItemType Directory -Force -Path C:/renx-data/Config, C:/renx-data/CustomContent, C:/renx-data/Logs | Out-Null
 
 EXPOSE 7777/udp
 EXPOSE 7778/udp
