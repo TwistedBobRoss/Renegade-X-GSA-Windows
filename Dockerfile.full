@@ -8,6 +8,20 @@ COPY Start.ps1 C:/renx-bootstrap/Start.ps1
 COPY LaunchRenegadeXServer.bat C:/renx-bootstrap/LaunchRenegadeXServer.bat
 COPY payload-runtime/ C:/renx-seed/ServerFiles/
 
+ARG VC2010_X64_URL=https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/vcredist_x64.exe
+ARG DIRECTX_JUNE2010_URL=https://download.microsoft.com/download/8/4/a/84a35bf1-dafe-4ae8-82af-ad2ae20b6b14/directx_Jun2010_redist.exe
+
+RUN New-Item -ItemType Directory -Force -Path C:/renx-runtime-install, C:/renx-runtime-install/directx | Out-Null; `
+    Invoke-WebRequest -Uri $env:VC2010_X64_URL -OutFile C:/renx-runtime-install/vcredist_x64.exe -UseBasicParsing; `
+    $vc = Start-Process C:/renx-runtime-install/vcredist_x64.exe -ArgumentList '/install','/quiet','/norestart' -Wait -PassThru; `
+    if ($vc.ExitCode -notin 0, 1638, 3010) { throw "Visual C++ 2010 x64 installation failed with exit code $($vc.ExitCode)" }; `
+    Invoke-WebRequest -Uri $env:DIRECTX_JUNE2010_URL -OutFile C:/renx-runtime-install/directx_redist.exe -UseBasicParsing; `
+    $extract = Start-Process C:/renx-runtime-install/directx_redist.exe -ArgumentList '/Q','/T:C:\renx-runtime-install\directx' -Wait -PassThru; `
+    if ($extract.ExitCode -ne 0) { throw "DirectX redist extraction failed with exit code $($extract.ExitCode)" }; `
+    $dx = Start-Process C:/renx-runtime-install/directx/DXSETUP.exe -ArgumentList '/silent' -Wait -PassThru; `
+    if ($dx.ExitCode -notin 0, 3010) { throw "DirectX June 2010 installation failed with exit code $($dx.ExitCode)" }; `
+    Remove-Item C:/renx-runtime-install -Recurse -Force
+
 RUN $parseErrors = $null; $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/Start.ps1), [ref]$parseErrors); if ($parseErrors) { throw ($parseErrors | Out-String) }; if (-not (Test-Path C:/renx-seed/ServerFiles/Binaries/Win64/UDK.exe)) { throw 'Seed runtime is missing UDK.exe' }; $maps = @(Get-ChildItem C:/renx-seed/ServerFiles/UDKGame/CookedPC/Maps/RenX -Filter *.udk -File); if ($maps.Count -ne 20) { throw \"Expected 20 seed map files, found $($maps.Count)\" }
 
 RUN New-Item -ItemType Directory -Force -Path C:/renx-data/ServerFiles, C:/renx-data/Config, C:/renx-data/CustomContent, C:/renx-data/Logs, C:/renx-data/PayloadCache | Out-Null

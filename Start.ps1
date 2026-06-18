@@ -672,4 +672,16 @@ Write-Host "Ports: game=$gamePort peer=$peerPort query=$queryPort rcon=$rconPort
 Write-Host "Custom content root: $customContentDir"
 
 & cmd.exe /c "`"$launcher`""
-exit $LASTEXITCODE
+$serverExitCode = $LASTEXITCODE
+
+Write-Host "Renegade X launcher returned exit code $serverExitCode."
+if (Test-Path -LiteralPath $env:RENX_LOG_FILE) {
+    Write-Host "Last 200 lines from $($env:RENX_LOG_FILE):"
+    Get-Content -LiteralPath $env:RENX_LOG_FILE -Tail 200 -ErrorAction SilentlyContinue |
+        ForEach-Object { Write-Host $_ }
+}
+else {
+    Write-Host "No Renegade X log was created at $($env:RENX_LOG_FILE). This usually indicates an executable dependency or loader failure."
+}
+
+exit $serverExitCode

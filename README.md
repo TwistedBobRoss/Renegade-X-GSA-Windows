@@ -66,7 +66,7 @@ Do not blindly remove all shared `UDKGame\CookedPC` packages. Even headless UDK 
 Primary core image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r1
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r2
 ```
 
 This is a Windows container image intended for Windows Server 2022 / LTSC 2022 Windows container hosts.
@@ -74,7 +74,7 @@ This is a Windows container image intended for Windows Server 2022 / LTSC 2022 W
 The smaller bootstrap-only image remains available as:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r4
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r5
 ```
 
 ## Build Images
@@ -83,7 +83,7 @@ Run `Build Renegade X Core 20 Windows Image` to build the primary image:
 
 ```text
 payload_release = renx-core20-1.0.1022-r1
-image_tag = 1.0.1022-core20-ltsc2022-r1
+image_tag = 1.0.1022-core20-ltsc2022-r2
 ```
 
 The workflow downloads the verified core payload release, reconstructs it, validates all 20 map files, and bakes the runtime into the Windows image.
@@ -344,7 +344,7 @@ docker run -d --name renx-test `
   -e RENX_RCON_PORT="37015" `
   -e RENX_SERVER_PAYLOAD_URLS="https://example.com/renx-server-payload.zip" `
   -e RENX_REQUIRED_CONTENT_URLS="https://example.com/renx-required-maps.zip" `
-  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r1
+  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r2
 ```
 
 ## References
