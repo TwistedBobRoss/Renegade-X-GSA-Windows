@@ -26,7 +26,7 @@
     },
     "image": {
       "name": "ghcr.io/twistedbobross/renegade-x-gsa-windows",
-      "tag": "1.0.1022-ltsc2022-r4"
+      "tag": "1.0.1022-core20-ltsc2022-r1"
     },
     "automatic_ports": true,
     "envs": {
@@ -59,6 +59,12 @@
       "RENX_REDIRECT_USE_COMPRESSION": "{config_parameter id=\"redirect_use_compression\"}",
       "RENX_SERVER_PAYLOAD_URLS": "{config_parameter id=\"server_payload_urls\"}",
       "RENX_REFRESH_SERVER_PAYLOAD": "{config_parameter id=\"refresh_server_payload\"}",
+      "RENX_INSTALL_OPTIONAL_MAP_PACK_1": "{config_parameter id=\"install_optional_map_pack_1\"}",
+      "RENX_INSTALL_OPTIONAL_MAP_PACK_2": "{config_parameter id=\"install_optional_map_pack_2\"}",
+      "RENX_INSTALL_OPTIONAL_MAP_PACK_3": "{config_parameter id=\"install_optional_map_pack_3\"}",
+      "RENX_OPTIONAL_MAP_PACK_1_URL": "{config_parameter id=\"optional_map_pack_1_url\"}",
+      "RENX_OPTIONAL_MAP_PACK_2_URL": "{config_parameter id=\"optional_map_pack_2_url\"}",
+      "RENX_OPTIONAL_MAP_PACK_3_URL": "{config_parameter id=\"optional_map_pack_3_url\"}",
       "RENX_REQUIRED_CONTENT_URLS": "{config_parameter id=\"required_content_urls\"}",
       "RENX_CONTENT_URLS": "{config_parameter id=\"content_urls\"}",
       "RENX_REFRESH_CONTENT_DOWNLOADS": "{config_parameter id=\"refresh_content_downloads\"}",
@@ -112,6 +118,11 @@
     },
     "RenX Custom Content": {
       "path": "\\renx-data\\CustomContent",
+      "create": true,
+      "type": "normal"
+    },
+    "RenX Optional Maps": {
+      "path": "\\renx-data\\CustomContent\\_OptionalMaps",
       "create": true,
       "type": "normal"
     },
@@ -187,10 +198,10 @@
         },
         "server_payload_urls": {
           "name": "Server Payload URLs",
-          "info": "Default split payload URLs for Renegade X 1.0.1022. Automatic download is used unless matching files were preloaded by FTP into renx-data/PayloadCache/Downloads. Keep URLs on one line separated by semicolons.",
+          "info": "Recovery URLs for the 20-map core runtime. The full image normally seeds this runtime without downloading it. If the seed is unavailable, FTP-preloaded matching files are reused before automatic download.",
           "section": "Install",
           "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022-headless-r2/renx-server-payload.zip.001;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022-headless-r2/renx-server-payload.zip.002;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022-headless-r2/renx-server-payload.zip.003;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022-headless-r2/renx-server-payload.zip.004;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-payload-1.0.1022-headless-r2/renx-server-payload.zip.005"
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.001;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.002;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.003;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.004"
         },
         "refresh_server_payload": {
           "name": "Refresh Server Payload",
@@ -198,6 +209,48 @@
           "section": "Install",
           "type": "boolean",
           "content": "0"
+        },
+        "install_optional_map_pack_1": {
+          "name": "Install Optional Map Pack 1",
+          "info": "On/true downloads 9 maps: City, Crash Site, Daybreak, Desolation, Forest Winter, HeXmountain, Mines, Reservoir Winter, and Tomb. Off/false skips this approximately 616 MiB archive.",
+          "section": "Optional Maps",
+          "type": "boolean",
+          "content": "0"
+        },
+        "install_optional_map_pack_2": {
+          "name": "Install Optional Map Pack 2",
+          "info": "On/true downloads 9 maps: CliffSide, DarkSide, Eyes, Field 2025, Forest, Hourglass, LakeSide Winter, Outposts, and Reservoir. Off/false skips this approximately 648 MiB archive.",
+          "section": "Optional Maps",
+          "type": "boolean",
+          "content": "0"
+        },
+        "install_optional_map_pack_3": {
+          "name": "Install Optional Map Pack 3",
+          "info": "On/true downloads 9 maps: Arctic Stronghold, Field Winter, Field X, Snow, Steppe, Toxicity, Tunnels, Uphill, and Walls Winter. Off/false skips this approximately 637 MiB archive.",
+          "section": "Optional Maps",
+          "type": "boolean",
+          "content": "0"
+        },
+        "optional_map_pack_1_url": {
+          "name": "Optional Map Pack 1 URL",
+          "info": "Public archive URL used when Optional Map Pack 1 is enabled.",
+          "section": "Optional Maps",
+          "type": "text",
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.0.1022-r1/renx-optional-maps-01.zip"
+        },
+        "optional_map_pack_2_url": {
+          "name": "Optional Map Pack 2 URL",
+          "info": "Public archive URL used when Optional Map Pack 2 is enabled.",
+          "section": "Optional Maps",
+          "type": "text",
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.0.1022-r1/renx-optional-maps-02.zip"
+        },
+        "optional_map_pack_3_url": {
+          "name": "Optional Map Pack 3 URL",
+          "info": "Public archive URL used when Optional Map Pack 3 is enabled.",
+          "section": "Optional Maps",
+          "type": "text",
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.0.1022-r1/renx-optional-maps-03.zip"
         },
         "mutators": {
           "name": "Mutators",

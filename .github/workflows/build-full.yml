@@ -1,0 +1,94 @@
+name: Build Renegade X Core 20 Windows Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      payload_release:
+        description: "GitHub release containing renx-core20-payload.zip parts"
+        required: true
+        default: "renx-core20-1.0.1022-r1"
+      image_tag:
+        description: "Full container image tag to publish"
+        required: true
+        default: "1.0.1022-core20-ltsc2022-r1"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download core payload parts
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $download = Join-Path $env:RUNNER_TEMP "renx-core-parts"
+          New-Item -ItemType Directory -Force -Path $download | Out-Null
+          gh release download "${{ inputs.payload_release }}" `
+            --repo "${{ github.repository }}" `
+            --pattern "renx-core20-payload.zip.*" `
+            --dir $download
+
+          $parts = @(Get-ChildItem $download -Filter "renx-core20-payload.zip.*" -File |
+            Where-Object { $_.Name -match '\.\d+$' } |
+            Sort-Object Name)
+          if ($parts.Count -lt 1) {
+            throw "No core payload parts were downloaded."
+          }
+
+          $zip = Join-Path $env:RUNNER_TEMP "renx-core20-payload.zip"
+          $output = [System.IO.File]::Create($zip)
+          try {
+            foreach ($part in $parts) {
+              Write-Host "Appending $($part.Name)"
+              $input = [System.IO.File]::OpenRead($part.FullName)
+              try {
+                $input.CopyTo($output)
+              }
+              finally {
+                $input.Dispose()
+              }
+            }
+          }
+          finally {
+            $output.Dispose()
+          }
+
+          New-Item -ItemType Directory -Force -Path payload-runtime | Out-Null
+          Expand-Archive -LiteralPath $zip -DestinationPath payload-runtime -Force
+          Remove-Item -LiteralPath $download, $zip -Recurse -Force
+
+          if (-not (Test-Path payload-runtime/Binaries/Win64/UDK.exe)) {
+            throw "Extracted core payload is missing UDK.exe."
+          }
+          $maps = @(Get-ChildItem payload-runtime/UDKGame/CookedPC/Maps/RenX -Filter "*.udk" -File)
+          if ($maps.Count -ne 20) {
+            throw "Expected 20 core map files, found $($maps.Count)."
+          }
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build full core image
+        shell: powershell
+        run: |
+          $repo = "${{ github.repository }}".ToLowerInvariant()
+          $image = "ghcr.io/${repo}:${{ inputs.image_tag }}"
+          docker build -f Dockerfile.full -t $image .
+
+      - name: Push full core image
+        shell: powershell
+        run: |
+          $repo = "${{ github.repository }}".ToLowerInvariant()
+          $image = "ghcr.io/${repo}:${{ inputs.image_tag }}"
+          docker push $image

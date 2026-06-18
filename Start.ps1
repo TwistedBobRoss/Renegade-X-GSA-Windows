@@ -303,6 +303,36 @@ function Test-ServerRuntime {
     return $true
 }
 
+function Install-SeedRuntime {
+    param(
+        [string]$SeedRoot,
+        [string]$InstallRoot,
+        [string]$BootstrapRoot
+    )
+
+    if ((Test-ServerRuntime $InstallRoot) -or [string]::IsNullOrWhiteSpace($SeedRoot)) {
+        return
+    }
+
+    if (-not (Test-ServerRuntime $SeedRoot)) {
+        Write-Host "No valid baked Renegade X seed runtime was found; using payload download fallback."
+        return
+    }
+
+    Write-Host "Installing baked 20-map Renegade X core runtime into persistent storage..."
+    New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
+    Copy-Item -Path (Join-Path $SeedRoot "*") -Destination $InstallRoot -Recurse -Force
+
+    $bootstrapLauncher = Join-Path $BootstrapRoot "LaunchRenegadeXServer.bat"
+    if (Test-Path -LiteralPath $bootstrapLauncher) {
+        Copy-Item -LiteralPath $bootstrapLauncher -Destination (Join-Path $InstallRoot "LaunchRenegadeXServer.bat") -Force
+    }
+
+    if (-not (Test-ServerRuntime $InstallRoot -RequireLauncher)) {
+        throw "Baked Renegade X seed runtime failed validation after copying to $InstallRoot"
+    }
+}
+
 function Install-ServerPayload {
     param(
         [string]$Urls,
@@ -497,6 +527,13 @@ $redirectUrl = Get-Setting "RENX_REDIRECT_URL" "https://community-content.totema
 $redirectUseCompression = Get-BoolSetting "RENX_REDIRECT_USE_COMPRESSION" "false"
 $serverPayloadUrls = Get-Setting "RENX_SERVER_PAYLOAD_URLS" ""
 $refreshServerPayload = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_REFRESH_SERVER_PAYLOAD" "false"))
+$seedRoot = Get-Setting "RENX_SEED_ROOT" ""
+$installOptionalMapPack1 = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_INSTALL_OPTIONAL_MAP_PACK_1" "false"))
+$installOptionalMapPack2 = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_INSTALL_OPTIONAL_MAP_PACK_2" "false"))
+$installOptionalMapPack3 = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_INSTALL_OPTIONAL_MAP_PACK_3" "false"))
+$optionalMapPack1Url = Get-Setting "RENX_OPTIONAL_MAP_PACK_1_URL" ""
+$optionalMapPack2Url = Get-Setting "RENX_OPTIONAL_MAP_PACK_2_URL" ""
+$optionalMapPack3Url = Get-Setting "RENX_OPTIONAL_MAP_PACK_3_URL" ""
 $requiredContentUrls = Get-Setting "RENX_REQUIRED_CONTENT_URLS" ""
 $contentUrls = Get-Setting "RENX_CONTENT_URLS" ""
 $refreshContentDownloads = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_REFRESH_CONTENT_DOWNLOADS" "false"))
@@ -529,6 +566,7 @@ $nodAttackPercent = Get-Setting "RENX_NOD_ATTACK_PERCENT" "50"
 $multihome = Get-Setting "RENX_MULTIHOME" ""
 $extraArgs = Get-Setting "RENX_EXTRA_ARGS" ""
 
+Install-SeedRuntime $seedRoot $root $bootstrapRoot
 Install-ServerPayload $serverPayloadUrls $root $dataRoot $bootstrapRoot $refreshServerPayload
 $launcher = Join-Path $root "LaunchRenegadeXServer.bat"
 
@@ -537,6 +575,7 @@ $configDir = Join-Path $dataRoot "Config"
 $customContentDir = Join-Path $dataRoot "CustomContent"
 $downloadedContentDir = Join-Path $customContentDir "_Downloaded"
 $requiredContentDir = Join-Path $customContentDir "_Required"
+$optionalMapDir = Join-Path $customContentDir "_OptionalMaps"
 $logDir = Join-Path $dataRoot "Logs"
 
 New-Item -ItemType Directory -Force -Path $configDir, $customContentDir, $logDir | Out-Null
@@ -595,6 +634,15 @@ Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "ListenPort" $webPort
 Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "MaxConnections" $webMaxConnections
 
 Copy-Item -Path (Join-Path $configDir "*") -Destination $installConfigDir -Force
+if ($installOptionalMapPack1) {
+    Invoke-CustomContentDownloads $optionalMapPack1Url $optionalMapDir $refreshContentDownloads "optional map pack 1"
+}
+if ($installOptionalMapPack2) {
+    Invoke-CustomContentDownloads $optionalMapPack2Url $optionalMapDir $refreshContentDownloads "optional map pack 2"
+}
+if ($installOptionalMapPack3) {
+    Invoke-CustomContentDownloads $optionalMapPack3Url $optionalMapDir $refreshContentDownloads "optional map pack 3"
+}
 Invoke-CustomContentDownloads $requiredContentUrls $requiredContentDir $refreshContentDownloads "required content"
 Invoke-CustomContentDownloads $contentUrls $downloadedContentDir $refreshContentDownloads "custom content"
 Sync-CustomContent $customContentDir $root

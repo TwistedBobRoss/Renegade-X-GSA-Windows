@@ -23,19 +23,29 @@ UDKGame\Config\UDKWeb.ini
 
 This wrapper seeds those runtime files from the bundled defaults on first boot, stores editable copies under `C:\renx-data\Config`, applies GSA parameters, then copies them back into the game install before launch.
 
-## Bootstrap Hosting Model
+## Core 20 Hosting Model
 
 There does not appear to be a separate tiny dedicated-server-only package. Current community tooling and forum examples still launch `UDK.exe server` from a Renegade X install folder.
 
-This container is now a bootstrap image. The Docker image contains only the launch scripts. The Renegade X server runtime is downloaded during first start into the persistent GSA mount:
+The primary GSA image contains a tested core runtime with 20 map files. On first start, it copies that runtime into the persistent GSA mount:
 
 ```text
 C:\renx-data\ServerFiles
 ```
 
-This keeps the published image small and avoids baking multi-gigabyte cooked client content into GHCR.
+The core contains 18 playable maps plus the two required frontend/menu maps:
 
-The runtime payload URL should point at a prepared Renegade X server zip or split zip parts. A safe server-focused payload keeps:
+```text
+CNC: Canyon, Complex, Field, GoldRush, Islands, LakeSide, Mesa, Oasis,
+     Under, Volcano, Walls, Whiteout, Xmountain
+DEF: DarkNight, HillSide
+TDM: Caves, Deck, UndergroundNetwork
+System: RenX-FrontEndMap, RenX-MenuMap
+```
+
+This includes all five maps shipped specifically for DEF/co-op and TDM, plus a practical CnC rotation covering small and large player counts. The other 27 playable CnC maps are available as three optional nine-map packs.
+
+The runtime payload URLs remain as a recovery path. A safe server-focused payload keeps:
 
 - `Binaries\Win64`
 - `UDKGame\Config`
@@ -53,23 +63,30 @@ Do not blindly remove all shared `UDKGame\CookedPC` packages. Even headless UDK 
 
 ## Image
 
-Image name:
+Primary core image:
+
+```text
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r1
+```
+
+This is a Windows container image intended for Windows Server 2022 / LTSC 2022 Windows container hosts.
+
+The smaller bootstrap-only image remains available as:
 
 ```text
 ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r4
 ```
 
-This is a Windows container image intended for Windows Server 2022 / LTSC 2022 Windows container hosts.
+## Build Images
 
-## Build Image
-
-Run the `Build Renegade X Bootstrap Windows Image` workflow manually and provide:
+Run `Build Renegade X Core 20 Windows Image` to build the primary image:
 
 ```text
-image_tag = 1.0.1022-ltsc2022-r4
+payload_release = renx-core20-1.0.1022-r1
+image_tag = 1.0.1022-core20-ltsc2022-r1
 ```
 
-The workflow no longer downloads or embeds the Renegade X payload. It builds the small bootstrap image directly from this repository.
+The workflow downloads the verified core payload release, reconstructs it, validates all 20 map files, and bakes the runtime into the Windows image.
 
 ## Runtime Payload URLs
 
@@ -89,13 +106,40 @@ https://example.com/renx-server-payload.zip.003
 
 The helper script `scripts\Publish-RenXPayloadAndBuild.ps1` can upload split payload parts to a GitHub Release and print URLs in this format.
 
-On first start, `Start.ps1` downloads and extracts the payload into:
+The full image normally copies its baked seed into:
 
 ```text
 C:\renx-data\ServerFiles
 ```
 
-Set `Refresh Server Payload` to true only when you intentionally want to redownload and reinstall the runtime.
+If that seed is unavailable, `Start.ps1` falls back to the configured split payload URLs. Set `Refresh Server Payload` to true only when you intentionally want to replace the persistent runtime from those URLs.
+
+## Optional Map Packs
+
+The remaining 27 playable maps are divided into three balanced downloads. Each pack may be enabled independently in the GSA blueprint.
+
+Pack 1, approximately 616 MiB:
+
+```text
+City, Crash Site, Daybreak, Desolation, Forest Winter, HeXmountain,
+Mines, Reservoir Winter, Tomb
+```
+
+Pack 2, approximately 648 MiB:
+
+```text
+CliffSide, DarkSide, Eyes, Field 2025, Forest, Hourglass,
+LakeSide Winter, Outposts, Reservoir
+```
+
+Pack 3, approximately 637 MiB:
+
+```text
+Arctic Stronghold, Field Winter, Field X, Snow, Steppe,
+Toxicity, Tunnels, Uphill, Walls Winter
+```
+
+Enable none, any one, any two, or all three packs. Enabled packs download and install during startup. Downloads are cached under `CustomContent\_OptionalMaps`, so later starts reuse them. Turning a switch off does not delete a pack already installed; remove its cached folder and map files manually if intentional removal is required.
 
 ## Optional FTP Payload Preload
 
@@ -113,14 +157,13 @@ You may preload the release assets before starting the server. This is optional 
 4. Keep every filename unchanged, including `.zip.001`, `.zip.002`, and the remaining numbered suffixes.
 5. Return to GSA and start the server normally.
 
-The current release requires:
+The core recovery release requires:
 
 ```text
-renx-server-payload.zip.001
-renx-server-payload.zip.002
-renx-server-payload.zip.003
-renx-server-payload.zip.004
-renx-server-payload.zip.005
+renx-core20-payload.zip.001
+renx-core20-payload.zip.002
+renx-core20-payload.zip.003
+renx-core20-payload.zip.004
 ```
 
 The manifest file is useful for checksum reference but is not required by the runtime installer. On startup, the container finds the preloaded parts, skips their GitHub downloads, joins them into one zip, extracts the runtime, validates `UDK.exe`, configuration folders, and maps, then launches Renegade X.
@@ -169,6 +212,7 @@ C:\renx-data\PayloadCache
 C:\renx-data\PayloadCache\Downloads
 C:\renx-data\Config
 C:\renx-data\CustomContent
+C:\renx-data\CustomContent\_OptionalMaps
 C:\renx-data\Logs
 ```
 
@@ -235,6 +279,9 @@ Map Cycle Class
 Map Rotation
 Server Payload URLs
 Refresh Server Payload
+Install Optional Map Pack 1
+Install Optional Map Pack 2
+Install Optional Map Pack 3
 Mutators
 Admin/RCON Password
 Server Password
@@ -297,7 +344,7 @@ docker run -d --name renx-test `
   -e RENX_RCON_PORT="37015" `
   -e RENX_SERVER_PAYLOAD_URLS="https://example.com/renx-server-payload.zip" `
   -e RENX_REQUIRED_CONTENT_URLS="https://example.com/renx-required-maps.zip" `
-  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r4
+  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r1
 ```
 
 ## References
