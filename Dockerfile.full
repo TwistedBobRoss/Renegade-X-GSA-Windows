@@ -1,5 +1,5 @@
 # escape=`
-FROM mcr.microsoft.com/windows:ltsc2022
+FROM mcr.microsoft.com/windows/server:ltsc2022
 
 SHELL ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
 
