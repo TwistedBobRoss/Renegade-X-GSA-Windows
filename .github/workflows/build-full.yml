@@ -132,22 +132,31 @@ jobs:
             $image | Out-Null
 
           try {
-            Start-Sleep -Seconds 75
-            $state = docker inspect $name | ConvertFrom-Json
+            $logPath = "C:\renx-data\Logs\RenegadeXServer.log"
+            $deadline = (Get-Date).AddMinutes(4)
+            $logReady = $false
+            do {
+              Start-Sleep -Seconds 5
+              $state = docker inspect $name | ConvertFrom-Json
+              if (-not $state[0].State.Running) {
+                docker logs $name
+                throw "Renegade X smoke-test container exited with code $($state[0].State.ExitCode)."
+              }
+
+              docker exec $name powershell -NoProfile -Command "if ((Test-Path -LiteralPath '$logPath') -and (Get-Item -LiteralPath '$logPath').Length -ge 100) { exit 0 }; exit 1"
+              $logReady = $LASTEXITCODE -eq 0
+            } while (-not $logReady -and (Get-Date) -lt $deadline)
+
             $containerLog = docker logs $name 2>&1 | Out-String
             Write-Host $containerLog
-            if (-not $state[0].State.Running) {
-              throw "Renegade X smoke-test container exited with code $($state[0].State.ExitCode)."
-            }
             if ($containerLog -notmatch "Public listing mode: Internet" -or $containerLog -notmatch "Query port: 27015") {
               throw "Renegade X launch diagnostics did not confirm internet mode and the assigned query port."
             }
-
-            $logPath = "C:\renx-data\Logs\RenegadeXServer.log"
-            docker exec $name powershell -NoProfile -Command "if (-not (Test-Path -LiteralPath '$logPath')) { exit 1 }; if ((Get-Item -LiteralPath '$logPath').Length -lt 100) { exit 2 }; Get-Content -LiteralPath '$logPath' -Tail 20"
-            if ($LASTEXITCODE -ne 0) {
+            if (-not $logReady) {
               throw "Renegade X did not create a readable persistent game log."
             }
+
+            docker exec $name powershell -NoProfile -Command "Get-Content -LiteralPath '$logPath' -Tail 20"
           }
           finally {
             docker rm -f $name | Out-Null
