@@ -15,7 +15,7 @@ ARG DIRECTX_JUNE2010_URL=https://download.microsoft.com/download/8/4/a/84a35bf1-
 RUN $ErrorActionPreference = 'Stop'; `
     New-Item -ItemType Directory -Force -Path C:/renx-runtime-install, C:/renx-runtime-install/directx | Out-Null; `
     Invoke-WebRequest -Uri $env:VC2010_X64_URL -OutFile C:/renx-runtime-install/vcredist_x64.exe -UseBasicParsing; `
-    $vc = Start-Process C:/renx-runtime-install/vcredist_x64.exe -ArgumentList '/install','/quiet','/norestart' -Wait -PassThru; `
+    $vc = Start-Process C:/renx-runtime-install/vcredist_x64.exe -ArgumentList '/q','/norestart' -Wait -PassThru; `
     Write-Host ('Visual C++ 2010 x64 installer exit code: {0}' -f $vc.ExitCode); `
     if ($vc.ExitCode -notin 0, 1638, 3010) { throw ('Visual C++ 2010 x64 installation failed with exit code {0}' -f $vc.ExitCode) }; `
     $vcRuntimeRoots = @(Get-ChildItem C:/Windows/WinSxS -Directory -Filter 'amd64_microsoft.vc100.crt_*' -ErrorAction SilentlyContinue); `
