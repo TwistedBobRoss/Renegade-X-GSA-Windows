@@ -64,7 +64,9 @@ jobs:
               'OLEAUT32.dll',
               'MSVCP100.dll',
               'MSVCR100.dll',
+              'VCRUNTIME140.dll',
               'DSOUND.dll',
+              'xaudio2_8.dll',
               'CRYPT32.dll',
               'IPHLPAPI.DLL',
               'IMM32.dll',
@@ -84,7 +86,7 @@ jobs:
           }
 
           if ($missing.Count -gt 0) {
-              Write-Host ('Missing direct UDK system imports: {0}' -f ($missing -join ', '))
+              Write-Host ('Missing direct or transitive UDK system imports: {0}' -f ($missing -join ', '))
               exit 2
           }
           '@
