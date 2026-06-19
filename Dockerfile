@@ -12,15 +12,28 @@ COPY LaunchRenegadeXServer.bat C:/renx-bootstrap/LaunchRenegadeXServer.bat
 ARG VC2010_X64_URL=https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/vcredist_x64.exe
 ARG DIRECTX_JUNE2010_URL=https://download.microsoft.com/download/8/4/a/84a35bf1-dafe-4ae8-82af-ad2ae20b6b14/directx_Jun2010_redist.exe
 
-RUN New-Item -ItemType Directory -Force -Path C:/renx-runtime-install, C:/renx-runtime-install/directx | Out-Null; `
+RUN $ErrorActionPreference = 'Stop'; `
+    New-Item -ItemType Directory -Force -Path C:/renx-runtime-install, C:/renx-runtime-install/directx | Out-Null; `
     Invoke-WebRequest -Uri $env:VC2010_X64_URL -OutFile C:/renx-runtime-install/vcredist_x64.exe -UseBasicParsing; `
     $vc = Start-Process C:/renx-runtime-install/vcredist_x64.exe -ArgumentList '/install','/quiet','/norestart' -Wait -PassThru; `
-    if ($vc.ExitCode -notin 0, 1638, 3010) { throw "Visual C++ 2010 x64 installation failed with exit code $($vc.ExitCode)" }; `
+    Write-Host ('Visual C++ 2010 x64 installer exit code: {0}' -f $vc.ExitCode); `
+    if ($vc.ExitCode -notin 0, 1638, 3010) { throw ('Visual C++ 2010 x64 installation failed with exit code {0}' -f $vc.ExitCode) }; `
     Invoke-WebRequest -Uri $env:DIRECTX_JUNE2010_URL -OutFile C:/renx-runtime-install/directx_redist.exe -UseBasicParsing; `
     $extract = Start-Process C:/renx-runtime-install/directx_redist.exe -ArgumentList '/Q','/T:C:\renx-runtime-install\directx' -Wait -PassThru; `
-    if ($extract.ExitCode -ne 0) { throw "DirectX redist extraction failed with exit code $($extract.ExitCode)" }; `
-    $dx = Start-Process C:/renx-runtime-install/directx/DXSETUP.exe -ArgumentList '/silent' -Wait -PassThru; `
-    if ($dx.ExitCode -notin 0, 3010) { throw "DirectX June 2010 installation failed with exit code $($dx.ExitCode)" }; `
+    Write-Host ('DirectX redist extraction exit code: {0}' -f $extract.ExitCode); `
+    if ($extract.ExitCode -ne 0) { throw ('DirectX redist extraction failed with exit code {0}' -f $extract.ExitCode) }; `
+    $legacyCabNames = @('Jun2010_D3DCompiler_43_x64.cab','Jun2010_d3dx9_43_x64.cab','Jun2010_d3dx11_43_x64.cab','Jun2010_XAudio_x64.cab','Feb2010_X3DAudio_x64.cab','APR2007_xinput_x64.cab'); `
+    foreach ($cabName in $legacyCabNames) { `
+        $cabPath = Join-Path C:/renx-runtime-install/directx $cabName; `
+        if (-not (Test-Path -LiteralPath $cabPath)) { throw ('Required DirectX cabinet was not found: {0}' -f $cabName) }; `
+        & expand.exe '-F:*.dll' $cabPath C:/Windows/System32 | Out-Host; `
+        if ($LASTEXITCODE -ne 0) { throw ('Failed to extract DirectX cabinet {0}; expand.exe exit code {1}' -f $cabName, $LASTEXITCODE) } `
+    }; `
+    $requiredLegacyDlls = @('D3DCompiler_43.dll','d3dx9_43.dll','d3dx11_43.dll','XAudio2_7.dll','XAPOFX1_5.dll','X3DAudio1_7.dll','xinput1_3.dll'); `
+    foreach ($dllName in $requiredLegacyDlls) { `
+        if (-not (Test-Path -LiteralPath (Join-Path C:/Windows/System32 $dllName))) { throw ('Required DirectX DLL was not installed: {0}' -f $dllName) }; `
+        Write-Host ('Installed legacy DirectX DLL: {0}' -f $dllName) `
+    }; `
     Remove-Item C:/renx-runtime-install -Recurse -Force
 
 RUN $parseErrors = $null; $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/Start.ps1), [ref]$parseErrors); if ($parseErrors) { throw ($parseErrors | Out-String) }; $parseErrors = $null; $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/RunRenX.ps1), [ref]$parseErrors); if ($parseErrors) { throw ($parseErrors | Out-String) }
