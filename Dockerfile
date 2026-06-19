@@ -11,6 +11,8 @@ COPY LaunchRenegadeXServer.bat C:/renx-bootstrap/LaunchRenegadeXServer.bat
 
 ARG VC2010_X64_URL=https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe
 ARG VC2010_X64_SHA256=F3B7A76D84D23F91957AA18456A14B4E90609E4CE8194C5653384ED38DADA6F3
+ARG VC2015_X64_URL=https://download.visualstudio.microsoft.com/download/pr/285b28c7-3cf9-47fb-9be8-01cf5323a8df/8F9FB1B3CFE6E5092CF1225ECD6659DAB7CE50B8BF935CB79BFEDE1F3C895240/VC_redist.x64.exe
+ARG VC2015_X64_SHA256=8F9FB1B3CFE6E5092CF1225ECD6659DAB7CE50B8BF935CB79BFEDE1F3C895240
 ARG DIRECTX_JUNE2010_URL=https://download.microsoft.com/download/8/4/a/84a35bf1-dafe-4ae8-82af-ad2ae20b6b14/directx_Jun2010_redist.exe
 
 RUN $ErrorActionPreference = 'Stop'; `
@@ -31,6 +33,13 @@ RUN $ErrorActionPreference = 'Stop'; `
         }; `
         Write-Host ('Installed Visual C++ runtime DLL: {0}' -f $dllName) `
     }; `
+    Invoke-WebRequest -Uri $env:VC2015_X64_URL -OutFile C:/renx-runtime-install/vc_redist.x64.exe -UseBasicParsing; `
+    $modernVcHash = (Get-FileHash -Algorithm SHA256 -LiteralPath C:/renx-runtime-install/vc_redist.x64.exe).Hash; `
+    if ($modernVcHash -ne $env:VC2015_X64_SHA256) { throw ('Visual C++ 2015-2022 x64 installer hash mismatch: {0}' -f $modernVcHash) }; `
+    $modernVc = Start-Process C:/renx-runtime-install/vc_redist.x64.exe -ArgumentList '/install','/quiet','/norestart' -Wait -PassThru; `
+    Write-Host ('Visual C++ 2015-2022 x64 installer exit code: {0}' -f $modernVc.ExitCode); `
+    if ($modernVc.ExitCode -notin 0, 1638, 3010) { throw ('Visual C++ 2015-2022 x64 installation failed with exit code {0}' -f $modernVc.ExitCode) }; `
+    if (-not (Test-Path -LiteralPath C:/Windows/System32/VCRUNTIME140.dll)) { throw 'Visual C++ 2015-2022 runtime DLL was not installed: VCRUNTIME140.dll' }; `
     Invoke-WebRequest -Uri $env:DIRECTX_JUNE2010_URL -OutFile C:/renx-runtime-install/directx_redist.exe -UseBasicParsing; `
     $extract = Start-Process C:/renx-runtime-install/directx_redist.exe -ArgumentList '/Q','/T:C:\renx-runtime-install\directx' -Wait -PassThru; `
     Write-Host ('DirectX redist extraction exit code: {0}' -f $extract.ExitCode); `
