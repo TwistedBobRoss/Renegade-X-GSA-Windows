@@ -129,9 +129,9 @@ elseif ($maxPlayers -gt 64) {
     $maxPlayers = 64
 }
 
-$runner = Join-Path $root "Binaries\Win64\UDK.com"
+$runner = Join-Path $root "Binaries\Win64\UDK.exe"
 if (-not (Test-Path -LiteralPath $runner)) {
-    $runner = Join-Path $root "Binaries\Win64\UDK.exe"
+    $runner = Join-Path $root "Binaries\Win64\UDK.com"
 }
 if (-not (Test-Path -LiteralPath $runner)) {
     throw "Renegade X executable was not found under $root\Binaries\Win64."
