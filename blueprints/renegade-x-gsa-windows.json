@@ -129,7 +129,7 @@
     "RenX Logs": {
       "path": "\\renx-data\\Logs",
       "create": true,
-      "type": "normal"
+      "type": "logs"
     }
   },
   "game": {
