@@ -6,6 +6,7 @@ SHELL ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
 WORKDIR C:/renx-bootstrap
 
 COPY Start.ps1 C:/renx-bootstrap/Start.ps1
+COPY RunRenX.ps1 C:/renx-bootstrap/RunRenX.ps1
 COPY LaunchRenegadeXServer.bat C:/renx-bootstrap/LaunchRenegadeXServer.bat
 
 ARG VC2010_X64_URL=https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/vcredist_x64.exe
@@ -22,7 +23,7 @@ RUN New-Item -ItemType Directory -Force -Path C:/renx-runtime-install, C:/renx-r
     if ($dx.ExitCode -notin 0, 3010) { throw "DirectX June 2010 installation failed with exit code $($dx.ExitCode)" }; `
     Remove-Item C:/renx-runtime-install -Recurse -Force
 
-RUN $parseErrors = $null; $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/Start.ps1), [ref]$parseErrors); if ($parseErrors) { throw ($parseErrors | Out-String) }
+RUN $parseErrors = $null; $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/Start.ps1), [ref]$parseErrors); if ($parseErrors) { throw ($parseErrors | Out-String) }; $parseErrors = $null; $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/RunRenX.ps1), [ref]$parseErrors); if ($parseErrors) { throw ($parseErrors | Out-String) }
 
 RUN New-Item -ItemType Directory -Force -Path C:/renx-data/ServerFiles, C:/renx-data/Config, C:/renx-data/CustomContent, C:/renx-data/Logs, C:/renx-data/PayloadCache | Out-Null
 
