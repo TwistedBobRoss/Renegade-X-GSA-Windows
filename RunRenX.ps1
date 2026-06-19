@@ -137,7 +137,7 @@ if (-not (Test-Path -LiteralPath $runner)) {
     throw "Renegade X executable was not found under $root\Binaries\Win64."
 }
 
-$url = "$map?maxplayers=$maxPlayers?bIsLanMatch=false"
+$url = "${map}?maxplayers=${maxPlayers}?bIsLanMatch=false"
 if (-not [string]::IsNullOrWhiteSpace($gameClass)) {
     $url += "?Game=$gameClass"
 }
