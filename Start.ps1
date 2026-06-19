@@ -586,6 +586,11 @@ $udkEngine = Join-Path $configDir "UDKEngine.ini"
 $udkRenegadeX = Join-Path $configDir "UDKRenegadeX.ini"
 $udkWeb = Join-Path $configDir "UDKWeb.ini"
 
+$surveyDate = [DateTime]::UtcNow.ToString("yyyyMMdd")
+Set-IniValue $udkEngine "HardwareSurvey" "LastSurveyVersion" "12791"
+Set-IniValue $udkEngine "HardwareSurvey" "LastSurveyDate" $surveyDate
+Set-IniValue $udkEngine "AppCompat" "CompatLevelComposite" "5"
+
 Set-IniValue $udkGame "Engine.GameReplicationInfo" "ServerName" $serverName
 Set-IniValue $udkGame "Engine.GameReplicationInfo" "MessageOfTheDay" (Get-Setting "RENX_MOTD" "")
 Set-IniValue $udkGame "Engine.GameInfo" "MaxPlayers" $maxPlayers
@@ -671,7 +676,6 @@ Write-Host "Server name: $serverName"
 Write-Host "Max players: $maxPlayers"
 Write-Host "Ports: game=$gamePort peer=$peerPort query=$queryPort rcon=$rconPort web=$webPort"
 Write-Host "Custom content root: $customContentDir"
-
 & cmd.exe /c "`"$launcher`""
 $serverExitCode = $LASTEXITCODE
 
