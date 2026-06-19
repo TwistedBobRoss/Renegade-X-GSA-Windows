@@ -630,6 +630,7 @@ Set-IniValue $udkRenegadeX "RenX_Game.Rx_Rcon" "RconPort" $rconPort
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Rcon" "SubscriberLimit" $rconSubscriberLimit
 
 Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "bEnabled" $webEnabled
+Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "ServerName" $serverName
 Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "ListenPort" $webPort
 Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "MaxConnections" $webMaxConnections
 
