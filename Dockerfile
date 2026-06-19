@@ -1,5 +1,5 @@
 # escape=`
-FROM mcr.microsoft.com/windows/servercore:ltsc2022
+FROM mcr.microsoft.com/windows:ltsc2022
 
 SHELL ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
 
@@ -18,6 +18,16 @@ RUN $ErrorActionPreference = 'Stop'; `
     $vc = Start-Process C:/renx-runtime-install/vcredist_x64.exe -ArgumentList '/install','/quiet','/norestart' -Wait -PassThru; `
     Write-Host ('Visual C++ 2010 x64 installer exit code: {0}' -f $vc.ExitCode); `
     if ($vc.ExitCode -notin 0, 1638, 3010) { throw ('Visual C++ 2010 x64 installation failed with exit code {0}' -f $vc.ExitCode) }; `
+    $vcRuntimeRoots = @(Get-ChildItem C:/Windows/WinSxS -Directory -Filter 'amd64_microsoft.vc100.crt_*' -ErrorAction SilentlyContinue); `
+    foreach ($dllName in @('MSVCP100.dll','MSVCR100.dll')) { `
+        $target = Join-Path C:/Windows/System32 $dllName; `
+        if (-not (Test-Path -LiteralPath $target)) { `
+            $candidate = $vcRuntimeRoots | ForEach-Object { Get-ChildItem -LiteralPath $_.FullName -Filter $dllName -File -ErrorAction SilentlyContinue } | Select-Object -First 1; `
+            if (-not $candidate) { throw ('Visual C++ 2010 runtime DLL was not installed: {0}' -f $dllName) }; `
+            Copy-Item -LiteralPath $candidate.FullName -Destination $target -Force `
+        }; `
+        Write-Host ('Installed Visual C++ runtime DLL: {0}' -f $dllName) `
+    }; `
     Invoke-WebRequest -Uri $env:DIRECTX_JUNE2010_URL -OutFile C:/renx-runtime-install/directx_redist.exe -UseBasicParsing; `
     $extract = Start-Process C:/renx-runtime-install/directx_redist.exe -ArgumentList '/Q','/T:C:\renx-runtime-install\directx' -Wait -PassThru; `
     Write-Host ('DirectX redist extraction exit code: {0}' -f $extract.ExitCode); `
