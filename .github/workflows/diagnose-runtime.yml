@@ -1,0 +1,93 @@
+name: Diagnose Renegade X Windows Runtime
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure Windows Docker daemon
+        shell: powershell
+        run: |
+          $service = Get-Service -Name docker -ErrorAction Stop
+          if ($service.Status -ne "Running") {
+            Start-Service -Name docker
+          }
+
+          $deadline = (Get-Date).AddMinutes(3)
+          do {
+            docker info *> $null
+            if ($LASTEXITCODE -eq 0) {
+              break
+            }
+            Start-Sleep -Seconds 5
+          } while ((Get-Date) -lt $deadline)
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Docker daemon did not become ready within three minutes."
+          }
+
+      - name: Build bootstrap runtime image
+        shell: powershell
+        run: docker build -f Dockerfile -t renx-runtime-diagnostic .
+
+      - name: Audit UDK system imports
+        shell: powershell
+        run: |
+          $script = @'
+          $names = @(
+              'DINPUT8.dll',
+              'XINPUT1_3.dll',
+              'WININET.dll',
+              'd3d9.dll',
+              'D3DCOMPILER_43.dll',
+              'd3dx9_43.dll',
+              'd3dx11_43.dll',
+              'X3DAudio1_7.dll',
+              'XAPOFX1_5.dll',
+              'WSOCK32.dll',
+              'dbghelp.dll',
+              'WINMM.dll',
+              'KERNEL32.dll',
+              'USER32.dll',
+              'GDI32.dll',
+              'ADVAPI32.dll',
+              'SHELL32.dll',
+              'ole32.dll',
+              'OLEAUT32.dll',
+              'MSVCP100.dll',
+              'MSVCR100.dll',
+              'DSOUND.dll',
+              'CRYPT32.dll',
+              'IPHLPAPI.DLL',
+              'IMM32.dll',
+              'PSAPI.DLL',
+              'faultrep.dll',
+              'mscoree.dll'
+          )
+
+          $missing = @()
+          foreach ($name in $names) {
+              $path = Join-Path C:\Windows\System32 $name
+              $present = Test-Path -LiteralPath $path
+              Write-Host ('{0,-24} {1}' -f $name, $(if ($present) { 'present' } else { 'MISSING' }))
+              if (-not $present) {
+                  $missing += $name
+              }
+          }
+
+          if ($missing.Count -gt 0) {
+              Write-Host ('Missing direct UDK system imports: {0}' -f ($missing -join ', '))
+              exit 2
+          }
+          '@
+
+          docker run --rm --entrypoint powershell renx-runtime-diagnostic `
+            -NoProfile -ExecutionPolicy Bypass -Command $script
