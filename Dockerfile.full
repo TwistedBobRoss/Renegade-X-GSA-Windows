@@ -10,13 +10,16 @@ COPY RunRenX.ps1 C:/renx-bootstrap/RunRenX.ps1
 COPY LaunchRenegadeXServer.bat C:/renx-bootstrap/LaunchRenegadeXServer.bat
 COPY payload-runtime/ C:/renx-seed/ServerFiles/
 
-ARG VC2010_X64_URL=https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/vcredist_x64.exe
+ARG VC2010_X64_URL=https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe
+ARG VC2010_X64_SHA256=F3B7A76D84D23F91957AA18456A14B4E90609E4CE8194C5653384ED38DADA6F3
 ARG DIRECTX_JUNE2010_URL=https://download.microsoft.com/download/8/4/a/84a35bf1-dafe-4ae8-82af-ad2ae20b6b14/directx_Jun2010_redist.exe
 
 RUN $ErrorActionPreference = 'Stop'; `
     New-Item -ItemType Directory -Force -Path C:/renx-runtime-install, C:/renx-runtime-install/directx | Out-Null; `
     Invoke-WebRequest -Uri $env:VC2010_X64_URL -OutFile C:/renx-runtime-install/vcredist_x64.exe -UseBasicParsing; `
-    $vc = Start-Process C:/renx-runtime-install/vcredist_x64.exe -ArgumentList '/install','/quiet','/norestart' -Wait -PassThru; `
+    $vcHash = (Get-FileHash -Algorithm SHA256 -LiteralPath C:/renx-runtime-install/vcredist_x64.exe).Hash; `
+    if ($vcHash -ne $env:VC2010_X64_SHA256) { throw ('Visual C++ 2010 x64 installer hash mismatch: {0}' -f $vcHash) }; `
+    $vc = Start-Process C:/renx-runtime-install/vcredist_x64.exe -ArgumentList '/quiet','/norestart' -Wait -PassThru; `
     Write-Host ('Visual C++ 2010 x64 installer exit code: {0}' -f $vc.ExitCode); `
     if ($vc.ExitCode -notin 0, 1638, 3010) { throw ('Visual C++ 2010 x64 installation failed with exit code {0}' -f $vc.ExitCode) }; `
     $vcRuntimeRoots = @(Get-ChildItem C:/Windows/WinSxS -Directory -Filter 'amd64_microsoft.vc100.crt_*' -ErrorAction SilentlyContinue); `
