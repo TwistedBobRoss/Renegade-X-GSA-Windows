@@ -114,6 +114,7 @@ $logPath = Get-Setting "RENX_LOG_FILE" "C:\renx-data\Logs\RenegadeXServer.log"
 $listed = Get-BoolSetting "RENX_LISTED" $true
 $listingAddress = "devbot-rx.totemarts.services"
 $listingPort = 21337
+$surveyDate = [DateTime]::UtcNow.ToString("yyyyMMdd")
 
 if ($gameClass -eq "none") {
     $gameClass = ""
@@ -151,7 +152,8 @@ if (-not [string]::IsNullOrWhiteSpace($nodBots)) {
     $url += "?NODBotCount=$nodBots"
 }
 
-$argumentLine = "server $url -port=$gamePort -QueryPort=$queryPort -abslog=`"$logPath`" -forcelogflush -unattended -nohomedir -nullrhi -nosound"
+$engineIniOverrides = "-ini:UDKEngine:HardwareSurvey.LastSurveyVersion=12791,HardwareSurvey.LastSurveyDate=$surveyDate,AppCompat.CompatLevelComposite=5"
+$argumentLine = "server $url -port=$gamePort -QueryPort=$queryPort $engineIniOverrides -abslog=`"$logPath`" -forcelogflush -unattended -nohomedir -nullrhi -nosound"
 if (-not [string]::IsNullOrWhiteSpace($multihome)) {
     $argumentLine += " -MULTIHOME=$multihome"
 }
