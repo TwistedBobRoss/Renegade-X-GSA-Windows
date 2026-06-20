@@ -151,7 +151,7 @@ if (-not [string]::IsNullOrWhiteSpace($nodBots)) {
     $url += "?NODBotCount=$nodBots"
 }
 
-$argumentLine = "server $url -port=$gamePort -QueryPort=$queryPort -abslog=`"$logPath`" -forcelogflush -unattended -nullrhi -nosound"
+$argumentLine = "server $url -port=$gamePort -QueryPort=$queryPort -abslog=`"$logPath`" -forcelogflush -unattended -nohomedir -nullrhi -nosound"
 if (-not [string]::IsNullOrWhiteSpace($multihome)) {
     $argumentLine += " -MULTIHOME=$multihome"
 }
