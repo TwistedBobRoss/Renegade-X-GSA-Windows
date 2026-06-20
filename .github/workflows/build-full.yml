@@ -156,8 +156,13 @@ jobs:
 
             $gameLog = docker exec $name powershell -NoProfile -Command "Get-Content -Raw -LiteralPath '$logPath'" | Out-String
             Write-Host $gameLog
-            if ($gameLog -notmatch "bIsLanMatch=false" -or $gameLog -notmatch "-port=7777" -or $gameLog -notmatch "-QueryPort=27015") {
-              throw "Renegade X game log did not confirm internet mode and the assigned game/query ports."
+            if (
+              $gameLog -notmatch "bIsLanMatch=false" -or
+              $gameLog -notmatch "-port=7777" -or
+              $gameLog -notmatch "-QueryPort=27015" -or
+              $gameLog -notmatch "-ini:UDKEngine:HardwareSurvey.LastSurveyVersion=12791"
+            ) {
+              throw "Renegade X game log did not confirm internet mode, assigned ports, and the headless hardware-survey override."
             }
           }
           finally {
