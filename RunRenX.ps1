@@ -100,6 +100,7 @@ function Test-TcpEndpoint {
 }
 
 $root = Get-Setting "RENX_ROOT" "C:\renx-data\ServerFiles"
+$serverName = Get-Setting "RENX_SERVER_NAME" "Renegade X Server"
 $map = Get-Setting "RENX_MAP" "CNC-Field"
 $gameClass = Get-Setting "RENX_GAME_CLASS" ""
 $maxPlayersSetting = Get-Setting "RENX_MAX_PLAYERS" "40"
@@ -153,7 +154,9 @@ if (-not [string]::IsNullOrWhiteSpace($nodBots)) {
 }
 
 $engineIniOverrides = "-ini:UDKEngine:HardwareSurvey.LastSurveyVersion=12791,HardwareSurvey.LastSurveyDate=$surveyDate,AppCompat.CompatLevelComposite=5"
-$argumentLine = "server $url -port=$gamePort -QueryPort=$queryPort $engineIniOverrides -abslog=`"$logPath`" -forcelogflush -unattended -nohomedir -nullrhi -nosound"
+$safeServerName = $serverName.Replace('"', '').Replace(',', ' ')
+$serverNameOverride = "-ini:UDKGame:Engine.GameReplicationInfo.ServerName=`"$safeServerName`""
+$argumentLine = "server $url -port=$gamePort -QueryPort=$queryPort $engineIniOverrides $serverNameOverride -abslog=`"$logPath`" -forcelogflush -unattended -nohomedir -nullrhi -nosound"
 if (-not [string]::IsNullOrWhiteSpace($multihome)) {
     $argumentLine += " -MULTIHOME=$multihome"
 }
@@ -172,6 +175,7 @@ $startupLine = "[{0}] Renegade X launch requested. Waiting for game log output."
 
 Write-Host "Starting Renegade X dedicated server..."
 Write-Host "Root: $root"
+Write-Host "Server name: $serverName"
 Write-Host "Map: $map"
 Write-Host "Players: $maxPlayers"
 Write-Host "Game port: $gamePort"

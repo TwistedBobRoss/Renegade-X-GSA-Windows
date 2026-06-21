@@ -640,6 +640,14 @@ Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "ListenPort" $webPort
 Set-IniValue $udkWeb "RenX_Game.Rx_WebServer" "MaxConnections" $webMaxConnections
 
 Copy-Item -Path (Join-Path $configDir "*") -Destination $installConfigDir -Force
+
+# Reinforce identity settings after the persistent config copy. UE3 may rebuild a
+# runtime config from DefaultGame.ini, so keep both sources aligned.
+Set-IniValue (Join-Path $installConfigDir "UDKGame.ini") "Engine.GameReplicationInfo" "ServerName" $serverName
+Set-IniValue (Join-Path $installConfigDir "UDKGame.ini") "Engine.GameReplicationInfo" "MessageOfTheDay" (Get-Setting "RENX_MOTD" "")
+Set-IniValue (Join-Path $installConfigDir "DefaultGame.ini") "Engine.GameReplicationInfo" "ServerName" $serverName
+Set-IniValue (Join-Path $installConfigDir "DefaultGame.ini") "Engine.GameReplicationInfo" "MessageOfTheDay" (Get-Setting "RENX_MOTD" "")
+
 if ($installOptionalMapPack1) {
     Invoke-CustomContentDownloads $optionalMapPack1Url $optionalMapDir $refreshContentDownloads "optional map pack 1"
 }
