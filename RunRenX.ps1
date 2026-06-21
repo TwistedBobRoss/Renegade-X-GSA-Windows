@@ -154,9 +154,7 @@ if (-not [string]::IsNullOrWhiteSpace($nodBots)) {
 }
 
 $engineIniOverrides = "-ini:UDKEngine:HardwareSurvey.LastSurveyVersion=12791,HardwareSurvey.LastSurveyDate=$surveyDate,AppCompat.CompatLevelComposite=5"
-$safeServerName = $serverName.Replace('"', '').Replace(',', ' ')
-$serverNameOverride = "-ini:UDKGame:Engine.GameReplicationInfo.ServerName=`"$safeServerName`""
-$argumentLine = "server $url -port=$gamePort -QueryPort=$queryPort $engineIniOverrides $serverNameOverride -abslog=`"$logPath`" -forcelogflush -unattended -nohomedir -nullrhi -nosound"
+$argumentLine = "server $url -port=$gamePort -QueryPort=$queryPort $engineIniOverrides -abslog=`"$logPath`" -forcelogflush -unattended -nohomedir -nullrhi -nosound"
 if (-not [string]::IsNullOrWhiteSpace($multihome)) {
     $argumentLine += " -MULTIHOME=$multihome"
 }

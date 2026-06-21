@@ -10,7 +10,7 @@ on:
       image_tag:
         description: "Full container image tag to publish"
         required: true
-        default: "1.0.1022-core20-ltsc2022-r6"
+        default: "1.0.1022-core20-ltsc2022-r7"
 
 permissions:
   contents: read
@@ -156,15 +156,23 @@ jobs:
 
             $gameLog = docker exec $name powershell -NoProfile -Command "Get-Content -Raw -LiteralPath '$logPath'" | Out-String
             Write-Host $gameLog
-          if (
+            $runtimeName = docker exec $name powershell -NoProfile -Command "(Select-String -LiteralPath 'C:\renx-data\ServerFiles\UDKGame\Config\UDKGame.ini' -Pattern '^ServerName=(.*)$').Matches.Groups[1].Value" | Out-String
+            $defaultName = docker exec $name powershell -NoProfile -Command "(Select-String -LiteralPath 'C:\renx-data\ServerFiles\UDKGame\Config\DefaultGame.ini' -Pattern '^ServerName=(.*)$').Matches.Groups[1].Value" | Out-String
+            $runtimeName = $runtimeName.Trim()
+            $defaultName = $defaultName.Trim()
+
+            if ($runtimeName -ne "Core 20 Smoke Test" -or $defaultName -ne "Core 20 Smoke Test") {
+              throw "Renegade X INI identity check failed. Runtime='$runtimeName'; Default='$defaultName'."
+            }
+
+            if (
               $gameLog -notmatch "bIsLanMatch=false" -or
               $gameLog -notmatch "-port=7777" -or
               $gameLog -notmatch "-QueryPort=27015" -or
               $gameLog -notmatch "-ini:UDKEngine:HardwareSurvey.LastSurveyVersion=12791" -or
-              $gameLog -notmatch "-ini:UDKGame:Engine.GameReplicationInfo.ServerName=" -or
-              $gameLog -notmatch "Core 20 Smoke Test"
+              $gameLog -match "-ini:UDKGame:Engine.GameReplicationInfo.ServerName="
             ) {
-              throw "Renegade X game log did not confirm internet mode, assigned ports, server identity, and the headless hardware-survey override."
+              throw "Renegade X game log did not confirm internet mode, assigned ports, and the headless hardware-survey override, or still contains the unsafe command-line server-name override."
             }
           }
           finally {

@@ -75,21 +75,63 @@ function Set-IniValue {
     }
 
     $insertIndex = $lines.Count
+    $matchingIndexes = [System.Collections.Generic.List[int]]::new()
     for ($i = $sectionIndex + 1; $i -lt $lines.Count; $i++) {
-        if ($lines[$i] -match $keyPattern) {
-            $lines[$i] = "$Key=$Value"
-            [System.IO.File]::WriteAllLines($Path, $lines)
-            return
-        }
-
         if ($lines[$i] -match $anySectionPattern) {
             $insertIndex = $i
             break
         }
+
+        if ($lines[$i] -match $keyPattern) {
+            $matchingIndexes.Add($i)
+        }
     }
 
-    $lines.Insert($insertIndex, "$Key=$Value")
+    if ($matchingIndexes.Count -eq 0) {
+        $lines.Insert($insertIndex, "$Key=$Value")
+    }
+    else {
+        $lines[$matchingIndexes[0]] = "$Key=$Value"
+        for ($i = $matchingIndexes.Count - 1; $i -ge 1; $i--) {
+            $lines.RemoveAt($matchingIndexes[$i])
+        }
+    }
+
     [System.IO.File]::WriteAllLines($Path, $lines)
+}
+
+function Get-IniValue {
+    param(
+        [string]$Path,
+        [string]$Section,
+        [string]$Key
+    )
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return $null
+    }
+
+    $sectionPattern = '^\s*\[' + [regex]::Escape($Section) + '\]\s*$'
+    $anySectionPattern = '^\s*\[.+\]\s*$'
+    $keyPattern = '^\s*' + [regex]::Escape($Key) + '\s*=(.*)$'
+    $insideSection = $false
+
+    foreach ($line in [System.IO.File]::ReadAllLines($Path)) {
+        if ($line -match $sectionPattern) {
+            $insideSection = $true
+            continue
+        }
+
+        if ($insideSection -and $line -match $anySectionPattern) {
+            break
+        }
+
+        if ($insideSection -and $line -match $keyPattern) {
+            return $Matches[1].Trim()
+        }
+    }
+
+    return $null
 }
 
 function Set-MapRotation {
@@ -647,6 +689,13 @@ Set-IniValue (Join-Path $installConfigDir "UDKGame.ini") "Engine.GameReplication
 Set-IniValue (Join-Path $installConfigDir "UDKGame.ini") "Engine.GameReplicationInfo" "MessageOfTheDay" (Get-Setting "RENX_MOTD" "")
 Set-IniValue (Join-Path $installConfigDir "DefaultGame.ini") "Engine.GameReplicationInfo" "ServerName" $serverName
 Set-IniValue (Join-Path $installConfigDir "DefaultGame.ini") "Engine.GameReplicationInfo" "MessageOfTheDay" (Get-Setting "RENX_MOTD" "")
+
+$runtimeServerName = Get-IniValue (Join-Path $installConfigDir "UDKGame.ini") "Engine.GameReplicationInfo" "ServerName"
+$defaultServerName = Get-IniValue (Join-Path $installConfigDir "DefaultGame.ini") "Engine.GameReplicationInfo" "ServerName"
+if ($runtimeServerName -ne $serverName -or $defaultServerName -ne $serverName) {
+    throw "Renegade X server-name configuration validation failed. Runtime='$runtimeServerName'; Default='$defaultServerName'; Expected='$serverName'."
+}
+Write-Host "Verified Renegade X server name in runtime and default INI files: $serverName"
 
 if ($installOptionalMapPack1) {
     Invoke-CustomContentDownloads $optionalMapPack1Url $optionalMapDir $refreshContentDownloads "optional map pack 1"

@@ -12,7 +12,7 @@ This project packages a tested Renegade X `1.0.1022` headless runtime, persisten
 - Game developer: **Totem Arts**
 - Project type: unofficial community hosting integration
 - Host operating system: Windows Server 2022 with Windows containers
-- Primary image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r3`
+- Primary image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r4`
 - Raw blueprint: [renegade-x-gsa-windows.json](https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/blueprints/renegade-x-gsa-windows.json)
 - Repository: [TwistedBobRoss/Renegade-X-GSA-Windows](https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows)
 
@@ -72,7 +72,7 @@ Enable Web Server = Off
 Maximum players = 40 or fewer for CNC-Field
 ```
 
-The Renegade X engine supports a maximum of 64 players. Individual maps may have lower practical or configured limits.
+The Renegade X engine supports a maximum of 64 players. Individual maps may have lower practical or configured limits. The container clamps a larger GSA slot setting to 64 before launch.
 
 ### Defense Survival Preset
 
@@ -116,6 +116,7 @@ To appear in the Renegade X server browser:
 - Keep `bListed=true` in `UDKRenegadeX.ini`.
 - Keep Steam enabled unless you are deliberately operating a private test.
 - Allow the GSA-assigned UDP game, peer, and query ports through Windows Firewall and any upstream firewall or router.
+- Allow outbound TCP `21337` to `devbot-rx.totemarts.services`; Renegade X uses this fixed remote service port for public-list registration. It is not a server listening port and is not allocated by GSA.
 - Wait for the map to finish loading before checking the list.
 
 The public listing name comes from:
@@ -132,13 +133,13 @@ ServerName={gameserver.list_name}
 Primary 20-map image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r3
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r4
 ```
 
 Bootstrap-only recovery image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r5
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r7
 ```
 
 The primary image is recommended for GSA. It seeds the runtime into persistent storage and avoids downloading the core payload during a normal first start.
@@ -167,7 +168,15 @@ C:\renx-data\Logs                              Persistent game logs
 C:\renx-data\Logs\RenegadeXServer.log          Main Renegade X log
 ```
 
-The Logs directory is registered with GSA as a log source, so `RenegadeXServer.log` can appear beside the Docker container log on the server Logs page.
+The Logs directory is registered with GSA as a log source, so `RenegadeXServer.log` appears beside the Docker container log on the server Logs page. The launcher creates this file before starting UDK and mirrors new game-log lines into the live Docker log, allowing both views to update while the server is running.
+
+For public-list troubleshooting, look for:
+
+```text
+Public listing endpoint reachable: devbot-rx.totemarts.services:21337
+RCON: Attempting to connect to DevBot...
+RCON: Outgoing connection established.
+```
 
 ## Ports
 
@@ -1184,7 +1193,7 @@ docker run -d --name renx-test `
   -e RENX_RCON_PORT="37015" `
   -e RENX_LISTED="true" `
   -e RENX_TEAM_MODE="6" `
-  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r3
+  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r4
 ```
 
 ## Troubleshooting
