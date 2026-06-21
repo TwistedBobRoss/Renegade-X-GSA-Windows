@@ -12,7 +12,7 @@ This project packages a tested Renegade X `1.0.1022` headless runtime, persisten
 - Game developer: **Totem Arts**
 - Project type: unofficial community hosting integration
 - Host operating system: Windows Server 2022 with Windows containers
-- Primary image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r4`
+- Primary image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r7`
 - Raw blueprint: [renegade-x-gsa-windows.json](https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/blueprints/renegade-x-gsa-windows.json)
 - Repository: [TwistedBobRoss/Renegade-X-GSA-Windows](https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows)
 
@@ -28,8 +28,7 @@ Renegade X remains the property of Totem Arts. This repository does not claim ow
 - Editable GSA configuration boxes
 - Persistent server files, configs, custom content, payload cache, and logs
 - Public master-server listing support
-- Source Query support
-- Separate configurable RCON port
+- Reliable container-based GSA monitoring
 - Optional Renegade X web statistics service
 - Bot count, difficulty, and behavior controls
 - Map voting and rotation controls
@@ -55,7 +54,9 @@ Download the published blueprint from the GameServerApp Marketplace. For manual 
 https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/blueprints/renegade-x-gsa-windows.json
 ```
 
-Create a server from the blueprint, choose its slot limit, review the settings, and install it. GSA assigns the game, peer, query, RCON, and optional web ports automatically.
+Create a server from the blueprint, choose its slot limit, review the settings, and install it. GSA assigns the game, peer, reserved query, and optional web ports automatically.
+
+Use **Container** monitoring in the GSA blueprint. It reliably reports whether the server process is running, but it does not display player counts or player names. Source Query and RCON integration for Renegade X in GSA container environments remain under development.
 
 ### Recommended First Test
 
@@ -67,7 +68,6 @@ List Server = On
 Fixed Map Rotation = Off
 Disable Bots = Off
 Enable Steam = On
-Enable RCON = On
 Enable Web Server = Off
 Maximum players = 40 or fewer for CNC-Field
 ```
@@ -133,13 +133,13 @@ ServerName={gameserver.list_name}
 Primary 20-map image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r4
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r7
 ```
 
 Bootstrap-only recovery image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r7
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r7
 ```
 
 The primary image is recommended for GSA. It seeds the runtime into persistent storage and avoids downloading the core payload during a normal first start.
@@ -174,8 +174,8 @@ For public-list troubleshooting, look for:
 
 ```text
 Public listing endpoint reachable: devbot-rx.totemarts.services:21337
-RCON: Attempting to connect to DevBot...
-RCON: Outgoing connection established.
+Game engine initialized
+MAP Loaded
 ```
 
 ## Ports
@@ -186,11 +186,10 @@ GSA assigns ports automatically from these blueprint port types:
 | --- | --- | ---: | --- |
 | Game | UDP | `7777` | `{gameserver.game_port}` |
 | Peer/raw | UDP | `7778` | `{gameserver.raw_port}` |
-| Source Query | UDP | `27015` | `{gameserver.query_port}` |
-| RCON | TCP | `37015` | `{gameserver.rcon_port}` |
+| Reserved query compatibility | UDP | `27015` | `{gameserver.query_port}` |
 | Optional web service | TCP | `6969` | `{gameserver.other_port}` |
 
-Renegade X normally answers Source Query on the configured query port. The web port is unnecessary when `Enable Web Server` is off.
+Keep the assigned query port exposed because the game configuration and online subsystem expect it. The web port is unnecessary when `Enable Web Server` is off.
 
 ## Included Maps
 
@@ -367,7 +366,7 @@ Values controlled by GSA parameters are written again at every start. To make an
 | Parameter | Default | Purpose |
 | --- | --- | --- |
 | GSA server name | GSA list name | Writes the public server name into `UDKGame.ini` and `UDKWeb.ini`. |
-| Admin/RCON Password | blank | Writes `AdminPassword`. |
+| Admin Password | blank | Writes `AdminPassword`. |
 | Server Password | blank | Writes `GamePassword`; blank means no join password. |
 | Moderator Password | blank | Writes `ModPassword`. |
 | Message Of The Day | blank | Writes `MessageOfTheDay`. |
@@ -430,12 +429,10 @@ Values controlled by GSA parameters are written again at every start. To make an
 | Net Wait Seconds | `15` | Startup or travel wait duration. |
 | Client Processing Timeout | `30` | Client loading/travel timeout. |
 
-### RCON And Web
+### Optional Web Service
 
 | Parameter | Default | Purpose |
 | --- | --- | --- |
-| Enable RCON | On | Enables Renegade X RCON. |
-| RCON Subscriber Limit | `8` | Maximum RCON subscribers. |
 | Enable Web Server | Off | Enables the optional HTTP statistics service. |
 | Web Max Connections | `32` | Maximum simultaneous web connections. |
 | Web Port | GSA assigned | Uses `{gameserver.other_port}`. |
@@ -526,7 +523,7 @@ Section: `[Engine.AccessControl]`
 
 | Setting | Typical value | Purpose |
 | --- | --- | --- |
-| `AdminPassword` | blank | Administrator and RCON authentication password. |
+| `AdminPassword` | blank | Administrator authentication password. |
 | `GamePassword` | blank | Password required to join the server. |
 | `IPPolicies` | `ACCEPT;*` | Unreal IP allow/deny policy list. |
 
@@ -609,7 +606,7 @@ Section: `[OnlineSubsystemSteamworks.OnlineSubsystemSteamworks]`
 | Setting | Shipped default | Purpose |
 | --- | --- | --- |
 | `bEnableSteam` | `true` | Enables Steam online services. |
-| `QueryPort` | `27015` | UDP Source Query port. |
+| `QueryPort` | `27015` | Reserved UDP query/Steam compatibility port. |
 | `bUseVAC` | `true` in distribution | Enables VAC where supported; blueprint defaults off. |
 | `bRelaunchInSteam` | `false` | Prevents dedicated server relaunch through Steam. |
 | `RelaunchAppId` | `0` | Steam relaunch application ID. |
@@ -708,7 +705,6 @@ Section: `[RenX_Game.Rx_Game]`
 | Setting | Shipped default | Purpose |
 | --- | ---: | --- |
 | `MaxServerUptime` | `500000` | Forces an in-game restart after this many seconds. GSA scheduled restarts are still recommended. |
-| `bLogRcon` | `true` | Logs RCON activity. |
 | `RTC_DisableTime` | `0` | Disables request-team-change behavior for an initial period. |
 | `GameplayEventsWriterClassName` | RenX writer | Gameplay-event writer class. |
 | `TeamMmrAnnouncementInterval` | `0` | Team MMR announcement interval; `0` disables announcements. |
@@ -790,15 +786,7 @@ This controls whether a map is eligible for voting at the current population. It
 | `AutoBalanceDuration` | `30` | Balance action duration. |
 | `bAutoBalanceRewardVp` | `false` | Enables VP reward for balancing. |
 
-### `UDKRenegadeX.ini`: RCON And Access
-
-Section: `[RenX_Game.Rx_Rcon]`
-
-| Setting | Blueprint default | Purpose |
-| --- | ---: | --- |
-| `bEnableRcon` | `true` | Enables RCON. |
-| `RconPort` | GSA assigned | TCP RCON port. `-1` uses game-port behavior in the original configuration. |
-| `SubscriberLimit` | `8` | Maximum RCON subscribers. |
+### `UDKRenegadeX.ini`: Access And Public Services
 
 Section: `[RenX_Game.Rx_AccessControl]`
 
@@ -809,13 +797,6 @@ Section: `[RenX_Game.Rx_AccessControl]`
 | `bSteamAuthAdmins` | `false` | Enables Steam administrator authentication. |
 | `bBroadcastAdminIdentity` | `false` | Announces administrator identity. |
 | `ModPassword` | blank | Moderator password where supported. |
-
-Section: `[RenX_Game.Rx_Rcon_Out]`
-
-| Setting | Shipped default | Purpose |
-| --- | --- | --- |
-| `Address` | Totem Arts devbot service | Outbound RCON/event destination. |
-| `Port` | `21337` | Outbound service port. |
 
 Section: `[RenX_Game.Rx_ServerListQueryHandler]`
 
@@ -858,7 +839,6 @@ Section: `[RenX_Coop.Rx_Game_Survival]`
 | `bAllowPrivateMessaging` | `true` | Private messages. |
 | `bPrivateMessageTeamOnly` | `false` | Team-only private messages. |
 | `bListed` | `true` | Public listing. |
-| `bLogRcon` | `true` | RCON logging. |
 | `bBotVotesDisabled` | `false` | Bot voting behavior. |
 | `SurrenderLength` | `300` | Surrender countdown. |
 | `SurrenderDisabledTime` | `600` | Initial surrender lockout. |
@@ -1113,7 +1093,6 @@ RENX_MAX_PLAYERS
 RENX_GAME_PORT
 RENX_PEER_PORT
 RENX_QUERY_PORT
-RENX_RCON_PORT
 RENX_WEB_PORT
 RENX_ADMIN_PASSWORD
 RENX_SERVER_PASSWORD
@@ -1141,8 +1120,6 @@ RENX_OPTIONAL_MAP_PACK_3_URL
 RENX_REQUIRED_CONTENT_URLS
 RENX_CONTENT_URLS
 RENX_REFRESH_CONTENT_DOWNLOADS
-RENX_ENABLE_RCON
-RENX_RCON_SUBSCRIBER_LIMIT
 RENX_WEB_ENABLED
 RENX_WEB_MAX_CONNECTIONS
 RENX_NET_WAIT
@@ -1182,7 +1159,6 @@ docker run -d --name renx-test `
   -p 7777:7777/udp `
   -p 7778:7778/udp `
   -p 27015:27015/udp `
-  -p 37015:37015/tcp `
   -v C:\renx-test\data:C:\renx-data `
   -e RENX_SERVER_NAME="Twisted Renegade X" `
   -e RENX_MAP="CNC-Field" `
@@ -1190,13 +1166,26 @@ docker run -d --name renx-test `
   -e RENX_GAME_PORT="7777" `
   -e RENX_PEER_PORT="7778" `
   -e RENX_QUERY_PORT="27015" `
-  -e RENX_RCON_PORT="37015" `
   -e RENX_LISTED="true" `
   -e RENX_TEAM_MODE="6" `
-  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r4
+  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r7
 ```
 
 ## Troubleshooting
+
+### First Pull Or Installation Takes A Long Time
+
+- The image contains Windows Server layers and the 20-map Renegade X runtime, so the first pull is large.
+- Leave the installation running while Docker is downloading and extracting layers.
+- Confirm the host has enough free disk space for the image, Docker's layer cache, and `renx-data`.
+- Later installs are normally faster because Docker reuses cached layers.
+
+### Installation Fails Immediately
+
+- Confirm the host is running Windows Server 2022 with Docker set to Windows containers.
+- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r7`.
+- Reinstall the server after changing the image tag, Docker environment variables, mounts, or port definitions.
+- Check the Docker container log for an image pull, mount, or Windows container compatibility error.
 
 ### Server Is Not In The Public List
 
@@ -1204,14 +1193,30 @@ docker run -d --name renx-test `
 - Set `List Server` to On.
 - Confirm the server reached a loaded map instead of stopping at wrapper startup output.
 - Confirm the game, peer, and query UDP ports are reachable.
+- Allow outbound TCP `21337` to `devbot-rx.totemarts.services`.
 - Check `RenegadeXServer.log` for bind, Steam, socket, or online-subsystem errors.
 
-### GSA Says The Server Crashed
+### GSA Monitoring Does Not Show Players
 
-- Use container monitoring until Source Query behavior is confirmed on the assigned port.
+- Use `Container` monitoring. This is the supported monitoring type for the current blueprint.
+- Container monitoring reports whether the server process is running, but it cannot show player count or player names.
+- Keep recovery enabled only after container monitoring has correctly recognized a healthy test start.
+
+### GSA Says The Server Crashed Or Offline
+
+- Confirm the blueprint is using `Container` monitoring.
 - Confirm the container process remains alive.
 - Open the game log from the GSA Logs page.
 - Check that `UDK.com` exists under `ServerFiles\Binaries\Win64`.
+- Look for `Game engine initialized` or `MAP Loaded` in `RenegadeXServer.log`.
+- If the game is running but monitoring was changed recently, restore `Container` monitoring and restart the container.
+
+### Game Log Does Not Appear In GSA
+
+- Confirm the blueprint includes `\renx-data\Logs` as a directory with type `logs`.
+- Confirm `C:\renx-data\Logs\RenegadeXServer.log` exists inside the container.
+- Restart the container after updating the blueprint's directory definitions.
+- The same live game output is also mirrored into the Docker container log.
 
 ### Server Starts On The Wrong Map Or Mode
 
@@ -1219,6 +1224,13 @@ docker run -d --name renx-test `
 - Normal CnC should use `CNC-*` maps.
 - Survival should use `DEF-*`, `RenX_Coop.Rx_Game_Survival`, and `Rx_Game_Survival`.
 - Confirm the map is installed in `UDKGame\CookedPC\Maps\RenX`.
+
+### Server Name Is Missing Words Or Contains Quotes
+
+- Use the `r7` image or newer.
+- Set the name through the normal GSA game-server list name field.
+- Restart or recreate the container after changing from an older image.
+- The orange server-list prefix used by some communities is assigned by the Renegade X master-list service and is not controlled by `ServerName`.
 
 ### Optional Map Download Repeats
 
@@ -1232,6 +1244,21 @@ docker run -d --name renx-test `
 - Edit the persistent file under `C:\renx-data\Config`, not only the runtime copy.
 - Recreate the container after changing image tags or Docker environment variables.
 - Do not wipe the persistent mount during routine updates.
+
+### Server Stops After A Configuration Change
+
+- Remove unsupported raw launch arguments from `Extra Launch Args`.
+- Confirm numeric fields contain numbers and boolean settings use the provided GSA toggles.
+- Confirm the selected map exists and is appropriate for the selected game class.
+- Review the last lines of both the container log and `RenegadeXServer.log`.
+- Restore the last known working value and restart before making additional changes.
+
+### Players Cannot Join
+
+- Confirm the game and peer ports are exposed as UDP and assigned by GSA.
+- Check Windows Firewall and upstream NAT/firewall rules.
+- Confirm the server is not password protected unexpectedly.
+- Confirm clients have the same custom maps, packages, and mutators or can download them through the configured redirect.
 
 ## Repository Files
 
