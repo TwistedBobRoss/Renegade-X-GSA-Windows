@@ -7,6 +7,7 @@ WORKDIR C:/renx-bootstrap
 
 COPY Start.ps1 C:/renx-bootstrap/Start.ps1
 COPY RunRenX.ps1 C:/renx-bootstrap/RunRenX.ps1
+COPY ApplyModeProfile.ps1 C:/renx-bootstrap/ApplyModeProfile.ps1
 COPY LaunchRenegadeXServer.bat C:/renx-bootstrap/LaunchRenegadeXServer.bat
 
 ARG VC2010_X64_URL=https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe
@@ -58,7 +59,7 @@ RUN $ErrorActionPreference = 'Stop'; `
     }; `
     Remove-Item C:/renx-runtime-install -Recurse -Force
 
-RUN $parseErrors = $null; $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/Start.ps1), [ref]$parseErrors); if ($parseErrors) { throw ($parseErrors | Out-String) }; $parseErrors = $null; $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/RunRenX.ps1), [ref]$parseErrors); if ($parseErrors) { throw ($parseErrors | Out-String) }
+RUN $parseErrors = $null; $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/Start.ps1), [ref]$parseErrors); if ($parseErrors) { throw ($parseErrors | Out-String) }; $parseErrors = $null; $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/RunRenX.ps1), [ref]$parseErrors); if ($parseErrors) { throw ($parseErrors | Out-String) }; $parseErrors = $null; $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/ApplyModeProfile.ps1), [ref]$parseErrors); if ($parseErrors) { throw ($parseErrors | Out-String) }
 
 RUN New-Item -ItemType Directory -Force -Path C:/renx-data/ServerFiles, C:/renx-data/Config, C:/renx-data/CustomContent, C:/renx-data/Logs, C:/renx-data/PayloadCache | Out-Null
 
