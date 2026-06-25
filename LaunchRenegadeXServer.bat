@@ -8,6 +8,12 @@ if "%RENX_BOOTSTRAP_ROOT%"=="" set "RENX_BOOTSTRAP_ROOT=C:\renx-bootstrap"
 set "RENX_PROFILE_SCRIPT=%RENX_BOOTSTRAP_ROOT%\ApplyModeProfile.ps1"
 set "RENX_RUNNER_SCRIPT=%RENX_BOOTSTRAP_ROOT%\RunRenX.ps1"
 
+if /I "%RENX_MODE_PROFILE%"=="survival" (
+  set "RENX_GAME_CLASS=RenX_Coop.Rx_Game_Survival"
+) else (
+  set "RENX_GAME_CLASS="
+)
+
 if not exist "%RENX_PROFILE_SCRIPT%" (
   echo ERROR: Could not find %RENX_PROFILE_SCRIPT%
   exit /b 1
