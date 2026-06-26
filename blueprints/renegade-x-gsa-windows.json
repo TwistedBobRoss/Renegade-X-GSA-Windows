@@ -166,7 +166,9 @@
         "extra_args": { "name": "Extra Launch Args", "info": "Raw UDK launch arguments. Leave blank for normal servers.", "section": "Networking", "type": "text", "content": "" },
         "game_class": { "name": "Game Type", "info": "Choose Survival only for DEF Survival. CnC, AOW, and CnC Marathon use normal map-prefix loading; Marathon is configured with a CnC map and CnC Time Limit set to 0.", "section": "Survival", "type": "array", "dropdown": "{\"CnC AOW or Marathon map default\":\"none\",\"Defense Survival\":\"RenX_Coop.Rx_Game_Survival\"}" },
         "map_cycle_class": { "name": "Survival Map Cycle Class", "info": "Choose Rx Game Survival for a DEF map rotation. Leave Rx Game for CnC AOW or Marathon map rotations.", "section": "Survival", "type": "array", "dropdown": "{\"CnC AOW Marathon\":\"Rx_Game\",\"Defense Survival\":\"Rx_Game_Survival\"}" },
-        "fixed_map_rotation": { "name": "Fixed Map Rotation", "info": "Enforces the configured CnC AOW or Marathon map rotation instead of normal map voting.", "section": "CnC AOW", "type": "boolean", "content": "0" },
+        "fixed_map_rotation": { "name": "Fixed Map Rotation", "info": "Enforces the configured map rotation instead of normal map voting.", "section": "Voting", "type": "boolean", "content": "0" },
+        "max_map_vote_size": { "name": "Map Vote Size", "info": "Number of map choices in voting.", "section": "Voting", "type": "text", "content": "5" },
+        "recent_maps_to_exclude": { "name": "Recent Maps Excluded", "info": "Recently played maps excluded from voting.", "section": "Voting", "type": "text", "content": "2" },
         "bots_disabled": { "name": "Disable Bots", "info": "Disables normal CnC AOW bots. It does not control Survival enemies.", "section": "CnC AOW", "type": "boolean", "content": "0" },
         "gdi_bots": { "name": "GDI Bot Count", "info": "Optional CnC AOW GDI bot count. Blank uses the game default.", "section": "CnC AOW", "type": "text", "content": "" },
         "nod_bots": { "name": "NOD Bot Count", "info": "Optional CnC AOW NOD bot count. Blank uses the game default.", "section": "CnC AOW", "type": "text", "content": "" },
@@ -178,8 +180,6 @@
         "cnc_time_limit": { "name": "CnC Time Limit Minutes", "info": "CnC or AOW round time in minutes. Set 0 for a CnC Marathon with no normal time limit.", "section": "CnC AOW", "type": "text", "content": "30" },
         "dm_time_limit": { "name": "DM Time Limit Minutes", "info": "Deathmatch time limit. Retained for modes that use it.", "section": "CnC AOW", "type": "text", "content": "20" },
         "team_mode": { "name": "Team Mode", "info": "Team organization for CnC AOW.", "section": "CnC AOW", "type": "array", "dropdown": "{\"All\":\"All\",\"GDI\":\"GDI\",\"Nod\":\"Nod\"}" },
-        "max_map_vote_size": { "name": "Map Vote Size", "info": "Number of CnC AOW map choices in voting.", "section": "CnC AOW", "type": "text", "content": "5" },
-        "recent_maps_to_exclude": { "name": "Recent Maps Excluded", "info": "Recently played CnC AOW maps excluded from voting.", "section": "CnC AOW", "type": "text", "content": "2" },
         "spawn_crates": { "name": "Spawn Crates", "info": "Enables CnC AOW crate spawning.", "section": "CnC AOW", "type": "boolean", "content": "1" }
       }
     }
