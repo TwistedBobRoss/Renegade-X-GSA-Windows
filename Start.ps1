@@ -592,9 +592,13 @@ $forceRespawn = Get-BoolSetting "RENX_FORCE_RESPAWN" "true"
 $playersMustBeReady = Get-BoolSetting "RENX_PLAYERS_MUST_BE_READY" "false"
 $restartWait = Get-Setting "RENX_RESTART_WAIT" "30"
 $initialCredits = Get-Setting "RENX_INITIAL_CREDITS" "0"
+$marathonMode = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_MARATHON_MODE" "false"))
+$timeLimit = Get-Setting "RENX_TIME_LIMIT" "50"
 $cncTimeLimit = Get-Setting "RENX_CNC_TIME_LIMIT" "30"
 $dmTimeLimit = Get-Setting "RENX_DM_TIME_LIMIT" "20"
-$teamMode = Get-Setting "RENX_TEAM_MODE" "All"
+$buildingsRevive = Get-BoolSetting "RENX_BUILDINGS_REVIVE" "true"
+$enableAirdrops = Get-BoolSetting "RENX_ENABLE_AIRDROPS" "false"
+$teamMode = Get-Setting "RENX_TEAM_MODE" "6"
 $maxMapVoteSize = Get-Setting "RENX_MAX_MAP_VOTE_SIZE" "5"
 $recentMapsToExclude = Get-Setting "RENX_RECENT_MAPS_TO_EXCLUDE" "2"
 $spawnCrates = Get-BoolSetting "RENX_SPAWN_CRATES" "true"
@@ -607,6 +611,13 @@ $gdiAttackPercent = Get-Setting "RENX_GDI_ATTACK_PERCENT" "50"
 $nodAttackPercent = Get-Setting "RENX_NOD_ATTACK_PERCENT" "50"
 $multihome = Get-Setting "RENX_MULTIHOME" ""
 $extraArgs = Get-Setting "RENX_EXTRA_ARGS" ""
+
+if ($marathonMode) {
+    $timeLimit = "0"
+    $cncTimeLimit = "0"
+    $buildingsRevive = "false"
+    $enableAirdrops = "true"
+}
 
 Install-SeedRuntime $seedRoot $root $bootstrapRoot
 Install-ServerPayload $serverPayloadUrls $root $dataRoot $bootstrapRoot $refreshServerPayload
@@ -662,8 +673,11 @@ Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bFixedMapRotation" $fixedMapRota
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bBotsDisabled" $botsDisabled
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bLogRcon" "true"
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "InitialCredits" $initialCredits
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "TimeLimit" $timeLimit
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "CnCModeTimeLimit" $cncTimeLimit
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "DMModeTimeLimit" $dmTimeLimit
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bBuildingsRevive" $buildingsRevive
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bEnableAirdrops" $enableAirdrops
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "TeamMode" $teamMode
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "MaxMapVoteSize" $maxMapVoteSize
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "RecentMapsToExclude" $recentMapsToExclude
