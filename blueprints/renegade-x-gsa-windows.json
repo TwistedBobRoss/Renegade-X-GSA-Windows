@@ -183,14 +183,14 @@
         },
         "game_class": {
           "name": "Game Class Override",
-          "info": "Normal / map prefix passes no override (none). Survival passes RenX_Coop.Rx_Game_Survival as the game class override.",
+          "info": "Normal / map prefix passes no override (none). Use Normal for CnC, AOW, and CnC Marathon. Survival passes RenX_Coop.Rx_Game_Survival as the game class override.",
           "section": "Survival",
           "type": "array",
           "dropdown": "{\"Normal / map prefix\":\"none\",\"Survival\":\"RenX_Coop.Rx_Game_Survival\"}"
         },
         "map_cycle_class": {
           "name": "Map Cycle Class",
-          "info": "Standard CnC writes Rx_Game into generated map-cycle entries. Survival writes Rx_Game_Survival.",
+          "info": "Standard CnC writes Rx_Game into generated map-cycle entries. Use Standard CnC for CnC, AOW, and CnC Marathon. Survival writes Rx_Game_Survival.",
           "section": "Survival",
           "type": "array",
           "dropdown": "{\"Standard CnC\":\"Rx_Game\",\"Survival\":\"Rx_Game_Survival\"}"
@@ -490,22 +490,22 @@
           "content": "0"
         },
         "marathon_mode": {
-          "name": "Marathon Mode",
-          "info": "On/true forces TimeLimit=0 and CnCModeTimeLimit=0, disables building revival, and enables vehicle airdrops. Off/false uses the individual timing and gameplay settings below.",
+          "name": "CnC Marathon Preset",
+          "info": "Optional convenience preset. On/true forces the recommended marathon values: Overall Time Limit=0, CnC Time Limit=0, Buildings Revive=Off, and Enable Airdrops=On. Leave Off/false to tune those granular settings manually below.",
           "section": "CnC AOW",
           "type": "boolean",
           "content": "0"
         },
         "time_limit": {
-          "name": "Overall Time Limit",
-          "info": "Writes TimeLimit=minutes for the generic Renegade X match limit. Set 0 to disable it. Marathon Mode forces this to 0.",
+          "name": "Overall Time Limit (Marathon: 0)",
+          "info": "Writes TimeLimit=minutes for the generic Renegade X match limit. Set 0 to disable it. CnC Marathon should use 0.",
           "section": "CnC AOW",
           "type": "text",
           "content": "50"
         },
         "cnc_time_limit": {
-          "name": "CnC Time Limit",
-          "info": "Writes CnCModeTimeLimit=minutes for CnC matches. Set 0 to disable it. Marathon Mode forces this to 0.",
+          "name": "CnC Time Limit (Marathon: 0)",
+          "info": "Writes CnCModeTimeLimit=minutes for CnC matches. Set 0 to disable the CnC round timer. CnC Marathon should use 0.",
           "section": "CnC AOW",
           "type": "text",
           "content": "30"
@@ -518,15 +518,15 @@
           "content": "20"
         },
         "buildings_revive": {
-          "name": "Buildings Revive",
-          "info": "On/true writes bBuildingsRevive=1. Off/false writes bBuildingsRevive=0. Marathon Mode forces this off.",
+          "name": "Buildings Revive (Marathon: Off)",
+          "info": "On/true writes bBuildingsRevive=1. Off/false writes bBuildingsRevive=0. CnC Marathon should use Off.",
           "section": "CnC AOW",
           "type": "boolean",
           "content": "1"
         },
         "enable_airdrops": {
-          "name": "Enable Airdrops",
-          "info": "On/true writes bEnableAirdrops=1. Off/false writes bEnableAirdrops=0. Marathon Mode forces this on.",
+          "name": "Enable Airdrops (Marathon: On)",
+          "info": "On/true writes bEnableAirdrops=1. Off/false writes bEnableAirdrops=0. CnC Marathon should use On.",
           "section": "CnC AOW",
           "type": "boolean",
           "content": "0"
