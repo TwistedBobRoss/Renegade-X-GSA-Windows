@@ -177,26 +177,28 @@
         "map": {
           "name": "Starting Map",
           "info": "Starting map. CNC-Field launches CNC-Field and writes LocalMap=CNC-Field.udk. Use the map name without .udk.",
+          "section": "Server Setup",
           "type": "text",
           "content": "CNC-Field"
         },
         "game_class": {
           "name": "Game Class Override",
           "info": "Normal / map prefix passes no override (none). Survival passes RenX_Coop.Rx_Game_Survival as the game class override.",
-          "section": "Launch",
+          "section": "Survival",
           "type": "array",
           "dropdown": "{\"Normal / map prefix\":\"none\",\"Survival\":\"RenX_Coop.Rx_Game_Survival\"}"
         },
         "map_cycle_class": {
           "name": "Map Cycle Class",
           "info": "Standard CnC writes Rx_Game into generated map-cycle entries. Survival writes Rx_Game_Survival.",
-          "section": "Launch",
+          "section": "Survival",
           "type": "array",
           "dropdown": "{\"Standard CnC\":\"Rx_Game\",\"Survival\":\"Rx_Game_Survival\"}"
         },
         "map_rotation": {
           "name": "Map Rotation",
           "info": "Comma-separated map names without .udk. This generates map-cycle entries using the selected Map Cycle Class.",
+          "section": "Server Setup",
           "type": "text",
           "content": "CNC-Field,CNC-Walls,CNC-GoldRush,CNC-Whiteout,CNC-Islands,CNC-LakeSide,CNC-Mesa,CNC-Volcano,CNC-Xmountain,CNC-Canyon,CNC-Complex,CNC-Under"
         },
@@ -259,340 +261,385 @@
         "mutators": {
           "name": "Mutators",
           "info": "Comma-separated mutator classes. This becomes the launch setting ?mutator=YourMutator. Leave blank for none.",
+          "section": "Server Setup",
           "type": "text",
           "content": ""
         },
         "admin_password": {
           "name": "Admin/RCON Password",
           "info": "Writes AdminPassword=yourpassword in UDKGame.ini. Leave blank to avoid setting an admin password.",
+          "section": "Access",
           "type": "text",
           "content": ""
         },
         "server_password": {
           "name": "Server Password",
           "info": "Writes GamePassword=yourpassword. Blank means players can join without a server password.",
+          "section": "Access",
           "type": "text",
           "content": ""
         },
         "motd": {
           "name": "Message Of The Day",
           "info": "Writes MessageOfTheDay=your message. Some Renegade X builds may not display MOTD reliably.",
+          "section": "Access",
           "type": "text",
           "content": ""
         },
         "listed": {
           "name": "List Server",
           "info": "On/true writes bListed=1 so the server can appear in the launcher/server browser. Off/false writes bListed=0.",
+          "section": "Access",
           "type": "boolean",
           "content": "1"
         },
         "fixed_map_rotation": {
           "name": "Fixed Map Rotation",
           "info": "On/true writes bFixedMapRotation=1 to enforce the rotation list. Off/false writes bFixedMapRotation=0 for normal voting.",
+          "section": "Voting",
           "type": "boolean",
           "content": "0"
         },
         "bots_disabled": {
           "name": "Disable Bots",
           "info": "On/true writes bBotsDisabled=1 to disable bots. Off/false writes bBotsDisabled=0 to allow bots.",
+          "section": "CnC AOW",
           "type": "boolean",
           "content": "0"
         },
         "gdi_bots": {
           "name": "GDI Bot Count",
           "info": "Adds ?GDIBotCount=number to the launch URL. Blank uses the game default.",
+          "section": "CnC AOW",
           "type": "text",
           "content": ""
         },
         "nod_bots": {
           "name": "NOD Bot Count",
           "info": "Adds ?NODBotCount=number to the launch URL. Blank uses the game default.",
+          "section": "CnC AOW",
           "type": "text",
           "content": ""
         },
         "gdi_bot_difficulty": {
           "name": "GDI Bot Difficulty",
           "info": "Easy writes GDIDifficulty=0.5, Normal writes 1.0, Hard writes 1.5, and Very Hard writes 2.0.",
-          "section": "Bots",
+          "section": "CnC AOW",
           "type": "array",
           "dropdown": "{\"Easy\":\"0.5\",\"Normal\":\"1.0\",\"Hard\":\"1.5\",\"Very Hard\":\"2.0\"}"
         },
         "nod_bot_difficulty": {
           "name": "NOD Bot Difficulty",
           "info": "Easy writes NodDifficulty=0.5, Normal writes 1.0, Hard writes 1.5, and Very Hard writes 2.0.",
-          "section": "Bots",
+          "section": "CnC AOW",
           "type": "array",
           "dropdown": "{\"Easy\":\"0.5\",\"Normal\":\"1.0\",\"Hard\":\"1.5\",\"Very Hard\":\"2.0\"}"
         },
         "gdi_attack_percent": {
           "name": "GDI Attack Percent",
           "info": "Defensive writes GDIAttackingValue=25, Balanced writes 50, Aggressive writes 75, and All Attack writes 100.",
-          "section": "Bots",
+          "section": "CnC AOW",
           "type": "array",
           "dropdown": "{\"Defensive\":\"25\",\"Balanced\":\"50\",\"Aggressive\":\"75\",\"All Attack\":\"100\"}"
         },
         "nod_attack_percent": {
           "name": "NOD Attack Percent",
           "info": "Defensive writes NODAttackingValue=25, Balanced writes 50, Aggressive writes 75, and All Attack writes 100.",
-          "section": "Bots",
+          "section": "CnC AOW",
           "type": "array",
           "dropdown": "{\"Defensive\":\"25\",\"Balanced\":\"50\",\"Aggressive\":\"75\",\"All Attack\":\"100\"}"
         },
         "allow_downloads": {
           "name": "Allow Downloads",
           "info": "On/true writes AllowDownloads=1 to allow fallback custom-content downloads. Off/false writes AllowDownloads=0.",
+          "section": "Content",
           "type": "boolean",
           "content": "1"
         },
         "redirect_url": {
           "name": "HTTP Redirect URL",
           "info": "Writes RedirectToURL=your URL for fast custom-content downloads. Use a trailing slash.",
+          "section": "Content",
           "type": "text",
           "content": "https://community-content.totemarts.services/"
         },
         "redirect_use_compression": {
           "name": "Redirect Uses Compression",
           "info": "On/true writes UseCompression=1 for compressed redirect files. Off/false writes UseCompression=0 for normal files.",
+          "section": "Content",
           "type": "boolean",
           "content": "0"
         },
         "required_content_urls": {
           "name": "Required Content URLs",
           "info": "Base game maps are expected to be included in the server payload above. Add separate required map/package URLs only for extra mandatory content. Use semicolon-separated public .zip, .udk, .u, .upk, .ini, or .int URLs; do not use line breaks.",
-          "section": "Install",
+          "section": "Content",
           "type": "text",
           "content": ""
         },
         "content_urls": {
           "name": "Custom Content URLs",
           "info": "Optional extra client-download content. Base maps should already come from the server payload. Use semicolon-separated public .zip, .udk, .u, .upk, .ini, or .int URLs; do not use line breaks.",
+          "section": "Content",
           "type": "text",
           "content": ""
         },
         "refresh_content_downloads": {
           "name": "Refresh Content Downloads",
           "info": "On/true sets RENX_REFRESH_CONTENT_DOWNLOADS=1 to redownload custom content. Off/false sets it to 0 and uses cached files.",
+          "section": "Content",
           "type": "boolean",
           "content": "0"
         },
         "web_enabled": {
           "name": "Enable Web Server",
           "info": "On/true writes bEnabled=1 in UDKWeb.ini to enable the optional web server. Off/false writes bEnabled=0.",
+          "section": "Remote Access",
           "type": "boolean",
           "content": "0"
         },
         "web_max_connections": {
           "name": "Web Max Connections",
           "info": "Writes MaxConnections=number in UDKWeb.ini for the optional web server.",
+          "section": "Remote Access",
           "type": "text",
           "content": "32"
         },
         "enable_rcon": {
           "name": "Enable RCON",
           "info": "On/true writes bEnableRcon=1. Off/false writes bEnableRcon=0. GSA RCON panel support is still unverified.",
+          "section": "Remote Access",
           "type": "boolean",
           "content": "1"
         },
         "rcon_subscriber_limit": {
           "name": "RCON Subscriber Limit",
           "info": "Writes SubscriberLimit=number under RenX_Game.Rx_Rcon.",
+          "section": "Remote Access",
           "type": "text",
           "content": "8"
         },
         "max_spectators": {
           "name": "Max Spectators",
           "info": "Writes MaxSpectators=number. Set 0 to effectively disable spectator slots.",
+          "section": "General Gameplay",
           "type": "text",
           "content": "2"
         },
         "admin_can_pause": {
           "name": "Admins Can Pause",
           "info": "On/true writes bAdminCanPause=1. Off/false writes bAdminCanPause=0.",
+          "section": "General Gameplay",
           "type": "boolean",
           "content": "0"
         },
         "force_respawn": {
           "name": "Force Respawn",
           "info": "On/true writes bForceRespawn=1. Off/false writes bForceRespawn=0.",
+          "section": "General Gameplay",
           "type": "boolean",
           "content": "1"
         },
         "players_must_be_ready": {
           "name": "Players Must Be Ready",
           "info": "On/true writes bPlayersMustBeReady=1. Off/false writes bPlayersMustBeReady=0.",
+          "section": "General Gameplay",
           "type": "boolean",
           "content": "0"
         },
         "wait_for_net_players": {
           "name": "Wait For Net Players",
           "info": "On/true writes bWaitForNetPlayers=1 and uses Minimum Net Players. Off/false writes bWaitForNetPlayers=0.",
+          "section": "General Gameplay",
           "type": "boolean",
           "content": "0"
         },
         "net_wait": {
           "name": "Net Wait Seconds",
           "info": "Writes NetWait=seconds. This controls how long the game waits during startup or match transition.",
+          "section": "General Gameplay",
           "type": "text",
           "content": "15"
         },
         "min_net_players": {
           "name": "Minimum Net Players",
           "info": "Writes MinNetPlayers=number. Used when Wait For Net Players is enabled.",
+          "section": "General Gameplay",
           "type": "text",
           "content": "1"
         },
         "restart_wait": {
           "name": "Restart Wait Seconds",
           "info": "Writes RestartWait=seconds. This is the in-game match transition delay, not GSA scheduled restarts.",
+          "section": "General Gameplay",
           "type": "text",
           "content": "30"
         },
         "client_processing_timeout": {
           "name": "Client Processing Timeout",
           "info": "Writes ClientProcessingTimeout=seconds for travel/loading timeout behavior.",
+          "section": "General Gameplay",
           "type": "text",
           "content": "30"
         },
         "initial_credits": {
           "name": "Initial Credits",
           "info": "Writes InitialCredits=number for player starting credits where the game mode supports it.",
+          "section": "CnC AOW",
           "type": "text",
           "content": "0"
         },
         "marathon_mode": {
           "name": "Marathon Mode",
           "info": "On/true forces TimeLimit=0 and CnCModeTimeLimit=0, disables building revival, and enables vehicle airdrops. Off/false uses the individual timing and gameplay settings below.",
-          "section": "Gameplay",
+          "section": "CnC AOW",
           "type": "boolean",
           "content": "0"
         },
         "time_limit": {
           "name": "Overall Time Limit",
           "info": "Writes TimeLimit=minutes for the generic Renegade X match limit. Set 0 to disable it. Marathon Mode forces this to 0.",
-          "section": "Gameplay",
+          "section": "CnC AOW",
           "type": "text",
           "content": "50"
         },
         "cnc_time_limit": {
           "name": "CnC Time Limit",
           "info": "Writes CnCModeTimeLimit=minutes for CnC matches. Set 0 to disable it. Marathon Mode forces this to 0.",
+          "section": "CnC AOW",
           "type": "text",
           "content": "30"
         },
         "dm_time_limit": {
           "name": "DM Time Limit",
           "info": "Writes DMModeTimeLimit=minutes for deathmatch modes.",
+          "section": "CnC AOW",
           "type": "text",
           "content": "20"
         },
         "buildings_revive": {
           "name": "Buildings Revive",
           "info": "On/true writes bBuildingsRevive=1. Off/false writes bBuildingsRevive=0. Marathon Mode forces this off.",
-          "section": "Gameplay",
+          "section": "CnC AOW",
           "type": "boolean",
           "content": "1"
         },
         "enable_airdrops": {
           "name": "Enable Airdrops",
           "info": "On/true writes bEnableAirdrops=1. Off/false writes bEnableAirdrops=0. Marathon Mode forces this on.",
-          "section": "Gameplay",
+          "section": "CnC AOW",
           "type": "boolean",
           "content": "0"
         },
         "team_mode": {
           "name": "Team Mode",
           "info": "Writes the numeric Renegade X TeamMode value.",
-          "section": "Gameplay",
+          "section": "CnC AOW",
           "type": "array",
           "dropdown": "{\"Random shuffle/scramble\":\"6\",\"Static teams\":\"0\",\"Swap teams\":\"1\",\"Random swap\":\"2\",\"Shuffle\":\"3\",\"Traditional assignment\":\"4\",\"Unrestricted traditional\":\"5\"}"
         },
         "max_map_vote_size": {
           "name": "Map Vote Size",
           "info": "Writes MaxMapVoteSize=number for how many map choices appear in voting.",
+          "section": "Voting",
           "type": "text",
           "content": "5"
         },
         "recent_maps_to_exclude": {
           "name": "Recent Maps Excluded",
           "info": "Writes RecentMapsToExclude=number to keep recently played maps out of the next vote.",
+          "section": "Voting",
           "type": "text",
           "content": "2"
         },
         "spawn_crates": {
           "name": "Spawn Crates",
           "info": "On/true writes SpawnCrates=1. Off/false writes SpawnCrates=0.",
+          "section": "CnC AOW",
           "type": "boolean",
           "content": "1"
         },
         "max_client_rate": {
           "name": "Max Client Rate",
           "info": "Writes MaxClientRate=number under IpDrv.TcpNetDriver.",
+          "section": "Networking",
           "type": "text",
           "content": "15000"
         },
         "max_internet_client_rate": {
           "name": "Max Internet Client Rate",
           "info": "Writes MaxInternetClientRate=number under IpDrv.TcpNetDriver.",
+          "section": "Networking",
           "type": "text",
           "content": "10000"
         },
         "server_tick_rate": {
           "name": "Server Tick Rate",
           "info": "Writes NetServerMaxTickRate=number under IpDrv.TcpNetDriver.",
+          "section": "Networking",
           "type": "text",
           "content": "30"
         },
         "download_timeout": {
           "name": "Download Timeout",
           "info": "Writes ConnectionTimeout=seconds under IpDrv.HTTPDownload.",
+          "section": "Networking",
           "type": "text",
           "content": "30"
         },
         "enable_steam": {
           "name": "Enable Steam",
           "info": "On/true writes bEnableSteam=1. Off/false writes bEnableSteam=0.",
+          "section": "Networking",
           "type": "boolean",
           "content": "1"
         },
         "use_vac": {
           "name": "Use VAC",
           "info": "On/true writes bUseVAC=1 where supported by the Renegade X build. Off/false writes bUseVAC=0.",
+          "section": "Networking",
           "type": "boolean",
           "content": "0"
         },
         "require_steam": {
           "name": "Require Steam",
           "info": "On/true writes bRequireSteam=1 in access control. Off/false writes bRequireSteam=0.",
+          "section": "Networking",
           "type": "boolean",
           "content": "0"
         },
         "steam_auth_admins": {
           "name": "Steam Auth Admins",
           "info": "On/true writes bSteamAuthAdmins=1 where supported. Off/false writes bSteamAuthAdmins=0.",
+          "section": "Networking",
           "type": "boolean",
           "content": "0"
         },
         "broadcast_admin_identity": {
           "name": "Broadcast Admin Identity",
           "info": "On/true writes bBroadcastAdminIdentity=1. Off/false writes bBroadcastAdminIdentity=0.",
+          "section": "Networking",
           "type": "boolean",
           "content": "0"
         },
         "moderator_password": {
           "name": "Moderator Password",
           "info": "Writes ModPassword=yourpassword under RenX_Game.Rx_AccessControl. Blank disables this password.",
+          "section": "Networking",
           "type": "text",
           "content": ""
         },
         "multihome": {
           "name": "Multihome IP",
           "info": "Adds -MULTIHOME=ipaddress to the launch command. Blank lets the server bind normally.",
+          "section": "Networking",
           "type": "text",
           "content": ""
         },
         "extra_args": {
           "name": "Extra Launch Args",
           "info": "Appends raw UDK command-line arguments to the launch command. Blank is safest for normal servers.",
+          "section": "Networking",
           "type": "text",
           "content": ""
         }
