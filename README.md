@@ -14,7 +14,8 @@ This project packages a tested Renegade X `1.0.1022` headless runtime, persisten
 - Host operating system: Windows Server 2022 with Windows containers
 - Primary image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r11`
 - Raw blueprint: [renegade-x-gsa-windows.json](https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/blueprints/renegade-x-gsa-windows.json)
-- Repository: [TwistedBobRoss/Renegade-X-GSA-Windows](https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows)`n- Release notes: [CHANGELOG.md](CHANGELOG.md)
+- Repository: [TwistedBobRoss/Renegade-X-GSA-Windows](https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows)
+- Release notes: [CHANGELOG.md](CHANGELOG.md)
 
 Renegade X remains the property of Totem Arts. This repository does not claim ownership of the game or its assets.
 
@@ -1274,6 +1275,7 @@ docker run -d --name renx-test `
 - Set `Marathon Mode` to On, then fully stop/start or reinstall the container so GSA passes the updated environment values.
 - Confirm `\renx-data\Config\UDKRenegadeX.ini` and `\renx-data\ServerFiles\UDKGame\Config\DefaultRenegadeX.ini` contain `TimeLimit=0` and `CnCModeTimeLimit=0`.
 - Leave `Marathon Mode` off for timed matches; the normal time-limit, building revive, and airdrop fields remain adjustable.
+
 ### Server Stops After A Configuration Change
 
 - Remove unsupported raw launch arguments from `Extra Launch Args`.
