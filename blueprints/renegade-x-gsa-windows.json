@@ -570,8 +570,8 @@
           "dropdown": "{\"Random shuffle/scramble\":\"6\",\"Static teams\":\"0\",\"Swap teams\":\"1\",\"Random swap\":\"2\",\"Shuffle\":\"3\",\"Traditional assignment\":\"4\",\"Unrestricted traditional\":\"5\"}"
         },
         "max_map_vote_size": {
-          "name": "Map Vote Size",
-          "info": "Writes MaxMapVoteSize=number for how many map choices appear in voting.",
+          "name": "Number Of Maps Available In Vote",
+          "info": "Writes MaxMapVoteSize=number for how many map choices appear in the map vote.",
           "section": "Voting",
           "type": "text",
           "content": "5"
