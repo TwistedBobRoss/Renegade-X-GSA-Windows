@@ -12,9 +12,9 @@ This project packages a tested Renegade X `1.0.1022` headless runtime, persisten
 - Game developer: **Totem Arts**
 - Project type: unofficial community hosting integration
 - Host operating system: Windows Server 2022 with Windows containers
-- Primary image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r7`
+- Primary image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r11`
 - Raw blueprint: [renegade-x-gsa-windows.json](https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/blueprints/renegade-x-gsa-windows.json)
-- Repository: [TwistedBobRoss/Renegade-X-GSA-Windows](https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows)
+- Repository: [TwistedBobRoss/Renegade-X-GSA-Windows](https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows)`n- Release notes: [CHANGELOG.md](CHANGELOG.md)
 
 Renegade X remains the property of Totem Arts. This repository does not claim ownership of the game or its assets.
 
@@ -73,6 +73,19 @@ Maximum players = 40 or fewer for CNC-Field
 ```
 
 The Renegade X engine supports a maximum of 64 players. Individual maps may have lower practical or configured limits. The container clamps a larger GSA slot setting to 64 before launch.
+
+### Marathon CnC Preset
+
+For a no-time-limit CnC server, use:
+
+```text
+Starting Map = CNC-Field
+Game Class Override = Normal / map prefix
+Map Cycle Class = Standard CnC
+Marathon Mode = On
+```
+
+`Marathon Mode` forces `TimeLimit=0` and `CnCModeTimeLimit=0`, disables building revival, and enables vehicle airdrops. Leave it off for timed All Out War style matches where overtime, sudden death, and building revival are intended.
 
 ### Defense Survival Preset
 
@@ -133,13 +146,13 @@ ServerName={gameserver.list_name}
 Primary 20-map image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r7
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r11
 ```
 
 Bootstrap-only recovery image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r7
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r11
 ```
 
 The primary image is recommended for GSA. It seeds the runtime into persistent storage and avoids downloading the core payload during a normal first start.
@@ -326,8 +339,9 @@ At startup the wrapper:
 2. Initializes persistent runtime INIs under `C:\renx-data\Config`.
 3. Applies GSA parameters to those INIs.
 4. Copies persistent configs into `ServerFiles\UDKGame\Config`.
-5. Installs optional maps and custom content.
-6. Launches `Binaries\Win64\UDK.com`.
+5. Reinforces managed identity and match settings in both runtime and default config files.
+6. Installs optional maps and custom content.
+7. Launches `Binaries\Win64\UDK.com`.
 
 Values controlled by GSA parameters are written again at every start. To make an advanced manual change persistent, do not edit a line that a GSA parameter intentionally manages unless you also change the corresponding parameter.
 
@@ -382,9 +396,13 @@ Values controlled by GSA parameters are written again at every start. To make an
 | Maximum players | GSA slot limit | Writes `MaxPlayers`; do not exceed 64. |
 | Max Spectators | `2` | Reserved spectator capacity. |
 | Initial Credits | `0` | Player starting credits where supported. |
-| CnC Time Limit | `30` | CnC match limit in minutes. |
+| Marathon Mode | Off | Forces `TimeLimit=0`, `CnCModeTimeLimit=0`, `bBuildingsRevive=false`, and `bEnableAirdrops=true`. |
+| Overall Time Limit | `50` | Generic Renegade X `TimeLimit` in minutes. Set `0` to disable it when not using Marathon Mode. |
+| CnC Time Limit | `30` | CnC match limit in minutes. Marathon Mode forces this to `0`. |
 | DM Time Limit | `20` | Deathmatch limit in minutes. |
-| Team Mode | blueprint selection | Team organization behavior. See numeric values below. |
+| Buildings Revive | On | Allows destroyed buildings to revive. Marathon Mode forces this off. |
+| Enable Airdrops | Off | Enables vehicle airdrops. Marathon Mode forces this on. |
+| Team Mode | Random shuffle/scramble | Team organization behavior. See numeric values below. |
 | Fixed Map Rotation | Off | Enforces the map cycle instead of normal map voting. |
 | Map Vote Size | `5` | Maximum choices in the map vote. |
 | Recent Maps Excluded | `2` | Number of recently played maps removed from the vote. |
@@ -393,6 +411,7 @@ Values controlled by GSA parameters are written again at every start. To make an
 | Force Respawn | On | Automatically respawns players. |
 | Admins Can Pause | Off | Allows administrators to pause. |
 | Restart Wait Seconds | `30` | In-game map transition delay, not a GSA scheduled restart. |
+
 
 ### Bots
 
@@ -1129,8 +1148,12 @@ RENX_FORCE_RESPAWN
 RENX_PLAYERS_MUST_BE_READY
 RENX_RESTART_WAIT
 RENX_INITIAL_CREDITS
+RENX_MARATHON_MODE
+RENX_TIME_LIMIT
 RENX_CNC_TIME_LIMIT
 RENX_DM_TIME_LIMIT
+RENX_BUILDINGS_REVIVE
+RENX_ENABLE_AIRDROPS
 RENX_TEAM_MODE
 RENX_MAX_MAP_VOTE_SIZE
 RENX_RECENT_MAPS_TO_EXCLUDE
@@ -1168,7 +1191,7 @@ docker run -d --name renx-test `
   -e RENX_QUERY_PORT="27015" `
   -e RENX_LISTED="true" `
   -e RENX_TEAM_MODE="6" `
-  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r7
+  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r11
 ```
 
 ## Troubleshooting
@@ -1183,7 +1206,7 @@ docker run -d --name renx-test `
 ### Installation Fails Immediately
 
 - Confirm the host is running Windows Server 2022 with Docker set to Windows containers.
-- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r7`.
+- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r11`.
 - Reinstall the server after changing the image tag, Docker environment variables, mounts, or port definitions.
 - Check the Docker container log for an image pull, mount, or Windows container compatibility error.
 
@@ -1227,7 +1250,7 @@ docker run -d --name renx-test `
 
 ### Server Name Is Missing Words Or Contains Quotes
 
-- Use the `r7` image or newer.
+- Use the `r11` image or newer.
 - Set the name through the normal GSA game-server list name field.
 - Restart or recreate the container after changing from an older image.
 - The orange server-list prefix used by some communities is assigned by the Renegade X master-list service and is not controlled by `ServerName`.
@@ -1245,6 +1268,12 @@ docker run -d --name renx-test `
 - Recreate the container after changing image tags or Docker environment variables.
 - Do not wipe the persistent mount during routine updates.
 
+### Marathon Mode Still Ends The Match
+
+- Use image `1.0.1022-core20-ltsc2022-r11` or newer.
+- Set `Marathon Mode` to On, then fully stop/start or reinstall the container so GSA passes the updated environment values.
+- Confirm `\renx-data\Config\UDKRenegadeX.ini` and `\renx-data\ServerFiles\UDKGame\Config\DefaultRenegadeX.ini` contain `TimeLimit=0` and `CnCModeTimeLimit=0`.
+- Leave `Marathon Mode` off for timed matches; the normal time-limit, building revive, and airdrop fields remain adjustable.
 ### Server Stops After A Configuration Change
 
 - Remove unsupported raw launch arguments from `Extra Launch Args`.
