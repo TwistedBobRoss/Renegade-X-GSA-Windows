@@ -8,6 +8,7 @@ All notable changes to the Renegade X GameServerApp Windows blueprint are tracke
 
 - Restored the host-facing GSA voting and surrender controls that were missing from the blueprint.
 - Reconnected vote settings to the existing mode-profile environment variables used by the `r11` image.
+- Renamed the map-vote count control to `Number Of Maps Available In Vote` so hosts can identify it more easily.
 
 ## 1.5.2 - 2026-07-07
 
