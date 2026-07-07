@@ -12,7 +12,7 @@ This project packages a tested Renegade X `1.0.1022` headless runtime, persisten
 - Game developer: **Totem Arts**
 - Project type: unofficial community hosting integration
 - Host operating system: Windows Server 2022 with Windows containers
-- Primary image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r11`
+- Primary image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r8`
 - Raw blueprint: [renegade-x-gsa-windows.json](https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/blueprints/renegade-x-gsa-windows.json)
 - Repository: [TwistedBobRoss/Renegade-X-GSA-Windows](https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows)
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
@@ -147,13 +147,13 @@ ServerName={gameserver.list_name}
 Primary 20-map image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r11
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r8
 ```
 
 Bootstrap-only recovery image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r11
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r8
 ```
 
 The primary image is recommended for GSA. It seeds the runtime into persistent storage and avoids downloading the core payload during a normal first start.
@@ -340,9 +340,8 @@ At startup the wrapper:
 2. Initializes persistent runtime INIs under `C:\renx-data\Config`.
 3. Applies GSA parameters to those INIs.
 4. Copies persistent configs into `ServerFiles\UDKGame\Config`.
-5. Reinforces managed identity and match settings in both runtime and default config files.
-6. Installs optional maps and custom content.
-7. Launches `Binaries\Win64\UDK.com`.
+5. Installs optional maps and custom content.
+6. Launches `Binaries\Win64\UDK.com`.
 
 Values controlled by GSA parameters are written again at every start. To make an advanced manual change persistent, do not edit a line that a GSA parameter intentionally manages unless you also change the corresponding parameter.
 
@@ -405,14 +404,20 @@ Values controlled by GSA parameters are written again at every start. To make an
 | Enable Airdrops | Off | Enables vehicle airdrops. Marathon Mode forces this on. |
 | Team Mode | Random shuffle/scramble | Team organization behavior. See numeric values below. |
 | Fixed Map Rotation | Off | Enforces the map cycle instead of normal map voting. |
+| Surrender Length Seconds | `120` | Surrender countdown duration. |
+| Surrender Lockout Seconds | `600` | Time before surrender voting becomes available. |
+| Change Map Vote Lockout | `600` | Time before change-map voting becomes available. |
 | Map Vote Size | `5` | Maximum choices in the map vote. |
 | Recent Maps Excluded | `2` | Number of recently played maps removed from the vote. |
+| Map Vote Time Seconds | `35` | How long the map vote remains open. |
+| Admins Start Map Vote | Off | Controls administrator-started map voting behavior. |
+| Disable Bot Votes | Off | Prevents bots from affecting votes when enabled. |
+| Remove Variant Maps In Vote List | On | Hides variant maps from the vote list when enabled. |
 | Spawn Crates | On | Enables crate spawning. |
 | Players Must Be Ready | Off | Requires players to ready before match start. |
 | Force Respawn | On | Automatically respawns players. |
 | Admins Can Pause | Off | Allows administrators to pause. |
 | Restart Wait Seconds | `30` | In-game map transition delay, not a GSA scheduled restart. |
-
 
 ### Bots
 
@@ -1158,6 +1163,16 @@ RENX_ENABLE_AIRDROPS
 RENX_TEAM_MODE
 RENX_MAX_MAP_VOTE_SIZE
 RENX_RECENT_MAPS_TO_EXCLUDE
+RENX_VOTE_FIXED_ROTATION
+RENX_VOTE_MAX_CHOICES
+RENX_VOTE_RECENT_EXCLUDE
+RENX_VOTE_DURATION
+RENX_VOTE_CHANGE_MAP_LOCKOUT
+RENX_VOTE_ADMINS_START
+RENX_VOTE_BOTS_DISABLED
+RENX_VOTE_REMOVE_VARIANTS
+RENX_CNC_SURRENDER_LENGTH
+RENX_CNC_SURRENDER_LOCKOUT
 RENX_SPAWN_CRATES
 RENX_MAX_CLIENT_RATE
 RENX_MAX_INTERNET_CLIENT_RATE
@@ -1192,7 +1207,7 @@ docker run -d --name renx-test `
   -e RENX_QUERY_PORT="27015" `
   -e RENX_LISTED="true" `
   -e RENX_TEAM_MODE="6" `
-  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r11
+  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r8
 ```
 
 ## Troubleshooting
@@ -1207,7 +1222,7 @@ docker run -d --name renx-test `
 ### Installation Fails Immediately
 
 - Confirm the host is running Windows Server 2022 with Docker set to Windows containers.
-- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r11`.
+- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r8`.
 - Reinstall the server after changing the image tag, Docker environment variables, mounts, or port definitions.
 - Check the Docker container log for an image pull, mount, or Windows container compatibility error.
 
@@ -1251,7 +1266,7 @@ docker run -d --name renx-test `
 
 ### Server Name Is Missing Words Or Contains Quotes
 
-- Use the `r11` image or newer.
+- Use the `r7` image or newer.
 - Set the name through the normal GSA game-server list name field.
 - Restart or recreate the container after changing from an older image.
 - The orange server-list prefix used by some communities is assigned by the Renegade X master-list service and is not controlled by `ServerName`.
@@ -1271,10 +1286,10 @@ docker run -d --name renx-test `
 
 ### Marathon Mode Still Ends The Match
 
-- Use image `1.0.1022-core20-ltsc2022-r11` or newer.
-- Set `Marathon Mode` to On, then fully stop/start or reinstall the container so GSA passes the updated environment values.
-- Confirm `\renx-data\Config\UDKRenegadeX.ini` and `\renx-data\ServerFiles\UDKGame\Config\DefaultRenegadeX.ini` contain `TimeLimit=0` and `CnCModeTimeLimit=0`.
-- Leave `Marathon Mode` off for timed matches; the normal time-limit, building revive, and airdrop fields remain adjustable.
+- Use image `1.0.1022-core20-ltsc2022-r8` or newer; older images only wrote `CnCModeTimeLimit`.
+- Set `Marathon Mode` to On, then restart the server.
+- Confirm `\renx-data\Config\UDKRenegadeX.ini` contains `TimeLimit=0` and `CnCModeTimeLimit=0`.
+- If staying on an older image, edit `\renx-data\Config\UDKRenegadeX.ini` manually and restart; do not wipe `renx-data`.
 
 ### Server Stops After A Configuration Change
 
