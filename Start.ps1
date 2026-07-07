@@ -704,12 +704,34 @@ Set-IniValue (Join-Path $installConfigDir "UDKGame.ini") "Engine.GameReplication
 Set-IniValue (Join-Path $installConfigDir "DefaultGame.ini") "Engine.GameReplicationInfo" "ServerName" $serverName
 Set-IniValue (Join-Path $installConfigDir "DefaultGame.ini") "Engine.GameReplicationInfo" "MessageOfTheDay" (Get-Setting "RENX_MOTD" "")
 
+# Keep the runtime and default Renegade X config aligned. The shipped defaults
+# advertise a 50 minute CnC timer, so marathon values must be reinforced in both
+# places before the game process starts.
+$runtimeRenegadeX = Join-Path $installConfigDir "UDKRenegadeX.ini"
+$defaultRenegadeX = Join-Path $installConfigDir "DefaultRenegadeX.ini"
+foreach ($renegadeXTarget in @($runtimeRenegadeX, $defaultRenegadeX)) {
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "TimeLimit" $timeLimit
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "CnCModeTimeLimit" $cncTimeLimit
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "DMModeTimeLimit" $dmTimeLimit
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "bBuildingsRevive" $buildingsRevive
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "bEnableAirdrops" $enableAirdrops
+}
+
 $runtimeServerName = Get-IniValue (Join-Path $installConfigDir "UDKGame.ini") "Engine.GameReplicationInfo" "ServerName"
 $defaultServerName = Get-IniValue (Join-Path $installConfigDir "DefaultGame.ini") "Engine.GameReplicationInfo" "ServerName"
 if ($runtimeServerName -ne $serverName -or $defaultServerName -ne $serverName) {
     throw "Renegade X server-name configuration validation failed. Runtime='$runtimeServerName'; Default='$defaultServerName'; Expected='$serverName'."
 }
 Write-Host "Verified Renegade X server name in runtime and default INI files: $serverName"
+
+$runtimeTimeLimit = Get-IniValue $runtimeRenegadeX "RenX_Game.Rx_Game" "TimeLimit"
+$runtimeCncTimeLimit = Get-IniValue $runtimeRenegadeX "RenX_Game.Rx_Game" "CnCModeTimeLimit"
+$defaultTimeLimit = Get-IniValue $defaultRenegadeX "RenX_Game.Rx_Game" "TimeLimit"
+$defaultCncTimeLimit = Get-IniValue $defaultRenegadeX "RenX_Game.Rx_Game" "CnCModeTimeLimit"
+if ($runtimeTimeLimit -ne $timeLimit -or $runtimeCncTimeLimit -ne $cncTimeLimit -or $defaultTimeLimit -ne $timeLimit -or $defaultCncTimeLimit -ne $cncTimeLimit) {
+    throw "Renegade X time-limit configuration validation failed. Runtime='$runtimeTimeLimit/$runtimeCncTimeLimit'; Default='$defaultTimeLimit/$defaultCncTimeLimit'; Expected='$timeLimit/$cncTimeLimit'."
+}
+Write-Host "Verified Renegade X time limits in runtime and default INI files: TimeLimit=$timeLimit; CnCModeTimeLimit=$cncTimeLimit"
 
 if ($installOptionalMapPack1) {
     Invoke-CustomContentDownloads $optionalMapPack1Url $optionalMapDir $refreshContentDownloads "optional map pack 1"
