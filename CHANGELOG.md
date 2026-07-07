@@ -2,6 +2,13 @@
 
 All notable changes to the Renegade X GameServerApp Windows blueprint are tracked here.
 
+## 1.5.3 - 2026-07-07
+
+### Fixed
+
+- Restored the host-facing GSA voting and surrender controls that were missing from the blueprint.
+- Reconnected vote settings to the existing mode-profile environment variables used by the `r11` image.
+
 ## 1.5.2 - 2026-07-07
 
 ### Changed
