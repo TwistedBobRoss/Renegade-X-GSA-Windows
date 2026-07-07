@@ -490,23 +490,23 @@
           "content": "0"
         },
         "marathon_mode": {
-          "name": "CnC Marathon Preset",
-          "info": "Optional convenience preset. On/true forces the recommended marathon values: Overall Time Limit=0, CnC Time Limit=0, Buildings Revive=Off, and Enable Airdrops=On. Leave Off/false to tune those granular settings manually below.",
-          "section": "CnC AOW",
+          "name": "Marathon Mode",
+          "info": "On/true forces TimeLimit=0 and CnCModeTimeLimit=0, disables building revival, and enables vehicle airdrops. Off/false uses the individual timing and gameplay settings below.",
+          "section": "CnC Marathon",
           "type": "boolean",
           "content": "0"
         },
         "time_limit": {
-          "name": "Overall Time Limit (Marathon: 0)",
-          "info": "Writes TimeLimit=minutes for the generic Renegade X match limit. Set 0 to disable it. CnC Marathon should use 0.",
-          "section": "CnC AOW",
+          "name": "Overall Time Limit",
+          "info": "Writes TimeLimit=minutes for the generic Renegade X match limit. Set 0 to disable it. Marathon Mode forces this to 0.",
+          "section": "CnC Marathon",
           "type": "text",
           "content": "50"
         },
         "cnc_time_limit": {
-          "name": "CnC Time Limit (Marathon: 0)",
-          "info": "Writes CnCModeTimeLimit=minutes for CnC matches. Set 0 to disable the CnC round timer. CnC Marathon should use 0.",
-          "section": "CnC AOW",
+          "name": "CnC Time Limit",
+          "info": "Writes CnCModeTimeLimit=minutes for CnC matches. Set 0 to disable it. Marathon Mode forces this to 0.",
+          "section": "CnC Marathon",
           "type": "text",
           "content": "30"
         },
@@ -518,16 +518,16 @@
           "content": "20"
         },
         "buildings_revive": {
-          "name": "Buildings Revive (Marathon: Off)",
-          "info": "On/true writes bBuildingsRevive=1. Off/false writes bBuildingsRevive=0. CnC Marathon should use Off.",
-          "section": "CnC AOW",
+          "name": "Buildings Revive",
+          "info": "On/true writes bBuildingsRevive=1. Off/false writes bBuildingsRevive=0. Marathon Mode forces this off.",
+          "section": "CnC Marathon",
           "type": "boolean",
           "content": "1"
         },
         "enable_airdrops": {
-          "name": "Enable Airdrops (Marathon: On)",
-          "info": "On/true writes bEnableAirdrops=1. Off/false writes bEnableAirdrops=0. CnC Marathon should use On.",
-          "section": "CnC AOW",
+          "name": "Enable Airdrops",
+          "info": "On/true writes bEnableAirdrops=1. Off/false writes bEnableAirdrops=0. Marathon Mode forces this on.",
+          "section": "CnC Marathon",
           "type": "boolean",
           "content": "0"
         },
