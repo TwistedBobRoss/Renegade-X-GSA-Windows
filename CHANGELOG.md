@@ -15,6 +15,7 @@ All notable changes to the Renegade X GameServerApp Windows blueprint are tracke
 - Reinforced Marathon timing in both runtime and default Renegade X config files so server listings no longer fall back to 50 minutes.
 - Preserved non-Marathon time-limit behavior by using `RENX_TIME_LIMIT` for generic `TimeLimit` and `RENX_CNC_TIME_LIMIT` for `CnCModeTimeLimit`.
 - Fixed `ApplyModeProfile.ps1` INI update handling and added a full-image smoke test that verifies Marathon `0/0` timing before publish.
+
 ## 1.5.1 - 2026-07-03
 
 ### Added
