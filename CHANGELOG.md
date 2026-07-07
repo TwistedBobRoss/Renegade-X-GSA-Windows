@@ -2,6 +2,19 @@
 
 All notable changes to the Renegade X GameServerApp Windows blueprint are tracked here.
 
+## 1.5.2 - 2026-07-07
+
+### Changed
+
+- Updated the primary Core 20 image and blueprint to `1.0.1022-core20-ltsc2022-r11`.
+- Updated bootstrap and full-image build workflow defaults to `r11`.
+- Restored the visible `CnC Marathon` blueprint section for Marathon Mode and related controls.
+
+### Fixed
+
+- Reinforced Marathon timing in both runtime and default Renegade X config files so server listings no longer fall back to 50 minutes.
+- Preserved non-Marathon time-limit behavior by using `RENX_TIME_LIMIT` for generic `TimeLimit` and `RENX_CNC_TIME_LIMIT` for `CnCModeTimeLimit`.
+- Fixed `ApplyModeProfile.ps1` INI update handling and added a full-image smoke test that verifies Marathon `0/0` timing before publish.
 ## 1.5.1 - 2026-07-03
 
 ### Added
