@@ -155,7 +155,7 @@ else {
     $section = "RenX_Game.Rx_Game"
     $isAow = ($mode -eq "aow")
     Set-IniValue $renxIni $section "InitialCredits" (Get-Setting "RENX_CNC_INITIAL_CREDITS" "200")
-    Set-IniValue $renxIni $section "TimeLimit" (Get-Setting "RENX_CNC_TIME_LIMIT" "0")
+    Set-IniValue $renxIni $section "TimeLimit" (Get-Setting "RENX_TIME_LIMIT" (Get-Setting "RENX_CNC_TIME_LIMIT" "0"))
     Set-IniValue $renxIni $section "CnCModeTimeLimit" (Get-Setting "RENX_CNC_TIME_LIMIT" "0")
     Set-IniValue $renxIni $section "DMModeTimeLimit" (Get-Setting "RENX_CNC_DM_TIME_LIMIT" "15")
     Set-IniValue $renxIni $section "TeamMode" (Get-Setting "RENX_CNC_TEAM_MODE" "6")
