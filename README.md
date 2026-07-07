@@ -407,7 +407,7 @@ Values controlled by GSA parameters are written again at every start. To make an
 | Surrender Length Seconds | `120` | Surrender countdown duration. |
 | Surrender Lockout Seconds | `600` | Time before surrender voting becomes available. |
 | Change Map Vote Lockout | `600` | Time before change-map voting becomes available. |
-| Map Vote Size | `5` | Maximum choices in the map vote. |
+| Number Of Maps Available In Vote | `5` | Maximum choices shown in the map vote. |
 | Recent Maps Excluded | `2` | Number of recently played maps removed from the vote. |
 | Map Vote Time Seconds | `35` | How long the map vote remains open. |
 | Admins Start Map Vote | Off | Controls administrator-started map voting behavior. |
