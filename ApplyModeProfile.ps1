@@ -62,24 +62,24 @@ function Set-IniValue {
     }
 
     $insertIndex = $lines.Count
-    $matches = [System.Collections.Generic.List[int]]::new()
+    $matchingIndexes = [System.Collections.Generic.List[int]]::new()
     for ($i = $sectionIndex + 1; $i -lt $lines.Count; $i++) {
         if ($lines[$i] -match $anySectionPattern) {
             $insertIndex = $i
             break
         }
         if ($lines[$i] -match $keyPattern) {
-            $matches.Add($i)
+            $matchingIndexes.Add($i)
         }
     }
 
-    if ($matches.Count -eq 0) {
+    if ($matchingIndexes.Count -eq 0) {
         $lines.Insert($insertIndex, "$Key=$Value")
     }
     else {
-        $lines[$matches[0]] = "$Key=$Value"
-        for ($i = $matches.Count - 1; $i -ge 1; $i--) {
-            $lines.RemoveAt($matches[$i])
+        $lines[$matchingIndexes[0]] = "$Key=$Value"
+        for ($i = $matchingIndexes.Count - 1; $i -ge 1; $i--) {
+            $lines.RemoveAt($matchingIndexes[$i])
         }
     }
 
