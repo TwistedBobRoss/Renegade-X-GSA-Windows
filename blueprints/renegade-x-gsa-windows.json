@@ -47,6 +47,7 @@
       "RENX_MOTD": "{config_parameter id=\"motd\"}",
       "RENX_LISTED": "{config_parameter id=\"listed\"}",
       "RENX_FIXED_MAP_ROTATION": "{config_parameter id=\"fixed_map_rotation\"}",
+      "RENX_VOTE_FIXED_ROTATION": "{config_parameter id=\"fixed_map_rotation\"}",
       "RENX_BOTS_DISABLED": "{config_parameter id=\"bots_disabled\"}",
       "RENX_GDI_BOTS": "{config_parameter id=\"gdi_bots\"}",
       "RENX_NOD_BOTS": "{config_parameter id=\"nod_bots\"}",
@@ -88,6 +89,15 @@
       "RENX_TEAM_MODE": "{config_parameter id=\"team_mode\"}",
       "RENX_MAX_MAP_VOTE_SIZE": "{config_parameter id=\"max_map_vote_size\"}",
       "RENX_RECENT_MAPS_TO_EXCLUDE": "{config_parameter id=\"recent_maps_to_exclude\"}",
+      "RENX_VOTE_MAX_CHOICES": "{config_parameter id=\"max_map_vote_size\"}",
+      "RENX_VOTE_RECENT_EXCLUDE": "{config_parameter id=\"recent_maps_to_exclude\"}",
+      "RENX_VOTE_DURATION": "{config_parameter id=\"map_vote_time\"}",
+      "RENX_VOTE_CHANGE_MAP_LOCKOUT": "{config_parameter id=\"change_map_disabled_time\"}",
+      "RENX_VOTE_ADMINS_START": "{config_parameter id=\"admins_start_map_vote\"}",
+      "RENX_VOTE_BOTS_DISABLED": "{config_parameter id=\"bot_votes_disabled\"}",
+      "RENX_VOTE_REMOVE_VARIANTS": "{config_parameter id=\"remove_variant_maps_in_vote_list\"}",
+      "RENX_CNC_SURRENDER_LENGTH": "{config_parameter id=\"surrender_length\"}",
+      "RENX_CNC_SURRENDER_LOCKOUT": "{config_parameter id=\"surrender_disabled_time\"}",
       "RENX_SPAWN_CRATES": "{config_parameter id=\"spawn_crates\"}",
       "RENX_MAX_CLIENT_RATE": "{config_parameter id=\"max_client_rate\"}",
       "RENX_MAX_INTERNET_CLIENT_RATE": "{config_parameter id=\"max_internet_client_rate\"}",
@@ -164,7 +174,7 @@
           "path": "\\renx-data\\Config\\UDKRenegadeX.ini",
           "info": "Renegade X-specific gameplay, voting, bot, RCON, and server-list settings.",
           "disable_edit": "0",
-          "content": "[RenX_Game.Rx_Game]\nbListed={config_parameter id=\"listed\"}\nbFixedMapRotation={config_parameter id=\"fixed_map_rotation\"}\nbBotsDisabled={config_parameter id=\"bots_disabled\"}\nbLogRcon=true\nInitialCredits={config_parameter id=\"initial_credits\"}\nTimeLimit={config_parameter id=\"time_limit\"}\nCnCModeTimeLimit={config_parameter id=\"cnc_time_limit\"}\nDMModeTimeLimit={config_parameter id=\"dm_time_limit\"}\nbBuildingsRevive={config_parameter id=\"buildings_revive\"}\nbEnableAirdrops={config_parameter id=\"enable_airdrops\"}\nTeamMode={config_parameter id=\"team_mode\"}\nMaxMapVoteSize={config_parameter id=\"max_map_vote_size\"}\nRecentMapsToExclude={config_parameter id=\"recent_maps_to_exclude\"}\nSpawnCrates={config_parameter id=\"spawn_crates\"}\nNodDifficulty={config_parameter id=\"nod_bot_difficulty\"}\nGDIDifficulty={config_parameter id=\"gdi_bot_difficulty\"}\nNODAttackingValue={config_parameter id=\"nod_attack_percent\"}\nGDIAttackingValue={config_parameter id=\"gdi_attack_percent\"}\n\n[RenX_Game.Rx_Rcon]\nbEnableRcon={config_parameter id=\"enable_rcon\"}\nRconPort={gameserver.rcon_port}\nSubscriberLimit={config_parameter id=\"rcon_subscriber_limit\"}\n\n[RenX_Game.Rx_AccessControl]\nbRequireSteam={config_parameter id=\"require_steam\"}\nbSteamAuthAdmins={config_parameter id=\"steam_auth_admins\"}\nbBroadcastAdminIdentity={config_parameter id=\"broadcast_admin_identity\"}\nModPassword={config_parameter id=\"moderator_password\"}\n\n[RenX_Game.Rx_ServerListQueryHandler]\nMasterServerURL=https://serverlist-rx.totemarts.services/servers.jsp\n"
+          "content": "[RenX_Game.Rx_Game]\nbListed={config_parameter id=\"listed\"}\nbFixedMapRotation={config_parameter id=\"fixed_map_rotation\"}\nbBotsDisabled={config_parameter id=\"bots_disabled\"}\nbLogRcon=true\nInitialCredits={config_parameter id=\"initial_credits\"}\nTimeLimit={config_parameter id=\"time_limit\"}\nCnCModeTimeLimit={config_parameter id=\"cnc_time_limit\"}\nDMModeTimeLimit={config_parameter id=\"dm_time_limit\"}\nbBuildingsRevive={config_parameter id=\"buildings_revive\"}\nbEnableAirdrops={config_parameter id=\"enable_airdrops\"}\nTeamMode={config_parameter id=\"team_mode\"}\nMaxMapVoteSize={config_parameter id=\"max_map_vote_size\"}\nRecentMapsToExclude={config_parameter id=\"recent_maps_to_exclude\"}\nMapVoteTime={config_parameter id=\"map_vote_time\"}\nChangeMapDisabledTime={config_parameter id=\"change_map_disabled_time\"}\nSurrenderLength={config_parameter id=\"surrender_length\"}\nSurrenderDisabledTime={config_parameter id=\"surrender_disabled_time\"}\nbAdminsStartMapVote={config_parameter id=\"admins_start_map_vote\"}\nbBotVotesDisabled={config_parameter id=\"bot_votes_disabled\"}\nbRemoveVariantMapsInVoteList={config_parameter id=\"remove_variant_maps_in_vote_list\"}\nSpawnCrates={config_parameter id=\"spawn_crates\"}\nNodDifficulty={config_parameter id=\"nod_bot_difficulty\"}\nGDIDifficulty={config_parameter id=\"gdi_bot_difficulty\"}\nNODAttackingValue={config_parameter id=\"nod_attack_percent\"}\nGDIAttackingValue={config_parameter id=\"gdi_attack_percent\"}\n\n[RenX_Game.Rx_Rcon]\nbEnableRcon={config_parameter id=\"enable_rcon\"}\nRconPort={gameserver.rcon_port}\nSubscriberLimit={config_parameter id=\"rcon_subscriber_limit\"}\n\n[RenX_Game.Rx_AccessControl]\nbRequireSteam={config_parameter id=\"require_steam\"}\nbSteamAuthAdmins={config_parameter id=\"steam_auth_admins\"}\nbBroadcastAdminIdentity={config_parameter id=\"broadcast_admin_identity\"}\nModPassword={config_parameter id=\"moderator_password\"}\n\n[RenX_Game.Rx_ServerListQueryHandler]\nMasterServerURL=https://serverlist-rx.totemarts.services/servers.jsp\n"
         },
         "UDKWeb.ini": {
           "path": "\\renx-data\\Config\\UDKWeb.ini",
@@ -299,6 +309,27 @@
           "section": "Voting",
           "type": "boolean",
           "content": "0"
+        },
+        "surrender_length": {
+          "name": "Surrender Length Seconds",
+          "info": "Writes SurrenderLength=seconds for the surrender countdown.",
+          "section": "Voting",
+          "type": "text",
+          "content": "120"
+        },
+        "surrender_disabled_time": {
+          "name": "Surrender Lockout Seconds",
+          "info": "Writes SurrenderDisabledTime=seconds before surrender voting becomes available.",
+          "section": "Voting",
+          "type": "text",
+          "content": "600"
+        },
+        "change_map_disabled_time": {
+          "name": "Change Map Vote Lockout",
+          "info": "Writes ChangeMapDisabledTime=seconds before change-map voting becomes available.",
+          "section": "Voting",
+          "type": "text",
+          "content": "600"
         },
         "bots_disabled": {
           "name": "Disable Bots",
@@ -551,6 +582,34 @@
           "section": "Voting",
           "type": "text",
           "content": "2"
+        },
+        "map_vote_time": {
+          "name": "Map Vote Time Seconds",
+          "info": "Writes MapVoteTime=seconds for how long the map vote remains open.",
+          "section": "Voting",
+          "type": "text",
+          "content": "35"
+        },
+        "admins_start_map_vote": {
+          "name": "Admins Start Map Vote",
+          "info": "On/true writes bAdminsStartMapVote=1. Off/false writes bAdminsStartMapVote=0.",
+          "section": "Voting",
+          "type": "boolean",
+          "content": "0"
+        },
+        "bot_votes_disabled": {
+          "name": "Disable Bot Votes",
+          "info": "On/true writes bBotVotesDisabled=1 so bots do not affect votes. Off/false writes bBotVotesDisabled=0.",
+          "section": "Voting",
+          "type": "boolean",
+          "content": "0"
+        },
+        "remove_variant_maps_in_vote_list": {
+          "name": "Remove Variant Maps In Vote List",
+          "info": "On/true writes bRemoveVariantMapsInVoteList=1 to hide variant maps from voting. Off/false writes bRemoveVariantMapsInVoteList=0.",
+          "section": "Voting",
+          "type": "boolean",
+          "content": "1"
         },
         "spawn_crates": {
           "name": "Spawn Crates",
