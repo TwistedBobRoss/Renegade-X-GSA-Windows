@@ -562,7 +562,7 @@ $webPort = Get-Setting "RENX_WEB_PORT" "6969"
 $adminPassword = Get-Setting "RENX_ADMIN_PASSWORD" ""
 $serverPassword = Get-Setting "RENX_SERVER_PASSWORD" ""
 $listed = Get-BoolSetting "RENX_LISTED" "true"
-$fixedMapRotation = Get-BoolSetting "RENX_FIXED_MAP_ROTATION" "false"
+$fixedMapRotation = Get-BoolSetting "RENX_FIXED_MAP_ROTATION" (Get-BoolSetting "RENX_VOTE_FIXED_ROTATION" "false")
 $botsDisabled = Get-BoolSetting "RENX_BOTS_DISABLED" "false"
 $allowDownloads = Get-BoolSetting "RENX_ALLOW_DOWNLOADS" "true"
 $redirectUrl = Get-Setting "RENX_REDIRECT_URL" "https://community-content.totemarts.services/"
@@ -599,8 +599,15 @@ $dmTimeLimit = Get-Setting "RENX_DM_TIME_LIMIT" "20"
 $buildingsRevive = Get-BoolSetting "RENX_BUILDINGS_REVIVE" "true"
 $enableAirdrops = Get-BoolSetting "RENX_ENABLE_AIRDROPS" "false"
 $teamMode = Get-Setting "RENX_TEAM_MODE" "6"
-$maxMapVoteSize = Get-Setting "RENX_MAX_MAP_VOTE_SIZE" "5"
-$recentMapsToExclude = Get-Setting "RENX_RECENT_MAPS_TO_EXCLUDE" "2"
+$maxMapVoteSize = Get-Setting "RENX_MAX_MAP_VOTE_SIZE" (Get-Setting "RENX_VOTE_MAX_CHOICES" "5")
+$recentMapsToExclude = Get-Setting "RENX_RECENT_MAPS_TO_EXCLUDE" (Get-Setting "RENX_VOTE_RECENT_EXCLUDE" "2")
+$mapVoteTime = Get-Setting "RENX_VOTE_DURATION" "35"
+$changeMapDisabledTime = Get-Setting "RENX_VOTE_CHANGE_MAP_LOCKOUT" "600"
+$adminsStartMapVote = Get-BoolSetting "RENX_VOTE_ADMINS_START" "false"
+$botVotesDisabled = Get-BoolSetting "RENX_VOTE_BOTS_DISABLED" "false"
+$removeVariantMapsInVoteList = Get-BoolSetting "RENX_VOTE_REMOVE_VARIANTS" "true"
+$surrenderLength = Get-Setting "RENX_CNC_SURRENDER_LENGTH" "120"
+$surrenderDisabledTime = Get-Setting "RENX_CNC_SURRENDER_LOCKOUT" "600"
 $spawnCrates = Get-BoolSetting "RENX_SPAWN_CRATES" "true"
 $maxClientRate = Get-Setting "RENX_MAX_CLIENT_RATE" "15000"
 $maxInternetClientRate = Get-Setting "RENX_MAX_INTERNET_CLIENT_RATE" "10000"
@@ -681,6 +688,13 @@ Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bEnableAirdrops" $enableAirdrops
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "TeamMode" $teamMode
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "MaxMapVoteSize" $maxMapVoteSize
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "RecentMapsToExclude" $recentMapsToExclude
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "MapVoteTime" $mapVoteTime
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "ChangeMapDisabledTime" $changeMapDisabledTime
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "SurrenderLength" $surrenderLength
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "SurrenderDisabledTime" $surrenderDisabledTime
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bAdminsStartMapVote" $adminsStartMapVote
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bBotVotesDisabled" $botVotesDisabled
+Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bRemoveVariantMapsInVoteList" $removeVariantMapsInVoteList
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "SpawnCrates" $spawnCrates
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "NodDifficulty" $nodBotDifficulty
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "GDIDifficulty" $gdiBotDifficulty
@@ -704,9 +718,9 @@ Set-IniValue (Join-Path $installConfigDir "UDKGame.ini") "Engine.GameReplication
 Set-IniValue (Join-Path $installConfigDir "DefaultGame.ini") "Engine.GameReplicationInfo" "ServerName" $serverName
 Set-IniValue (Join-Path $installConfigDir "DefaultGame.ini") "Engine.GameReplicationInfo" "MessageOfTheDay" (Get-Setting "RENX_MOTD" "")
 
-# Keep the runtime and default Renegade X config aligned. The shipped defaults
-# advertise a 50 minute CnC timer, so marathon values must be reinforced in both
-# places before the game process starts.
+# Keep the runtime and default Renegade X config aligned. UE3 may rebuild the
+# runtime config from defaults, so managed match-flow and voting values are
+# reinforced in both places before the game process starts.
 $runtimeRenegadeX = Join-Path $installConfigDir "UDKRenegadeX.ini"
 $defaultRenegadeX = Join-Path $installConfigDir "DefaultRenegadeX.ini"
 foreach ($renegadeXTarget in @($runtimeRenegadeX, $defaultRenegadeX)) {
@@ -715,6 +729,16 @@ foreach ($renegadeXTarget in @($runtimeRenegadeX, $defaultRenegadeX)) {
     Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "DMModeTimeLimit" $dmTimeLimit
     Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "bBuildingsRevive" $buildingsRevive
     Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "bEnableAirdrops" $enableAirdrops
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "bFixedMapRotation" $fixedMapRotation
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "MaxMapVoteSize" $maxMapVoteSize
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "RecentMapsToExclude" $recentMapsToExclude
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "MapVoteTime" $mapVoteTime
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "ChangeMapDisabledTime" $changeMapDisabledTime
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "SurrenderLength" $surrenderLength
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "SurrenderDisabledTime" $surrenderDisabledTime
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "bAdminsStartMapVote" $adminsStartMapVote
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "bBotVotesDisabled" $botVotesDisabled
+    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "bRemoveVariantMapsInVoteList" $removeVariantMapsInVoteList
 }
 
 $runtimeServerName = Get-IniValue (Join-Path $installConfigDir "UDKGame.ini") "Engine.GameReplicationInfo" "ServerName"
