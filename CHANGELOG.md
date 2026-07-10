@@ -2,6 +2,17 @@
 
 All notable changes to the Renegade X GameServerApp Windows blueprint are tracked here.
 
+## 1.5.4 - 2026-07-10
+
+### Changed
+
+- Updated the published GSA blueprint image tag to `1.0.1022-core20-ltsc2022-r12`.
+- Updated bootstrap and full-image build workflow defaults to `r12`.
+
+### Fixed
+
+- Startup now applies the host-facing GSA voting and surrender controls into both runtime and default Renegade X config files.
+
 ## 1.5.3 - 2026-07-07
 
 ### Fixed

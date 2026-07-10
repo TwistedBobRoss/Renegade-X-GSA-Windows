@@ -26,7 +26,7 @@
     },
     "image": {
       "name": "ghcr.io/twistedbobross/renegade-x-gsa-windows",
-      "tag": "1.0.1022-core20-ltsc2022-r11"
+      "tag": "1.0.1022-core20-ltsc2022-r12"
     },
     "automatic_ports": true,
     "envs": {

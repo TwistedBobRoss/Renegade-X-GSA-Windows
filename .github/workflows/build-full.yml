@@ -10,7 +10,7 @@ on:
       image_tag:
         description: "Full container image tag to publish"
         required: true
-        default: "1.0.1022-core20-ltsc2022-r11"
+        default: "1.0.1022-core20-ltsc2022-r12"
 
 permissions:
   contents: read

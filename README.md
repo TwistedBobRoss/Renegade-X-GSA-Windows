@@ -12,7 +12,7 @@ This project packages a tested Renegade X `1.0.1022` headless runtime, persisten
 - Game developer: **Totem Arts**
 - Project type: unofficial community hosting integration
 - Host operating system: Windows Server 2022 with Windows containers
-- Primary image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r8`
+- Primary image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r12`
 - Raw blueprint: [renegade-x-gsa-windows.json](https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/blueprints/renegade-x-gsa-windows.json)
 - Repository: [TwistedBobRoss/Renegade-X-GSA-Windows](https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows)
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
@@ -147,13 +147,13 @@ ServerName={gameserver.list_name}
 Primary 20-map image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r8
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r12
 ```
 
 Bootstrap-only recovery image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r8
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r12
 ```
 
 The primary image is recommended for GSA. It seeds the runtime into persistent storage and avoids downloading the core payload during a normal first start.
@@ -1207,7 +1207,7 @@ docker run -d --name renx-test `
   -e RENX_QUERY_PORT="27015" `
   -e RENX_LISTED="true" `
   -e RENX_TEAM_MODE="6" `
-  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r8
+  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r12
 ```
 
 ## Troubleshooting
@@ -1222,7 +1222,7 @@ docker run -d --name renx-test `
 ### Installation Fails Immediately
 
 - Confirm the host is running Windows Server 2022 with Docker set to Windows containers.
-- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r8`.
+- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r12`.
 - Reinstall the server after changing the image tag, Docker environment variables, mounts, or port definitions.
 - Check the Docker container log for an image pull, mount, or Windows container compatibility error.
 
