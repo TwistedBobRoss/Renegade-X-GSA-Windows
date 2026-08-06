@@ -12,7 +12,7 @@ This project packages a tested Renegade X `1.0.1022` headless runtime, persisten
 - Game developer: **Totem Arts**
 - Project type: unofficial community hosting integration
 - Host operating system: Windows Server 2022 with Windows containers
-- Primary image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r12`
+- Primary image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:stable-core20-ltsc2022`
 - Raw blueprint: [renegade-x-gsa-windows.json](https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/blueprints/renegade-x-gsa-windows.json)
 - Repository: [TwistedBobRoss/Renegade-X-GSA-Windows](https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows)
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
@@ -121,6 +121,10 @@ Changing the image tag, Docker environment variables, mounts, or blueprint direc
 
 Do not wipe `renx-data` unless you intentionally want to remove the server runtime, configs, maps, downloads, and logs.
 
+Runtime auto-update is controlled by `Runtime Auto Update` and `Update Manifest URL`. When enabled, the container checks `release-manifest.json` on start. If the manifest has a higher Renegade X `version_number`, the launcher skips the baked seed, redownloads the manifest payload, replaces `C:\renx-data\ServerFiles`, and syncs `GameVersion` / `GameVersionNumber` into persistent config before launch.
+
+The Docker image cannot replace itself while running. The blueprint uses the rolling image tag `stable-core20-ltsc2022`; after a new image is pushed to that tag, recreate or reinstall the GSA container to pull it while keeping `\renx-data`.
+
 ## Public Server Listing
 
 To appear in the Renegade X server browser:
@@ -147,7 +151,7 @@ ServerName={gameserver.list_name}
 Primary 20-map image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r12
+ghcr.io/twistedbobross/renegade-x-gsa-windows:stable-core20-ltsc2022
 ```
 
 Bootstrap-only recovery image:
@@ -365,6 +369,9 @@ Values controlled by GSA parameters are written again at every start. To make an
 | --- | --- | --- |
 | Server Payload URLs | Core release parts | Recovery URLs for the core runtime. |
 | Refresh Server Payload | Off | Forces payload redownload and runtime replacement on the next start. |
+| Runtime Auto Update | On | Checks the update manifest at container start and refreshes when a newer runtime is published. |
+| Update Manifest URL | Published manifest | Public JSON manifest containing the current runtime payload URLs. |
+| Update Channel | `stable` | Manifest channel accepted by Runtime Auto Update. |
 | Install Optional Map Pack 1 | Off | Installs optional map pack 1. |
 | Install Optional Map Pack 2 | Off | Installs optional map pack 2. |
 | Install Optional Map Pack 3 | Off | Installs optional map pack 3. |
@@ -1207,7 +1214,7 @@ docker run -d --name renx-test `
   -e RENX_QUERY_PORT="27015" `
   -e RENX_LISTED="true" `
   -e RENX_TEAM_MODE="6" `
-  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r12
+  ghcr.io/twistedbobross/renegade-x-gsa-windows:stable-core20-ltsc2022
 ```
 
 ## Troubleshooting
@@ -1222,7 +1229,7 @@ docker run -d --name renx-test `
 ### Installation Fails Immediately
 
 - Confirm the host is running Windows Server 2022 with Docker set to Windows containers.
-- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r12`.
+- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:stable-core20-ltsc2022`.
 - Reinstall the server after changing the image tag, Docker environment variables, mounts, or port definitions.
 - Check the Docker container log for an image pull, mount, or Windows container compatibility error.
 

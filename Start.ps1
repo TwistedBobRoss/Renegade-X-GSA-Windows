@@ -173,6 +173,233 @@ function Split-SettingList {
     )
 }
 
+function Join-SettingList {
+    param([object[]]$Values)
+
+    return (@(
+        $Values |
+            ForEach-Object { [string]$_ } |
+            ForEach-Object { $_.Trim() } |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    ) -join ";")
+}
+
+function Get-JsonPropertyValue {
+    param(
+        [object]$Object,
+        [string]$Name
+    )
+
+    if ($null -eq $Object) {
+        return $null
+    }
+
+    $property = $Object.PSObject.Properties[$Name]
+    if ($property) {
+        return $property.Value
+    }
+
+    return $null
+}
+
+function Get-JsonStringList {
+    param([object]$Value)
+
+    if ($null -eq $Value) {
+        return @()
+    }
+
+    if ($Value -is [System.Array]) {
+        return @(
+            $Value |
+                ForEach-Object { [string]$_ } |
+                ForEach-Object { $_.Trim() } |
+                Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+        )
+    }
+
+    return Split-SettingList ([string]$Value)
+}
+
+function Get-RuntimeVersionNumber {
+    param(
+        [string]$InstallRoot,
+        [string]$PersistentRoot
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($InstallRoot)) {
+        $manifestPath = Join-Path $InstallRoot ".renx-install.json"
+        if (Test-Path -LiteralPath $manifestPath) {
+            try {
+                $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
+                $runtime = Get-JsonPropertyValue $manifest "runtime"
+                $candidate = if ($runtime) {
+                    Get-JsonPropertyValue $runtime "version_number"
+                }
+                else {
+                    Get-JsonPropertyValue $manifest "version_number"
+                }
+
+                $parsed = 0
+                if ($null -ne $candidate -and [int]::TryParse(([string]$candidate), [ref]$parsed)) {
+                    return $parsed
+                }
+            }
+            catch {
+                Write-Host "Ignoring unreadable runtime install manifest: $manifestPath"
+            }
+        }
+    }
+
+    $configPaths = [System.Collections.Generic.List[string]]::new()
+    if (-not [string]::IsNullOrWhiteSpace($InstallRoot)) {
+        $configPaths.Add((Join-Path $InstallRoot "UDKGame\Config\DefaultRenegadeX.ini"))
+        $configPaths.Add((Join-Path $InstallRoot "UDKGame\Config\UDKRenegadeX.ini"))
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($PersistentRoot)) {
+        $configPaths.Add((Join-Path $PersistentRoot "Config\UDKRenegadeX.ini"))
+    }
+
+    foreach ($configPath in $configPaths) {
+        $candidate = Get-IniValue $configPath "RenX_Game.Rx_Game" "GameVersionNumber"
+        $parsed = 0
+        if ($null -ne $candidate -and [int]::TryParse(([string]$candidate), [ref]$parsed)) {
+            return $parsed
+        }
+    }
+
+    return $null
+}
+
+function Resolve-RuntimeUpdate {
+    param(
+        [bool]$AutoUpdate,
+        [string]$ManifestUrl,
+        [string]$Channel,
+        [string]$InstallRoot,
+        [string]$PersistentRoot,
+        [string]$SeedRoot,
+        [string]$ServerPayloadUrls,
+        [bool]$RefreshServerPayload,
+        [string]$OptionalMapPack1Url,
+        [string]$OptionalMapPack2Url,
+        [string]$OptionalMapPack3Url
+    )
+
+    $result = [ordered]@{
+        ServerPayloadUrls = $ServerPayloadUrls
+        RefreshServerPayload = $RefreshServerPayload
+        SeedRoot = $SeedRoot
+        OptionalMapPack1Url = $OptionalMapPack1Url
+        OptionalMapPack2Url = $OptionalMapPack2Url
+        OptionalMapPack3Url = $OptionalMapPack3Url
+        RuntimeVersionName = $null
+        RuntimeVersionNumber = $null
+    }
+
+    if (-not $AutoUpdate) {
+        Write-Host "Runtime auto-update is disabled."
+        return [pscustomobject]$result
+    }
+
+    if ([string]::IsNullOrWhiteSpace($ManifestUrl)) {
+        Write-Host "Runtime auto-update manifest URL is empty; using configured payload URLs."
+        return [pscustomobject]$result
+    }
+
+    try {
+        Write-Host "Checking Renegade X runtime update manifest: $ManifestUrl"
+        $manifest = (Invoke-WebRequest -Uri $ManifestUrl -UseBasicParsing).Content | ConvertFrom-Json
+    }
+    catch {
+        Write-Host "Runtime auto-update manifest unavailable; using configured payload URLs. $($_.Exception.Message)"
+        return [pscustomobject]$result
+    }
+
+    $manifestChannel = [string](Get-JsonPropertyValue $manifest "channel")
+    if (-not [string]::IsNullOrWhiteSpace($Channel) -and
+        -not [string]::IsNullOrWhiteSpace($manifestChannel) -and
+        -not $manifestChannel.Equals($Channel, [System.StringComparison]::OrdinalIgnoreCase)) {
+        Write-Host "Runtime auto-update manifest channel '$manifestChannel' does not match requested '$Channel'; using configured payload URLs."
+        return [pscustomobject]$result
+    }
+
+    $runtime = Get-JsonPropertyValue $manifest "runtime"
+    if (-not $runtime) {
+        Write-Host "Runtime auto-update manifest does not contain a runtime object; using configured payload URLs."
+        return [pscustomobject]$result
+    }
+
+    $payloadUrls = Get-JsonStringList (Get-JsonPropertyValue $runtime "payload_urls")
+    if ($payloadUrls.Count -eq 0) {
+        Write-Host "Runtime auto-update manifest has no payload_urls; using configured payload URLs."
+        return [pscustomobject]$result
+    }
+
+    $result.ServerPayloadUrls = Join-SettingList $payloadUrls
+    $result.RuntimeVersionName = [string](Get-JsonPropertyValue $runtime "version_name")
+
+    $manifestVersionNumber = 0
+    $hasManifestVersion = [int]::TryParse(([string](Get-JsonPropertyValue $runtime "version_number")), [ref]$manifestVersionNumber)
+    if ($hasManifestVersion) {
+        $result.RuntimeVersionNumber = $manifestVersionNumber
+    }
+
+    $optionalPacks = Get-JsonPropertyValue $manifest "optional_map_packs"
+    if ($optionalPacks) {
+        foreach ($pack in @($optionalPacks)) {
+            $packId = Get-JsonPropertyValue $pack "id"
+            if ($null -eq $packId) {
+                $packId = Get-JsonPropertyValue $pack "index"
+            }
+
+            $packUrl = [string](Get-JsonPropertyValue $pack "url")
+            if ([string]::IsNullOrWhiteSpace($packUrl)) {
+                continue
+            }
+
+            switch ([string]$packId) {
+                "1" { $result.OptionalMapPack1Url = $packUrl; break }
+                "2" { $result.OptionalMapPack2Url = $packUrl; break }
+                "3" { $result.OptionalMapPack3Url = $packUrl; break }
+            }
+        }
+    }
+
+    if (-not $hasManifestVersion) {
+        Write-Host "Runtime auto-update manifest has payload URLs but no numeric version; using manifest payload URLs without version comparison."
+        return [pscustomobject]$result
+    }
+
+    $installedVersionNumber = Get-RuntimeVersionNumber $InstallRoot $PersistentRoot
+    $seedVersionNumber = Get-RuntimeVersionNumber $SeedRoot ""
+
+    if ($null -eq $installedVersionNumber) {
+        if ($null -ne $seedVersionNumber -and $seedVersionNumber -ge $manifestVersionNumber) {
+            Write-Host "Baked runtime seed version $seedVersionNumber satisfies manifest version $manifestVersionNumber."
+        }
+        else {
+            Write-Host "No installed runtime version was found; using manifest payload version $manifestVersionNumber."
+            $result.RefreshServerPayload = $true
+            $result.SeedRoot = ""
+        }
+    }
+    elseif ($manifestVersionNumber -gt $installedVersionNumber) {
+        Write-Host "Renegade X runtime update available: installed=$installedVersionNumber manifest=$manifestVersionNumber."
+        $result.RefreshServerPayload = $true
+        $result.SeedRoot = ""
+    }
+    elseif ($manifestVersionNumber -eq $installedVersionNumber) {
+        Write-Host "Renegade X runtime is current: version $installedVersionNumber."
+    }
+    else {
+        Write-Host "Installed Renegade X runtime version $installedVersionNumber is newer than manifest version $manifestVersionNumber; keeping installed runtime."
+    }
+
+    return [pscustomobject]$result
+}
+
 function Copy-CustomContentFile {
     param(
         [string]$File,
@@ -409,6 +636,12 @@ function Install-ServerPayload {
     $extractRoot = Join-Path $cacheRoot "Extracted"
     New-Item -ItemType Directory -Force -Path $downloadRoot, $extractRoot, $InstallRoot | Out-Null
 
+    if ($Refresh) {
+        Get-ChildItem -LiteralPath $downloadRoot -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -like "*.zip" -or $_.Name -match '\.zip\.\d+$' } |
+            Remove-Item -Force
+    }
+
     foreach ($url in $urlList) {
         $uri = [Uri]$url
         $fileName = [System.IO.Path]::GetFileName($uri.AbsolutePath)
@@ -544,6 +777,39 @@ function Initialize-RuntimeConfig {
     }
 }
 
+function Sync-RuntimeVersionSettings {
+    param(
+        [string]$InstallConfigDir,
+        [string]$PersistentConfigDir
+    )
+
+    $persistentRenegadeX = Join-Path $PersistentConfigDir "UDKRenegadeX.ini"
+    $runtimeRenegadeX = Join-Path $InstallConfigDir "UDKRenegadeX.ini"
+    $defaultRenegadeX = Join-Path $InstallConfigDir "DefaultRenegadeX.ini"
+    $sources = @($defaultRenegadeX, $runtimeRenegadeX)
+    $targets = @($persistentRenegadeX, $runtimeRenegadeX, $defaultRenegadeX)
+
+    foreach ($key in @("GameVersion", "GameVersionNumber")) {
+        $value = $null
+        foreach ($source in $sources) {
+            $value = Get-IniValue $source "RenX_Game.Rx_Game" $key
+            if (-not [string]::IsNullOrWhiteSpace($value)) {
+                break
+            }
+        }
+
+        if ([string]::IsNullOrWhiteSpace($value)) {
+            continue
+        }
+
+        foreach ($target in $targets) {
+            Set-IniValue $target "RenX_Game.Rx_Game" $key $value
+        }
+
+        Write-Host "Synced Renegade X runtime version setting: $key=$value"
+    }
+}
+
 $serverName = Get-Setting "RENX_SERVER_NAME" "Renegade X Server"
 $map = Get-Setting "RENX_MAP" "CNC-Field"
 $gameClass = Get-Setting "RENX_GAME_CLASS" ""
@@ -569,6 +835,9 @@ $redirectUrl = Get-Setting "RENX_REDIRECT_URL" "https://community-content.totema
 $redirectUseCompression = Get-BoolSetting "RENX_REDIRECT_USE_COMPRESSION" "false"
 $serverPayloadUrls = Get-Setting "RENX_SERVER_PAYLOAD_URLS" ""
 $refreshServerPayload = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_REFRESH_SERVER_PAYLOAD" "false"))
+$runtimeAutoUpdate = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_RUNTIME_AUTO_UPDATE" "true"))
+$runtimeUpdateManifestUrl = Get-Setting "RENX_UPDATE_MANIFEST_URL" ""
+$runtimeUpdateChannel = Get-Setting "RENX_UPDATE_CHANNEL" "stable"
 $seedRoot = Get-Setting "RENX_SEED_ROOT" ""
 $installOptionalMapPack1 = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_INSTALL_OPTIONAL_MAP_PACK_1" "false"))
 $installOptionalMapPack2 = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_INSTALL_OPTIONAL_MAP_PACK_2" "false"))
@@ -626,6 +895,14 @@ if ($marathonMode) {
     $enableAirdrops = "true"
 }
 
+$runtimeUpdate = Resolve-RuntimeUpdate $runtimeAutoUpdate $runtimeUpdateManifestUrl $runtimeUpdateChannel $root $dataRoot $seedRoot $serverPayloadUrls $refreshServerPayload $optionalMapPack1Url $optionalMapPack2Url $optionalMapPack3Url
+$serverPayloadUrls = $runtimeUpdate.ServerPayloadUrls
+$refreshServerPayload = [bool]$runtimeUpdate.RefreshServerPayload
+$seedRoot = $runtimeUpdate.SeedRoot
+$optionalMapPack1Url = $runtimeUpdate.OptionalMapPack1Url
+$optionalMapPack2Url = $runtimeUpdate.OptionalMapPack2Url
+$optionalMapPack3Url = $runtimeUpdate.OptionalMapPack3Url
+
 Install-SeedRuntime $seedRoot $root $bootstrapRoot
 Install-ServerPayload $serverPayloadUrls $root $dataRoot $bootstrapRoot $refreshServerPayload
 $launcher = Join-Path $root "LaunchRenegadeXServer.bat"
@@ -640,6 +917,7 @@ $logDir = Join-Path $dataRoot "Logs"
 
 New-Item -ItemType Directory -Force -Path $configDir, $customContentDir, $logDir | Out-Null
 Initialize-RuntimeConfig $installConfigDir $configDir
+Sync-RuntimeVersionSettings $installConfigDir $configDir
 
 $udkGame = Join-Path $configDir "UDKGame.ini"
 $udkEngine = Join-Path $configDir "UDKEngine.ini"

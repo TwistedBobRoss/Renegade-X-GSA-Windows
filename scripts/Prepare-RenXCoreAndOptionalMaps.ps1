@@ -42,8 +42,8 @@ if ($missingCore.Count -gt 0) {
 $coreMapFiles = @($allMapFiles | Where-Object { $coreMaps -contains $_.BaseName })
 $optionalMapFiles = @($allMapFiles | Where-Object { $coreMaps -notcontains $_.BaseName })
 
-if ($allMapFiles.Count -ne 47 -or $coreMapFiles.Count -ne 20 -or $optionalMapFiles.Count -ne 27) {
-    throw "Expected 47 total, 20 core, and 27 optional map files. Found $($allMapFiles.Count), $($coreMapFiles.Count), and $($optionalMapFiles.Count)."
+if ($coreMapFiles.Count -ne $coreMaps.Count) {
+    throw "Expected $($coreMaps.Count) core map files. Found $($coreMapFiles.Count)."
 }
 
 Get-ChildItem -LiteralPath $outputRoot -File |
@@ -130,7 +130,7 @@ finally {
     $inputStream.Dispose()
 }
 
-Write-Host "Balancing 27 optional maps across $OptionalArchiveCount archives..."
+Write-Host "Balancing $($optionalMapFiles.Count) optional maps across $OptionalArchiveCount archives..."
 $bins = @(
     for ($i = 0; $i -lt $OptionalArchiveCount; $i++) {
         [pscustomobject]@{

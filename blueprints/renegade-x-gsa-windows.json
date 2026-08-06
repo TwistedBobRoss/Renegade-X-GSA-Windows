@@ -26,7 +26,7 @@
     },
     "image": {
       "name": "ghcr.io/twistedbobross/renegade-x-gsa-windows",
-      "tag": "1.0.1022-core20-ltsc2022-r12"
+      "tag": "stable-core20-ltsc2022"
     },
     "automatic_ports": true,
     "envs": {
@@ -60,6 +60,9 @@
       "RENX_REDIRECT_USE_COMPRESSION": "{config_parameter id=\"redirect_use_compression\"}",
       "RENX_SERVER_PAYLOAD_URLS": "{config_parameter id=\"server_payload_urls\"}",
       "RENX_REFRESH_SERVER_PAYLOAD": "{config_parameter id=\"refresh_server_payload\"}",
+      "RENX_RUNTIME_AUTO_UPDATE": "{config_parameter id=\"runtime_auto_update\"}",
+      "RENX_UPDATE_MANIFEST_URL": "{config_parameter id=\"update_manifest_url\"}",
+      "RENX_UPDATE_CHANNEL": "{config_parameter id=\"update_channel\"}",
       "RENX_INSTALL_OPTIONAL_MAP_PACK_1": "{config_parameter id=\"install_optional_map_pack_one\"}",
       "RENX_INSTALL_OPTIONAL_MAP_PACK_2": "{config_parameter id=\"install_optional_map_pack_two\"}",
       "RENX_INSTALL_OPTIONAL_MAP_PACK_3": "{config_parameter id=\"install_optional_map_pack_three\"}",
@@ -225,6 +228,27 @@
           "section": "Install",
           "type": "boolean",
           "content": "0"
+        },
+        "runtime_auto_update": {
+          "name": "Runtime Auto Update",
+          "info": "On/true checks the update manifest at container start. If the manifest advertises a newer Renegade X runtime, the payload is redownloaded and installed before launch.",
+          "section": "Install",
+          "type": "boolean",
+          "content": "1"
+        },
+        "update_manifest_url": {
+          "name": "Update Manifest URL",
+          "info": "Public JSON manifest that points to the current core payload and optional map packs. Leave blank to use only the payload URLs configured below.",
+          "section": "Install",
+          "type": "text",
+          "content": "https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/release-manifest.json"
+        },
+        "update_channel": {
+          "name": "Update Channel",
+          "info": "Manifest channel accepted by Runtime Auto Update. Stable is recommended for public servers.",
+          "section": "Install",
+          "type": "text",
+          "content": "stable"
         },
         "install_optional_map_pack_one": {
           "name": "Install Optional Map Pack 1",
