@@ -4,7 +4,7 @@ Ready-to-use Windows container and GameServerApp blueprint for hosting Renegade 
 
 Renegade X is Totem Arts' free tactical first-person shooter and real-time strategy hybrid inspired by Command & Conquer: Renegade. Players fight as GDI or Nod, purchase infantry and vehicles, defend their base, destroy enemy structures, and coordinate across large combined-arms battlefields. The game also includes Defense Survival, a cooperative wave mode that is well suited to private groups and community events.
 
-This project packages a tested Renegade X `1.0.1022` headless runtime, persistent configuration, optional map downloads, logs, and GameServerApp controls into a Windows Server 2022 container.
+This project packages a tested Renegade X `1.1.1094` headless runtime, persistent configuration, optional map downloads, logs, and GameServerApp controls into a Windows Server 2022 container.
 
 ## Project Information
 
@@ -518,7 +518,7 @@ TDM-*.ini
 
 ## Complete Server Setting Reference
 
-This reference covers every server-relevant setting shipped in the Renegade X `1.0.1022` configuration used by this project. The distribution also contains client controls, graphics, editor, UI, audio, and key-binding settings. Those are intentionally excluded because they do not provide useful dedicated-server behavior.
+This reference covers every server-relevant setting shipped in the Renegade X `1.1.1094` configuration used by this project. The distribution also contains client controls, graphics, editor, UI, audio, and key-binding settings. Those are intentionally excluded because they do not provide useful dedicated-server behavior.
 
 ### `UDKGame.ini`: Core Server Identity And Limits
 
@@ -797,8 +797,8 @@ This controls whether a map is eligible for voting at the current population. It
 | --- | --- | --- |
 | `bVehiclesAlwaysRelevant` | `true` | Keeps vehicles network-relevant. |
 | `bInfantryAlwaysRelevant` | `true` | Keeps infantry network-relevant. |
-| `GameVersion` | `Release 1.0.1022` | Game version advertised by the server; do not change casually. |
-| `GameVersionNumber` | `17209` | Numeric compatibility version; do not change. |
+| `GameVersion` | `Release 1.1.1094` | Game version advertised by the server; do not change casually. |
+| `GameVersionNumber` | `17913` | Numeric compatibility version; do not change. |
 
 #### Auto-Balance
 
