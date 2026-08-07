@@ -220,7 +220,7 @@
           "info": "Recovery URLs for the 20-map core runtime. The full image normally seeds this runtime without downloading it. If the seed is unavailable, FTP-preloaded matching files are reused before automatic download.",
           "section": "Install",
           "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.001;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.002;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.003;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.004"
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.001;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.002;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.003;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.004;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.005"
         },
         "refresh_server_payload": {
           "name": "Refresh Server Payload",
@@ -252,21 +252,21 @@
         },
         "install_optional_map_pack_one": {
           "name": "Install Optional Map Pack 1",
-          "info": "On/true downloads 9 maps: City, Crash Site, Daybreak, Desolation, Forest Winter, HeXmountain, Mines, Reservoir Winter, and Tomb. Off/false skips this approximately 616 MiB archive.",
+          "info": "On/true downloads 9 maps: DarkSide, Desolation, Eyes, Field 2025, Forest Winter, HeXmountain, Hourglass, Reservoir, and Tomb. Off/false skips this approximately 619 MiB archive.",
           "section": "Optional Maps",
           "type": "boolean",
           "content": "0"
         },
         "install_optional_map_pack_two": {
           "name": "Install Optional Map Pack 2",
-          "info": "On/true downloads 9 maps: CliffSide, DarkSide, Eyes, Field 2025, Forest, Hourglass, LakeSide Winter, Outposts, and Reservoir. Off/false skips this approximately 648 MiB archive.",
+          "info": "On/true downloads 9 maps: Arctic Stronghold, Field X, LakeSide Winter, Mines, Outposts, Reservoir Winter, Snow, Toxicity, and Walls Winter. Off/false skips this approximately 653 MiB archive.",
           "section": "Optional Maps",
           "type": "boolean",
           "content": "0"
         },
         "install_optional_map_pack_three": {
           "name": "Install Optional Map Pack 3",
-          "info": "On/true downloads 9 maps: Arctic Stronghold, Field Winter, Field X, Snow, Steppe, Toxicity, Tunnels, Uphill, and Walls Winter. Off/false skips this approximately 637 MiB archive.",
+          "info": "On/true downloads 9 maps: City, CliffSide, Crash Site, Daybreak, Field Winter, Forest, Steppe, Tunnels, and Uphill. Off/false skips this approximately 624 MiB archive.",
           "section": "Optional Maps",
           "type": "boolean",
           "content": "0"
@@ -276,21 +276,21 @@
           "info": "Public archive URL used when Optional Map Pack 1 is enabled.",
           "section": "Optional Maps",
           "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.0.1022-r1/renx-optional-maps-01.zip"
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.1.1094-r1/renx-optional-maps-01.zip"
         },
         "optional_map_pack_two_url": {
           "name": "Optional Map Pack 2 URL",
           "info": "Public archive URL used when Optional Map Pack 2 is enabled.",
           "section": "Optional Maps",
           "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.0.1022-r1/renx-optional-maps-02.zip"
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.1.1094-r1/renx-optional-maps-02.zip"
         },
         "optional_map_pack_three_url": {
           "name": "Optional Map Pack 3 URL",
           "info": "Public archive URL used when Optional Map Pack 3 is enabled.",
           "section": "Optional Maps",
           "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.0.1022-r1/renx-optional-maps-03.zip"
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.1.1094-r1/renx-optional-maps-03.zip"
         },
         "mutators": {
           "name": "Mutators",
