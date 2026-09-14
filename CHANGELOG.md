@@ -15,6 +15,7 @@ All notable changes to the Renegade X GameServerApp Windows blueprint are tracke
 
 - Reduced the blueprint install surface so GSA no longer has to render and validate dozens of config-template tabs before installing a server.
 - Made common gameplay settings prefer persistent INI values after install, matching the INI-first map voting behavior.
+- Made the full-image workflow retry each payload chunk download and verify recorded size/hash before assembling the runtime zip.
 
 ## 1.6.0 - 2026-09-14
 

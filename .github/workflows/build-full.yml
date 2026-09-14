@@ -57,16 +57,50 @@ jobs:
         run: |
           $download = Join-Path $env:RUNNER_TEMP "renx-core-parts"
           New-Item -ItemType Directory -Force -Path $download | Out-Null
-          gh release download "${{ inputs.payload_release }}" `
-            --repo "${{ github.repository }}" `
-            --pattern "renx-core20-payload.zip.*" `
-            --dir $download
 
-          $parts = @(Get-ChildItem $download -Filter "renx-core20-payload.zip.*" -File |
-            Where-Object { $_.Name -match '\.\d+$' } |
-            Sort-Object Name)
-          if ($parts.Count -lt 1) {
-            throw "No core payload parts were downloaded."
+          function Invoke-GhDownloadWithRetry {
+            param(
+              [string]$Pattern,
+              [string]$Destination
+            )
+
+            $targetPath = Join-Path $Destination $Pattern
+            for ($attempt = 1; $attempt -le 5; $attempt++) {
+              Remove-Item -LiteralPath $targetPath -Force -ErrorAction SilentlyContinue
+              Write-Host "Downloading $Pattern (attempt $attempt of 5)"
+              gh release download "${{ inputs.payload_release }}" `
+                --repo "${{ github.repository }}" `
+                --pattern $Pattern `
+                --dir $Destination
+
+              if ($LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $targetPath)) {
+                return Get-Item -LiteralPath $targetPath
+              }
+
+              Start-Sleep -Seconds ([Math]::Min(60, 5 * $attempt))
+            }
+
+            throw "Failed to download release asset after retries: $Pattern"
+          }
+
+          $manifestAsset = Invoke-GhDownloadWithRetry "renx-tiered-payload-manifest.json" $download
+          $manifest = Get-Content -Raw -LiteralPath $manifestAsset.FullName | ConvertFrom-Json
+          $expectedParts = @($manifest.core_parts | Sort-Object name)
+          if ($expectedParts.Count -lt 1) {
+            throw "Payload manifest does not list any core_parts."
+          }
+
+          $parts = @()
+          foreach ($part in $expectedParts) {
+            $asset = Invoke-GhDownloadWithRetry $part.name $download
+            $hash = (Get-FileHash -LiteralPath $asset.FullName -Algorithm SHA256).Hash
+            if ($hash -ne $part.sha256) {
+              throw "Hash mismatch for $($part.name). Expected $($part.sha256), got $hash."
+            }
+            if ($asset.Length -ne [int64]$part.bytes) {
+              throw "Size mismatch for $($part.name). Expected $($part.bytes), got $($asset.Length)."
+            }
+            $parts += $asset
           }
 
           $zip = Join-Path $env:RUNNER_TEMP "renx-core20-payload.zip"
