@@ -3,7 +3,7 @@
 This repository builds a small Windows bootstrap image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.1.1094-ltsc2022-r1
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-ltsc2022-r1
 ```
 
 The image does not bake Renegade X game files into GHCR. It contains only:
@@ -23,7 +23,7 @@ C:\renx-data\ServerFiles
 Run the `Build Renegade X Bootstrap Windows Image` workflow and provide:
 
 ```text
-image_tag = 1.1.1094-ltsc2022-r1
+image_tag = 1.2.1109-ltsc2022-r1
 ```
 
 No payload release is required for the image build.
@@ -33,8 +33,8 @@ If you want to host the runtime zip parts on this repository's GitHub Releases, 
 ```powershell
 .\scripts\Publish-RenXPayloadAndBuild.ps1 `
   -PayloadPartsDir ".\payload-parts" `
-  -PayloadReleaseTag "renx-core20-1.1.1094-r1" `
-  -ImageTag "1.1.1094-ltsc2022-r1"
+  -PayloadReleaseTag "renx-core20-1.2.1109-r1" `
+  -ImageTag "1.2.1109-ltsc2022-r1"
 ```
 
 The script uploads the payload release assets, dispatches the bootstrap image workflow, and prints release download URLs that can be pasted into GSA's `Server Payload URLs` field.
@@ -43,9 +43,9 @@ For the full 20-map image, run `Build Renegade X Core 20 Windows Image` with the
 
 After publishing new payload assets, update `release-manifest.json` with the new `version_name`, numeric `version_number`, core payload URLs, and optional map-pack URLs. Servers with `Runtime Auto Update` enabled check that manifest on start and refresh `C:\renx-data\ServerFiles` when the manifest version is newer.
 
-## Required GSA Fields
+## Runtime Payload URLs
 
-In the blueprint/server settings, provide `Server Payload URLs`.
+The blueprint includes current payload fallback URLs and the manifest-based auto-update URL by default.
 
 Use one direct public zip URL:
 
@@ -61,7 +61,7 @@ https://example.com/renx-server-payload.zip.002
 https://example.com/renx-server-payload.zip.003
 ```
 
-The startup script downloads those files into:
+When a payload download is needed, the startup script downloads those files into:
 
 ```text
 C:\renx-data\PayloadCache

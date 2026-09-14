@@ -1,31 +1,30 @@
 {
   "schema": 1,
   "channel": "stable",
-  "updated_at_utc": "2026-08-06T00:00:00Z",
+  "updated_at_utc": "2026-09-14T00:00:00Z",
   "runtime": {
-    "version_name": "Release 1.1.1094",
-    "version_number": 17913,
-    "release_id": "renx-core20-1.1.1094-r1",
+    "version_name": "Release 1.2.1109",
+    "version_number": 18038,
+    "release_id": "renx-core20-1.2.1109-r1",
     "payload_urls": [
-      "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.001",
-      "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.002",
-      "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.003",
-      "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.004",
-      "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.005"
+      "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.001",
+      "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.002",
+      "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.003",
+      "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.004"
     ]
   },
   "optional_map_packs": [
     {
       "id": 1,
-      "url": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.1.1094-r1/renx-optional-maps-01.zip"
+      "url": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-01.zip"
     },
     {
       "id": 2,
-      "url": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.1.1094-r1/renx-optional-maps-02.zip"
+      "url": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-02.zip"
     },
     {
       "id": 3,
-      "url": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.1.1094-r1/renx-optional-maps-03.zip"
+      "url": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-03.zip"
     }
   ],
   "image": {

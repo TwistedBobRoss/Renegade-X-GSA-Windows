@@ -4,7 +4,7 @@ Ready-to-use Windows container and GameServerApp blueprint for hosting Renegade 
 
 Renegade X is Totem Arts' free tactical first-person shooter and real-time strategy hybrid inspired by Command & Conquer: Renegade. Players fight as GDI or Nod, purchase infantry and vehicles, defend their base, destroy enemy structures, and coordinate across large combined-arms battlefields. The game also includes Defense Survival, a cooperative wave mode that is well suited to private groups and community events.
 
-This project packages a tested Renegade X `1.1.1094` headless runtime, persistent configuration, optional map downloads, logs, and GameServerApp controls into a Windows Server 2022 container.
+This project packages a tested Renegade X `1.2.1109` headless runtime, persistent configuration, optional map downloads, logs, and GameServerApp controls into a Windows Server 2022 container.
 
 ## Project Information
 
@@ -26,13 +26,13 @@ Renegade X remains the property of Totem Arts. This repository does not claim ow
 - Tested 20-map core runtime
 - Three optional map packs containing 27 additional maps
 - Standard Command & Conquer and Defense Survival launch profiles
-- Editable GSA configuration boxes
+- Editable normal INI configuration files
 - Persistent server files, configs, custom content, payload cache, and logs
 - Public master-server listing support
 - Reliable container-based GSA monitoring
 - Optional Renegade X web statistics service
 - Bot count, difficulty, and behavior controls
-- Map voting and rotation controls
+- INI-first map voting and rotation
 - Custom maps, packages, mutators, and HTTP redirect support
 - Automatic recovery download when the baked runtime is unavailable
 - FTP payload preloading for installations with slow first-start downloads
@@ -55,21 +55,18 @@ Download the published blueprint from the GameServerApp Marketplace. For manual 
 https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/blueprints/renegade-x-gsa-windows.json
 ```
 
-Create a server from the blueprint, choose its slot limit, review the settings, and install it. GSA assigns the game, peer, reserved query, and optional web ports automatically.
+Create a server from the blueprint, choose its slot limit, review the INI files, and install it. GSA assigns the game, peer, reserved query, and optional web ports automatically.
 
 Use **Container** monitoring in the GSA blueprint. It reliably reports whether the server process is running, but it does not display player counts or player names. Source Query and RCON integration for Renegade X in GSA container environments remain under development.
 
 ### Recommended First Test
 
 ```text
-Starting Map = CNC-Field
-Game Class Override = Normal / map prefix
-Map Cycle Class = Standard CnC
-List Server = On
-Fixed Map Rotation = Off
-Disable Bots = Off
-Enable Steam = On
-Enable Web Server = Off
+UDKEngine.ini LocalMap=CNC-Field.udk
+UDKRenegadeX.ini bListed=true
+UDKRenegadeX.ini bFixedMapRotation=false
+UDKRenegadeX.ini bBotsDisabled=false
+UDKWeb.ini bEnabled=false
 Maximum players = 40 or fewer for CNC-Field
 ```
 
@@ -80,25 +77,23 @@ The Renegade X engine supports a maximum of 64 players. Individual maps may have
 For a no-time-limit CnC server, use:
 
 ```text
-Starting Map = CNC-Field
-Game Class Override = Normal / map prefix
-Map Cycle Class = Standard CnC
-Marathon Mode = On
+UDKEngine.ini LocalMap=CNC-Field.udk
+UDKRenegadeX.ini TimeLimit=0
+UDKRenegadeX.ini CnCModeTimeLimit=0
+UDKRenegadeX.ini bBuildingsRevive=false
+UDKRenegadeX.ini bEnableAirdrops=true
 ```
 
-`Marathon Mode` forces `TimeLimit=0` and `CnCModeTimeLimit=0`, disables building revival, and enables vehicle airdrops. Leave it off for timed All Out War style matches where overtime, sudden death, and building revival are intended.
+Leave the default timed values in place for All Out War style matches where overtime, sudden death, and building revival are intended.
 
 ### Defense Survival Preset
 
 ```text
-Starting Map = DEF-DarkNight
-Game Class Override = Survival
-Map Cycle Class = Survival
-Map Rotation = DEF-DarkNight,DEF-HillSide
-List Server = On
-Disable Bots = Off
-Minimum Net Players = 1
-Wait For Net Players = Off
+UDKEngine.ini LocalMap=DEF-DarkNight.udk
+UDKGame.ini GameSpecificMapCycles=(GameClassName="Rx_Game_Survival",Maps=("DEF-DarkNight","DEF-HillSide"))
+UDKSurvival.ini bListed=true
+UDKSurvival.ini MinNetPlayers=1
+UDKSurvival.ini bWaitForNetPlayers=false
 ```
 
 Survival mode uses:
@@ -121,7 +116,7 @@ Changing the image tag, Docker environment variables, mounts, or blueprint direc
 
 Do not wipe `renx-data` unless you intentionally want to remove the server runtime, configs, maps, downloads, and logs.
 
-Runtime auto-update is controlled by `Runtime Auto Update` and `Update Manifest URL`. When enabled, the container checks `release-manifest.json` on start. If the manifest has a higher Renegade X `version_number`, the launcher skips the baked seed, redownloads the manifest payload, replaces `C:\renx-data\ServerFiles`, and syncs `GameVersion` / `GameVersionNumber` into persistent config before launch.
+Runtime auto-update is enabled in the blueprint. The container checks `release-manifest.json` on start. If the manifest has a higher Renegade X `version_number`, the launcher skips the baked seed, redownloads the manifest payload, replaces `C:\renx-data\ServerFiles`, and syncs `GameVersion` / `GameVersionNumber` into persistent config before launch.
 
 The Docker image cannot replace itself while running. The blueprint uses the rolling image tag `stable-core20-ltsc2022`; after a new image is pushed to that tag, recreate or reinstall the GSA container to pull it while keeping `\renx-data`.
 
@@ -159,7 +154,7 @@ ghcr.io/twistedbobross/renegade-x-gsa-windows:stable-core20-ltsc2022
 Bootstrap-only recovery image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.1.1094-ltsc2022-r1
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-ltsc2022-r1
 ```
 
 The primary image is recommended for GSA. It seeds the runtime into persistent storage and avoids downloading the core payload during a normal first start.
@@ -344,134 +339,20 @@ At startup the wrapper:
 
 1. Installs or validates the persistent runtime.
 2. Initializes persistent runtime INIs under `C:\renx-data\Config`.
-3. Applies GSA parameters for install, identity, ports, access, and common gameplay values.
+3. Applies the essential GSA values for identity, slots, ports, RCON password, and update sources.
 4. Preserves INI-first map voting/rotation values and syncs `GameSpecificMapCycles` with `UDKMapList.ini`.
 5. Copies persistent configs into `ServerFiles\UDKGame\Config`.
 6. Mirrors managed values into runtime/default INIs.
 7. Installs optional maps and custom content.
 8. Launches `Binaries\Win64\UDK.com`.
 
-For map voting and rotation, the persistent INI value wins after it exists. For non-map operational settings, values controlled by GSA parameters are written again at every start.
+Persistent INI values win for map voting, rotation, and common gameplay settings after the files exist. GSA continues to supply server identity, slot limit, ports, and update source values.
 
-## GameServerApp Parameter Reference
+## GameServerApp Blueprint Defaults
 
-### Launch And Rotation
+The current blueprint keeps the install surface intentionally small. GSA supplies server name, slot limit, ports, RCON password, and update URLs through Docker environment variables. Day-to-day game settings live in the editable INIs under `\renx-data\Config`.
 
-| Parameter | Default | Purpose |
-| --- | --- | --- |
-| Starting Map | `CNC-Field` | Initial map name without `.udk`. |
-| Game Class Override | Normal / map prefix | Lets the map prefix choose the class, or explicitly launches Survival. |
-| Map Cycle Class | Standard CnC | Fresh-install fallback for choosing the `GameSpecificMapCycles` entry. Existing INI map cycles are preserved. |
-| Map Rotation | Core CNC rotation | Fresh-install fallback list. After install, edit `GameSpecificMapCycles` in `UDKGame.ini`; the wrapper syncs the matching `UDKMapList.ini` section. |
-| Mutators | blank | Comma-separated mutator class names appended to the launch URL. |
-| Extra Launch Args | blank | Raw advanced UDK command-line arguments. |
-| Multihome IP | blank | Adds `-MULTIHOME=address` when binding to a specific local address. |
-
-### Installation And Content
-
-| Parameter | Default | Purpose |
-| --- | --- | --- |
-| Server Payload URLs | Core release parts | Recovery URLs for the core runtime. |
-| Refresh Server Payload | Off | Forces payload redownload and runtime replacement on the next start. |
-| Runtime Auto Update | On | Checks the update manifest at container start and refreshes when a newer runtime is published. |
-| Update Manifest URL | Published manifest | Public JSON manifest containing the current runtime payload URLs. |
-| Update Channel | `stable` | Manifest channel accepted by Runtime Auto Update. |
-| Install Optional Map Pack 1 | Off | Installs optional map pack 1. |
-| Install Optional Map Pack 2 | Off | Installs optional map pack 2. |
-| Install Optional Map Pack 3 | Off | Installs optional map pack 3. |
-| Optional Map Pack 1 URL | Published release | Public archive URL for pack 1. |
-| Optional Map Pack 2 URL | Published release | Public archive URL for pack 2. |
-| Optional Map Pack 3 URL | Published release | Public archive URL for pack 3. |
-| Required Content URLs | blank | Semicolon-separated content that must be installed before launch. |
-| Custom Content URLs | blank | Semicolon-separated optional content downloads. |
-| Refresh Content Downloads | Off | Redownloads configured custom content on the next start. |
-
-### Identity And Access
-
-| Parameter | Default | Purpose |
-| --- | --- | --- |
-| GSA server name | GSA list name | Writes the public server name into `UDKGame.ini` and `UDKWeb.ini`. |
-| Admin Password | blank | Writes `AdminPassword`. |
-| Server Password | blank | Writes `GamePassword`; blank means no join password. |
-| Moderator Password | blank | Writes `ModPassword`. |
-| Message Of The Day | blank | Writes `MessageOfTheDay`. |
-| List Server | On | Writes `bListed=true`. GSA's public exposure toggle must also be enabled. |
-| Require Steam | Off | Writes `bRequireSteam`. |
-| Steam Auth Admins | Off | Writes `bSteamAuthAdmins`. |
-| Broadcast Admin Identity | Off | Writes `bBroadcastAdminIdentity`. |
-
-### Match And Voting
-
-| Parameter | Default | Purpose |
-| --- | --- | --- |
-| Maximum players | GSA slot limit | Writes `MaxPlayers`; do not exceed 64. |
-| Max Spectators | `2` | Reserved spectator capacity. |
-| Initial Credits | `0` | Player starting credits where supported. |
-| Marathon Mode | Off | Forces `TimeLimit=0`, `CnCModeTimeLimit=0`, `bBuildingsRevive=false`, and `bEnableAirdrops=true`. |
-| Overall Time Limit | `50` | Generic Renegade X `TimeLimit` in minutes. Set `0` to disable it when not using Marathon Mode. |
-| CnC Time Limit | `30` | CnC match limit in minutes. Marathon Mode forces this to `0`. |
-| DM Time Limit | `20` | Deathmatch limit in minutes. |
-| Buildings Revive | On | Allows destroyed buildings to revive. Marathon Mode forces this off. |
-| Enable Airdrops | Off | Enables vehicle airdrops. Marathon Mode forces this on. |
-| Team Mode | Random shuffle/scramble | Team organization behavior. See numeric values below. |
-| Fixed Map Rotation | Off | Enforces the map cycle instead of normal map voting. |
-| Surrender Length Seconds | `120` | Surrender countdown duration. |
-| Surrender Lockout Seconds | `600` | Time before surrender voting becomes available. |
-| Change Map Vote Lockout | `600` | Time before change-map voting becomes available. |
-| Number Of Maps Available In Vote | `5` | Maximum choices shown in the map vote. |
-| Recent Maps Excluded | `5` | Number of recently played maps removed from the vote. |
-| Map Vote Time Seconds | `35` | How long the map vote remains open. |
-| Admins Start Map Vote | Off | Controls administrator-started map voting behavior. |
-| Disable Bot Votes | Off | Prevents bots from affecting votes when enabled. |
-| Remove Variant Maps In Vote List | On | Hides variant maps from the vote list when enabled. |
-| Spawn Crates | On | Enables crate spawning. |
-| Players Must Be Ready | Off | Requires players to ready before match start. |
-| Force Respawn | On | Automatically respawns players. |
-| Admins Can Pause | Off | Allows administrators to pause. |
-| Restart Wait Seconds | `30` | In-game map transition delay, not a GSA scheduled restart. |
-
-### Bots
-
-| Parameter | Default | Purpose |
-| --- | --- | --- |
-| Disable Bots | Off | Writes `bBotsDisabled`. |
-| GDI Bot Count | blank | Launch URL `GDIBotCount`. |
-| NOD Bot Count | blank | Launch URL `NODBotCount`. |
-| GDI Bot Difficulty | Normal | Bot difficulty value written for GDI. |
-| NOD Bot Difficulty | Normal | Bot difficulty value written for Nod. |
-| GDI Attack Percent | Balanced | GDI attacking behavior value. |
-| NOD Attack Percent | Balanced | Nod attacking behavior value. |
-
-### Network And Downloads
-
-| Parameter | Default | Purpose |
-| --- | --- | --- |
-| Allow Downloads | On | Allows Unreal channel downloads. |
-| HTTP Redirect URL | Totem Arts content service | Fast-download base URL; use a trailing slash. |
-| Redirect Uses Compression | Off | Enables compressed redirect packages only when the redirect supports them. |
-| Download Timeout | `30` | HTTP download connection timeout in seconds. |
-| Max Client Rate | `15000` | Per-client network rate. |
-| Max Internet Client Rate | `10000` | Internet client network rate. |
-| Server Tick Rate | `30` | Maximum server network tick rate. |
-| Enable Steam | On | Enables the Steam online subsystem. |
-| Use VAC | Off | Enables VAC where supported. |
-
-### Startup Waiting
-
-| Parameter | Default | Purpose |
-| --- | --- | --- |
-| Wait For Net Players | Off | Waits for the configured minimum before starting. |
-| Minimum Net Players | `1` | Minimum players used by the wait behavior. |
-| Net Wait Seconds | `15` | Startup or travel wait duration. |
-| Client Processing Timeout | `30` | Client loading/travel timeout. |
-
-### Optional Web Service
-
-| Parameter | Default | Purpose |
-| --- | --- | --- |
-| Enable Web Server | Off | Enables the optional HTTP statistics service. |
-| Web Max Connections | `32` | Maximum simultaneous web connections. |
-| Web Port | GSA assigned | Uses `{gameserver.other_port}`. |
+To change maps, map voting, marathon timing, bots, Steam, web, RCON, or custom-content behavior, edit the matching INI and restart the server. The wrapper mirrors those INI values into the runtime/default game config before launch.
 
 ## Team Mode Values
 
@@ -522,7 +403,7 @@ TDM-*.ini
 
 ## Complete Server Setting Reference
 
-This reference covers every server-relevant setting shipped in the Renegade X `1.1.1094` configuration used by this project. The distribution also contains client controls, graphics, editor, UI, audio, and key-binding settings. Those are intentionally excluded because they do not provide useful dedicated-server behavior.
+This reference covers every server-relevant setting shipped in the Renegade X `1.2.1109` configuration used by this project. The distribution also contains client controls, graphics, editor, UI, audio, and key-binding settings. Those are intentionally excluded because they do not provide useful dedicated-server behavior.
 
 ### `UDKGame.ini`: Core Server Identity And Limits
 
@@ -801,8 +682,8 @@ This controls whether a map is eligible for voting at the current population. It
 | --- | --- | --- |
 | `bVehiclesAlwaysRelevant` | `true` | Keeps vehicles network-relevant. |
 | `bInfantryAlwaysRelevant` | `true` | Keeps infantry network-relevant. |
-| `GameVersion` | `Release 1.1.1094` | Game version advertised by the server; do not change casually. |
-| `GameVersionNumber` | `17913` | Numeric compatibility version; do not change. |
+| `GameVersion` | `Release 1.2.1109` | Game version advertised by the server; do not change casually. |
+| `GameVersionNumber` | `18038` | Numeric compatibility version; do not change. |
 
 #### Auto-Balance
 
@@ -1116,7 +997,7 @@ bTiersForced
 
 ## Container Environment Variables
 
-GSA supplies these automatically:
+The lean GSA blueprint supplies only the essential values automatically: server name, slot limit, ports, RCON password, payload fallback URLs, and update manifest settings. The wrapper also supports these variables for custom blueprint variants or direct Docker use:
 
 ```text
 RENX_SERVER_NAME
@@ -1292,15 +1173,15 @@ docker run -d --name renx-test `
 ### Config Changes Do Not Stick
 
 - Map/vote changes should be made in the persistent INIs under `C:\renx-data\Config`; restart the server after editing.
-- For non-map settings, check whether a GSA parameter controls the same key.
+- For startup-critical settings, remember GSA still controls server name, slot limit, ports, and RCON password.
 - Edit the persistent file under `C:\renx-data\Config`, not only the runtime copy.
 - Recreate the container after changing image tags or Docker environment variables.
 - Do not wipe the persistent mount during routine updates.
 
 ### Marathon Mode Still Ends The Match
 
-- Use image `stable-core20-ltsc2022` or `1.0.1022-core20-ltsc2022-r8` or newer; older images only wrote `CnCModeTimeLimit`.
-- Set `Marathon Mode` to On, then restart the server.
+- Use image `stable-core20-ltsc2022` or `1.2.1109-core20-ltsc2022-r1` or newer.
+- Set `TimeLimit=0` and `CnCModeTimeLimit=0` in `UDKRenegadeX.ini`, then restart the server.
 - Confirm `\renx-data\Config\UDKRenegadeX.ini` contains `TimeLimit=0` and `CnCModeTimeLimit=0`.
 - If staying on an older image, edit `\renx-data\Config\UDKRenegadeX.ini` manually and restart; do not wipe `renx-data`.
 

@@ -2,6 +2,20 @@
 
 All notable changes to the Renegade X GameServerApp Windows blueprint are tracked here.
 
+## 1.7.0 - 2026-09-14
+
+### Changed
+
+- Updated the packaged Totem Arts runtime to Renegade X `Release 1.2.1109` / `18038`.
+- Updated the release manifest, workflow defaults, and payload URLs for the `renx-core20-1.2.1109-r1` release assets.
+- Simplified the GSA blueprint to use normal editable INI files with zero custom config-parameter fields.
+- Kept only essential Docker environment values in the blueprint: server identity, slots, ports, RCON password, payload fallback URLs, and restart-time auto-update settings.
+
+### Fixed
+
+- Reduced the blueprint install surface so GSA no longer has to render and validate dozens of config-template tabs before installing a server.
+- Made common gameplay settings prefer persistent INI values after install, matching the INI-first map voting behavior.
+
 ## 1.6.0 - 2026-09-14
 
 ### Changed

@@ -1213,6 +1213,51 @@ $defaultRenegadeX = Join-Path $installConfigDir "DefaultRenegadeX.ini"
 $runtimeSurvival = Join-Path $installConfigDir "UDKSurvival.ini"
 $defaultSurvival = Join-Path $installConfigDir "DefaultSurvival.ini"
 
+$gameIniSources = @($udkGame, $runtimeGame, $defaultGame)
+$engineIniSources = @($udkEngine, $runtimeEngine, $defaultEngine)
+$renegadeXIniSources = @($udkRenegadeX, $runtimeRenegadeX, $defaultRenegadeX)
+$webIniSources = @($udkWeb)
+
+$listed = Get-IniPreferredBoolSetting $renegadeXIniSources "RenX_Game.Rx_Game" "bListed" @("RENX_LISTED") $listed
+$botsDisabled = Get-IniPreferredBoolSetting $renegadeXIniSources "RenX_Game.Rx_Game" "bBotsDisabled" @("RENX_BOTS_DISABLED") $botsDisabled
+$allowDownloads = Get-IniPreferredBoolSetting $engineIniSources "IpDrv.TcpNetDriver" "AllowDownloads" @("RENX_ALLOW_DOWNLOADS") $allowDownloads
+$redirectUrl = Get-IniPreferredSetting $engineIniSources "IpDrv.HTTPDownload" "RedirectToURL" @("RENX_REDIRECT_URL") $redirectUrl
+$redirectUseCompression = Get-IniPreferredBoolSetting $engineIniSources "IpDrv.HTTPDownload" "UseCompression" @("RENX_REDIRECT_USE_COMPRESSION") $redirectUseCompression
+$enableRcon = Get-IniPreferredBoolSetting $renegadeXIniSources "RenX_Game.Rx_Rcon" "bEnableRcon" @("RENX_ENABLE_RCON") $enableRcon
+$rconSubscriberLimit = Get-IniPreferredSetting $renegadeXIniSources "RenX_Game.Rx_Rcon" "SubscriberLimit" @("RENX_RCON_SUBSCRIBER_LIMIT") $rconSubscriberLimit
+$webEnabled = Get-IniPreferredBoolSetting $webIniSources "RenX_Game.Rx_WebServer" "bEnabled" @("RENX_WEB_ENABLED") $webEnabled
+$webMaxConnections = Get-IniPreferredSetting $webIniSources "RenX_Game.Rx_WebServer" "MaxConnections" @("RENX_WEB_MAX_CONNECTIONS") $webMaxConnections
+$netWait = Get-IniPreferredSetting $gameIniSources "UTGame.UTGame" "NetWait" @("RENX_NET_WAIT") $netWait
+$minNetPlayers = Get-IniPreferredSetting $gameIniSources "UTGame.UTGame" "MinNetPlayers" @("RENX_MIN_NET_PLAYERS") $minNetPlayers
+$waitForNetPlayers = Get-IniPreferredBoolSetting $gameIniSources "UTGame.UTGame" "bWaitForNetPlayers" @("RENX_WAIT_FOR_NET_PLAYERS") $waitForNetPlayers
+$forceRespawn = Get-IniPreferredBoolSetting $gameIniSources "UTGame.UTGame" "bForceRespawn" @("RENX_FORCE_RESPAWN") $forceRespawn
+$playersMustBeReady = Get-IniPreferredBoolSetting $gameIniSources "UTGame.UTGame" "bPlayersMustBeReady" @("RENX_PLAYERS_MUST_BE_READY") $playersMustBeReady
+$restartWait = Get-IniPreferredSetting $gameIniSources "UTGame.UTGame" "RestartWait" @("RENX_RESTART_WAIT") $restartWait
+$initialCredits = Get-IniPreferredSetting $renegadeXIniSources "RenX_Game.Rx_Game" "InitialCredits" @("RENX_INITIAL_CREDITS") $initialCredits
+$timeLimit = Get-IniPreferredSetting $renegadeXIniSources "RenX_Game.Rx_Game" "TimeLimit" @("RENX_TIME_LIMIT") $timeLimit
+$cncTimeLimit = Get-IniPreferredSetting $renegadeXIniSources "RenX_Game.Rx_Game" "CnCModeTimeLimit" @("RENX_CNC_TIME_LIMIT") $cncTimeLimit
+$dmTimeLimit = Get-IniPreferredSetting $renegadeXIniSources "RenX_Game.Rx_Game" "DMModeTimeLimit" @("RENX_DM_TIME_LIMIT") $dmTimeLimit
+$buildingsRevive = Get-IniPreferredBoolSetting $renegadeXIniSources "RenX_Game.Rx_Game" "bBuildingsRevive" @("RENX_BUILDINGS_REVIVE") $buildingsRevive
+$enableAirdrops = Get-IniPreferredBoolSetting $renegadeXIniSources "RenX_Game.Rx_Game" "bEnableAirdrops" @("RENX_ENABLE_AIRDROPS") $enableAirdrops
+$teamMode = Get-IniPreferredSetting $renegadeXIniSources "RenX_Game.Rx_Game" "TeamMode" @("RENX_TEAM_MODE") $teamMode
+$surrenderLength = Get-IniPreferredSetting $renegadeXIniSources "RenX_Game.Rx_Game" "SurrenderLength" @("RENX_CNC_SURRENDER_LENGTH") $surrenderLength
+$surrenderDisabledTime = Get-IniPreferredSetting $renegadeXIniSources "RenX_Game.Rx_Game" "SurrenderDisabledTime" @("RENX_CNC_SURRENDER_LOCKOUT") $surrenderDisabledTime
+$spawnCrates = Get-IniPreferredBoolSetting $renegadeXIniSources "RenX_Game.Rx_Game" "SpawnCrates" @("RENX_SPAWN_CRATES") $spawnCrates
+$maxClientRate = Get-IniPreferredSetting $engineIniSources "IpDrv.TcpNetDriver" "MaxClientRate" @("RENX_MAX_CLIENT_RATE") $maxClientRate
+$maxInternetClientRate = Get-IniPreferredSetting $engineIniSources "IpDrv.TcpNetDriver" "MaxInternetClientRate" @("RENX_MAX_INTERNET_CLIENT_RATE") $maxInternetClientRate
+$serverTickRate = Get-IniPreferredSetting $engineIniSources "IpDrv.TcpNetDriver" "NetServerMaxTickRate" @("RENX_SERVER_TICK_RATE") $serverTickRate
+$nodBotDifficulty = Get-IniPreferredSetting $renegadeXIniSources "RenX_Game.Rx_Game" "NodDifficulty" @("RENX_NOD_BOT_DIFFICULTY") $nodBotDifficulty
+$gdiBotDifficulty = Get-IniPreferredSetting $renegadeXIniSources "RenX_Game.Rx_Game" "GDIDifficulty" @("RENX_GDI_BOT_DIFFICULTY") $gdiBotDifficulty
+$nodAttackPercent = Get-IniPreferredSetting $renegadeXIniSources "RenX_Game.Rx_Game" "NODAttackingValue" @("RENX_NOD_ATTACK_PERCENT") $nodAttackPercent
+$gdiAttackPercent = Get-IniPreferredSetting $renegadeXIniSources "RenX_Game.Rx_Game" "GDIAttackingValue" @("RENX_GDI_ATTACK_PERCENT") $gdiAttackPercent
+
+if ($marathonMode) {
+    $timeLimit = "0"
+    $cncTimeLimit = "0"
+    $buildingsRevive = "false"
+    $enableAirdrops = "true"
+}
+
 $iniLocalMap = Get-IniValueFromPaths @($udkEngine, $runtimeEngine, $defaultEngine) "URL" "LocalMap"
 if (-not [string]::IsNullOrWhiteSpace($iniLocalMap)) {
     $iniMapName = [System.IO.Path]::GetFileNameWithoutExtension($iniLocalMap.Trim().Trim('"'))

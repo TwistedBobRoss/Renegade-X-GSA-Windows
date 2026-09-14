@@ -31,82 +31,30 @@
     "automatic_ports": true,
     "envs": {
       "RENX_SERVER_NAME": "{gameserver.list_name}",
-      "RENX_MAP": "{config_parameter id=\"map\"}",
-      "RENX_GAME_CLASS": "{config_parameter id=\"game_class\"}",
-      "RENX_MAP_CYCLE_CLASS": "{config_parameter id=\"map_cycle_class\"}",
-      "RENX_MAP_ROTATION": "{config_parameter id=\"map_rotation\"}",
-      "RENX_MUTATORS": "{config_parameter id=\"mutators\"}",
+      "RENX_MAP": "CNC-Field",
       "RENX_MAX_PLAYERS": "{gameserver.slot_limit}",
       "RENX_GAME_PORT": "{gameserver.game_port}",
       "RENX_PEER_PORT": "{gameserver.raw_port}",
       "RENX_QUERY_PORT": "{gameserver.query_port}",
       "RENX_RCON_PORT": "{gameserver.rcon_port}",
       "RENX_WEB_PORT": "{gameserver.other_port}",
-      "RENX_ADMIN_PASSWORD": "{config_parameter id=\"admin_password\"}",
-      "RENX_SERVER_PASSWORD": "{config_parameter id=\"server_password\"}",
-      "RENX_MOTD": "{config_parameter id=\"motd\"}",
-      "RENX_LISTED": "{config_parameter id=\"listed\"}",
-      "RENX_FIXED_MAP_ROTATION": "{config_parameter id=\"fixed_map_rotation\"}",
-      "RENX_VOTE_FIXED_ROTATION": "{config_parameter id=\"fixed_map_rotation\"}",
-      "RENX_BOTS_DISABLED": "{config_parameter id=\"bots_disabled\"}",
-      "RENX_GDI_BOTS": "{config_parameter id=\"gdi_bots\"}",
-      "RENX_NOD_BOTS": "{config_parameter id=\"nod_bots\"}",
-      "RENX_GDI_BOT_DIFFICULTY": "{config_parameter id=\"gdi_bot_difficulty\"}",
-      "RENX_NOD_BOT_DIFFICULTY": "{config_parameter id=\"nod_bot_difficulty\"}",
-      "RENX_GDI_ATTACK_PERCENT": "{config_parameter id=\"gdi_attack_percent\"}",
-      "RENX_NOD_ATTACK_PERCENT": "{config_parameter id=\"nod_attack_percent\"}",
-      "RENX_ALLOW_DOWNLOADS": "{config_parameter id=\"allow_downloads\"}",
-      "RENX_REDIRECT_URL": "{config_parameter id=\"redirect_url\"}",
-      "RENX_REDIRECT_USE_COMPRESSION": "{config_parameter id=\"redirect_use_compression\"}",
-      "RENX_SERVER_PAYLOAD_URLS": "{config_parameter id=\"server_payload_urls\"}",
-      "RENX_REFRESH_SERVER_PAYLOAD": "{config_parameter id=\"refresh_server_payload\"}",
-      "RENX_RUNTIME_AUTO_UPDATE": "{config_parameter id=\"runtime_auto_update\"}",
-      "RENX_UPDATE_MANIFEST_URL": "{config_parameter id=\"update_manifest_url\"}",
-      "RENX_UPDATE_CHANNEL": "{config_parameter id=\"update_channel\"}",
-      "RENX_INSTALL_OPTIONAL_MAP_PACK_1": "{config_parameter id=\"install_optional_map_pack_one\"}",
-      "RENX_INSTALL_OPTIONAL_MAP_PACK_2": "{config_parameter id=\"install_optional_map_pack_two\"}",
-      "RENX_INSTALL_OPTIONAL_MAP_PACK_3": "{config_parameter id=\"install_optional_map_pack_three\"}",
-      "RENX_OPTIONAL_MAP_PACK_1_URL": "{config_parameter id=\"optional_map_pack_one_url\"}",
-      "RENX_OPTIONAL_MAP_PACK_2_URL": "{config_parameter id=\"optional_map_pack_two_url\"}",
-      "RENX_OPTIONAL_MAP_PACK_3_URL": "{config_parameter id=\"optional_map_pack_three_url\"}",
-      "RENX_REQUIRED_CONTENT_URLS": "{config_parameter id=\"required_content_urls\"}",
-      "RENX_CONTENT_URLS": "{config_parameter id=\"content_urls\"}",
-      "RENX_REFRESH_CONTENT_DOWNLOADS": "{config_parameter id=\"refresh_content_downloads\"}",
-      "RENX_ENABLE_RCON": "{config_parameter id=\"enable_rcon\"}",
-      "RENX_RCON_SUBSCRIBER_LIMIT": "{config_parameter id=\"rcon_subscriber_limit\"}",
-      "RENX_WEB_ENABLED": "{config_parameter id=\"web_enabled\"}",
-      "RENX_WEB_MAX_CONNECTIONS": "{config_parameter id=\"web_max_connections\"}",
-      "RENX_NET_WAIT": "{config_parameter id=\"net_wait\"}",
-      "RENX_MIN_NET_PLAYERS": "{config_parameter id=\"min_net_players\"}",
-      "RENX_WAIT_FOR_NET_PLAYERS": "{config_parameter id=\"wait_for_net_players\"}",
-      "RENX_FORCE_RESPAWN": "{config_parameter id=\"force_respawn\"}",
-      "RENX_PLAYERS_MUST_BE_READY": "{config_parameter id=\"players_must_be_ready\"}",
-      "RENX_RESTART_WAIT": "{config_parameter id=\"restart_wait\"}",
-      "RENX_INITIAL_CREDITS": "{config_parameter id=\"initial_credits\"}",
-      "RENX_MARATHON_MODE": "{config_parameter id=\"marathon_mode\"}",
-      "RENX_TIME_LIMIT": "{config_parameter id=\"time_limit\"}",
-      "RENX_CNC_TIME_LIMIT": "{config_parameter id=\"cnc_time_limit\"}",
-      "RENX_DM_TIME_LIMIT": "{config_parameter id=\"dm_time_limit\"}",
-      "RENX_BUILDINGS_REVIVE": "{config_parameter id=\"buildings_revive\"}",
-      "RENX_ENABLE_AIRDROPS": "{config_parameter id=\"enable_airdrops\"}",
-      "RENX_TEAM_MODE": "{config_parameter id=\"team_mode\"}",
-      "RENX_MAX_MAP_VOTE_SIZE": "{config_parameter id=\"max_map_vote_size\"}",
-      "RENX_RECENT_MAPS_TO_EXCLUDE": "{config_parameter id=\"recent_maps_to_exclude\"}",
-      "RENX_VOTE_MAX_CHOICES": "{config_parameter id=\"max_map_vote_size\"}",
-      "RENX_VOTE_RECENT_EXCLUDE": "{config_parameter id=\"recent_maps_to_exclude\"}",
-      "RENX_VOTE_DURATION": "{config_parameter id=\"map_vote_time\"}",
-      "RENX_VOTE_CHANGE_MAP_LOCKOUT": "{config_parameter id=\"change_map_disabled_time\"}",
-      "RENX_VOTE_ADMINS_START": "{config_parameter id=\"admins_start_map_vote\"}",
-      "RENX_VOTE_BOTS_DISABLED": "{config_parameter id=\"bot_votes_disabled\"}",
-      "RENX_VOTE_REMOVE_VARIANTS": "{config_parameter id=\"remove_variant_maps_in_vote_list\"}",
-      "RENX_CNC_SURRENDER_LENGTH": "{config_parameter id=\"surrender_length\"}",
-      "RENX_CNC_SURRENDER_LOCKOUT": "{config_parameter id=\"surrender_disabled_time\"}",
-      "RENX_SPAWN_CRATES": "{config_parameter id=\"spawn_crates\"}",
-      "RENX_MAX_CLIENT_RATE": "{config_parameter id=\"max_client_rate\"}",
-      "RENX_MAX_INTERNET_CLIENT_RATE": "{config_parameter id=\"max_internet_client_rate\"}",
-      "RENX_SERVER_TICK_RATE": "{config_parameter id=\"server_tick_rate\"}",
-      "RENX_MULTIHOME": "{config_parameter id=\"multihome\"}",
-      "RENX_EXTRA_ARGS": "{config_parameter id=\"extra_args\"}"
+      "RENX_ADMIN_PASSWORD": "{gameserver.rcon_password}",
+      "RENX_LISTED": "true",
+      "RENX_ENABLE_RCON": "true",
+      "RENX_ALLOW_DOWNLOADS": "true",
+      "RENX_REDIRECT_URL": "https://community-content.totemarts.services/",
+      "RENX_REDIRECT_USE_COMPRESSION": "false",
+      "RENX_RUNTIME_AUTO_UPDATE": "true",
+      "RENX_UPDATE_MANIFEST_URL": "https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/release-manifest.json",
+      "RENX_UPDATE_CHANNEL": "stable",
+      "RENX_SERVER_PAYLOAD_URLS": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.001;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.002;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.003;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.004",
+      "RENX_REFRESH_SERVER_PAYLOAD": "false",
+      "RENX_INSTALL_OPTIONAL_MAP_PACK_1": "false",
+      "RENX_INSTALL_OPTIONAL_MAP_PACK_2": "false",
+      "RENX_INSTALL_OPTIONAL_MAP_PACK_3": "false",
+      "RENX_OPTIONAL_MAP_PACK_1_URL": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-01.zip",
+      "RENX_OPTIONAL_MAP_PACK_2_URL": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-02.zip",
+      "RENX_OPTIONAL_MAP_PACK_3_URL": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-03.zip"
     },
     "mounts": {
       "{container.home_root}/renx-data": "C:/renx-data"
@@ -147,6 +95,11 @@
       "path": "\\renx-data\\Logs",
       "create": true,
       "type": "logs"
+    },
+    "RenX Config": {
+      "path": "\\renx-data\\Config",
+      "create": true,
+      "type": "normal"
     }
   },
   "game": {
@@ -163,582 +116,42 @@
       "files": {
         "UDKGame.ini": {
           "path": "\\renx-data\\Config\\UDKGame.ini",
-          "info": "Primary Renegade X game settings. Map cycles are normal INI entries and are preserved on restart; edit GameSpecificMapCycles here for advanced map voting/rotation tuning.",
+          "info": "Primary Renegade X game settings. Edit this INI for server identity, player limits, and GameSpecificMapCycles map voting/rotation.",
           "disable_edit": "0",
-          "content": "[Engine.GameInfo]\nDefaultGameType=RenX_Game.Rx_Game\nDefaultGame=RenX_Game.Rx_Game\nDefaultServerGame=RenX_Game.Rx_Game\nPlayerControllerClassName=RenX_Game.Rx_Controller\nMaxPlayers={gameserver.slot_limit}\nMaxSpectators={config_parameter id=\"max_spectators\"}\nGameDifficulty=+1.0\nbAdminCanPause={config_parameter id=\"admin_can_pause\"}\n\n[Engine.GameReplicationInfo]\nServerName={gameserver.list_name}\nMessageOfTheDay={config_parameter id=\"motd\"}\n\n[Engine.AccessControl]\nAdminPassword={config_parameter id=\"admin_password\"}\nGamePassword={config_parameter id=\"server_password\"}\nIPPolicies=ACCEPT;*\n\n[UTGame.UTGame]\nbForceRespawn={config_parameter id=\"force_respawn\"}\nbPlayersMustBeReady={config_parameter id=\"players_must_be_ready\"}\nNetWait={config_parameter id=\"net_wait\"}\nMinNetPlayers={config_parameter id=\"min_net_players\"}\nbWaitForNetPlayers={config_parameter id=\"wait_for_net_players\"}\nRestartWait={config_parameter id=\"restart_wait\"}\nClientProcessingTimeout={config_parameter id=\"client_processing_timeout\"}\nGameSpecificMapCycles=(GameClassName=\"Rx_Game\",Maps=(\"CNC-Field\",\"CNC-Walls\",\"CNC-GoldRush\",\"CNC-Whiteout\",\"CNC-Islands\",\"CNC-LakeSide\",\"CNC-Mesa\",\"CNC-Volcano\",\"CNC-Canyon\",\"CNC-Complex\",\"CNC-Under\",\"CNC-Oasis\",\"CNC-Xmountain\"))\nGameSpecificMapCycles=(GameClassName=\"Rx_Game_Survival\",Maps=(\"DEF-DarkNight\",\"DEF-HillSide\"))\n"
+          "content": "[Engine.GameInfo]\nDefaultGameType=RenX_Game.Rx_Game\nDefaultGame=RenX_Game.Rx_Game\nDefaultServerGame=RenX_Game.Rx_Game\nPlayerControllerClassName=RenX_Game.Rx_Controller\nMaxPlayers={gameserver.slot_limit}\nMaxSpectators=2\nGameDifficulty=+1.0\nbAdminCanPause=false\n\n[Engine.GameReplicationInfo]\nServerName={gameserver.list_name}\nMessageOfTheDay=\n\n[Engine.AccessControl]\nAdminPassword={gameserver.rcon_password}\nGamePassword=\nIPPolicies=ACCEPT;*\n\n[UTGame.UTGame]\nbForceRespawn=true\nbPlayersMustBeReady=false\nNetWait=15\nMinNetPlayers=1\nbWaitForNetPlayers=false\nRestartWait=30\nClientProcessingTimeout=30\nGameSpecificMapCycles=(GameClassName=\"Rx_Game\",Maps=(\"CNC-Field\",\"CNC-Walls\",\"CNC-GoldRush\",\"CNC-Whiteout\",\"CNC-Islands\",\"CNC-LakeSide\",\"CNC-Mesa\",\"CNC-Volcano\",\"CNC-Canyon\",\"CNC-Complex\",\"CNC-Under\",\"CNC-Oasis\",\"CNC-Xmountain\"))\nGameSpecificMapCycles=(GameClassName=\"Rx_Game_Survival\",Maps=(\"DEF-DarkNight\",\"DEF-HillSide\"))"
         },
         "UDKEngine.ini": {
           "path": "\\renx-data\\Config\\UDKEngine.ini",
-          "info": "Network, Steam/query, and custom-content download settings.",
+          "info": "Network, Steam/query, starting map, and custom-content download settings.",
           "disable_edit": "0",
-          "content": "[URL]\nMapExt=udk\nMap=RenX-MenuMap.udk\nLocalMap={config_parameter id=\"map\"}.udk\nPort={gameserver.game_port}\nPeerPort={gameserver.raw_port}\n\n[IpDrv.TcpNetDriver]\nAllowDownloads={config_parameter id=\"allow_downloads\"}\nMaxClientRate={config_parameter id=\"max_client_rate\"}\nMaxInternetClientRate={config_parameter id=\"max_internet_client_rate\"}\nNetServerMaxTickRate={config_parameter id=\"server_tick_rate\"}\n\n[IpDrv.HTTPDownload]\nConnectionTimeout={config_parameter id=\"download_timeout\"}\nRedirectToURL={config_parameter id=\"redirect_url\"}\nUseCompression={config_parameter id=\"redirect_use_compression\"}\n\n[OnlineSubsystemSteamworks.OnlineSubsystemSteamworks]\nbEnableSteam={config_parameter id=\"enable_steam\"}\nQueryPort={gameserver.query_port}\nbUseVAC={config_parameter id=\"use_vac\"}\nRegion=255\nServerBrowserTimeout=10\n"
+          "content": "[URL]\nMapExt=udk\nMap=RenX-MenuMap.udk\nLocalMap=CNC-Field.udk\nPort={gameserver.game_port}\nPeerPort={gameserver.raw_port}\n\n[IpDrv.TcpNetDriver]\nAllowDownloads=true\nMaxClientRate=15000\nMaxInternetClientRate=10000\nNetServerMaxTickRate=30\n\n[IpDrv.HTTPDownload]\nConnectionTimeout=30\nRedirectToURL=https://community-content.totemarts.services/\nUseCompression=false\n\n[OnlineSubsystemSteamworks.OnlineSubsystemSteamworks]\nbEnableSteam=true\nQueryPort={gameserver.query_port}\nbUseVAC=false\nRegion=255\nServerBrowserTimeout=10"
         },
         "UDKMapList.ini": {
           "path": "\\renx-data\\Config\\UDKMapList.ini",
-          "info": "Renegade X map-vote map lists. The startup wrapper keeps the active map-list section aligned from UDKGame.ini GameSpecificMapCycles.",
+          "info": "Renegade X map-vote map lists. Keep this aligned with UDKGame.ini GameSpecificMapCycles when doing advanced rotation tuning.",
           "disable_edit": "0",
-          "content": "; Renegade X map vote profiles.\n[RenX_Game.Rx_MapListManager]\nGameProfiles=(GameClass=\"RenX_Game.Rx_Game\",GameName=\"Command & Conquer\",bIsTeamGame=true,MapListName=\"CNCMapList\",Options=\"\",Mutators=\"\",ExcludedMuts=\"\")\nGameProfiles=(GameClass=\"RenX_Coop.Rx_Game_Survival\",GameName=\"Defense Survival\",bIsTeamGame=true,MapListName=\"DEFMapList\",Options=\"\",Mutators=\"\",ExcludedMuts=\"\")\n;AutoStripOptions=LinkSetup\n;AutoEmptyOptions=GoalScore\n;MapReplayLimit=0\n;PlayIndex=0\n\n[CNCMapList Rx_MapList]\nMaps=(Map=\"CNC-Field\")\nMaps=(Map=\"CNC-Walls\")\nMaps=(Map=\"CNC-GoldRush\")\nMaps=(Map=\"CNC-Whiteout\")\nMaps=(Map=\"CNC-Islands\")\nMaps=(Map=\"CNC-LakeSide\")\nMaps=(Map=\"CNC-Mesa\")\nMaps=(Map=\"CNC-Volcano\")\nMaps=(Map=\"CNC-Canyon\")\nMaps=(Map=\"CNC-Complex\")\nMaps=(Map=\"CNC-Under\")\nMaps=(Map=\"CNC-Oasis\")\nMaps=(Map=\"CNC-Xmountain\")\n\n[DEFMapList Rx_MapList]\nMaps=(Map=\"DEF-DarkNight\")\nMaps=(Map=\"DEF-HillSide\")\n"
+          "content": "[RenX_Game.Rx_MapListManager]\nGameProfiles=(GameClass=\"RenX_Game.Rx_Game\",GameName=\"Command and Conquer\",bIsTeamGame=true,MapListName=\"CNCMapList\",Options=\"\",Mutators=\"\",ExcludedMuts=\"\")\nGameProfiles=(GameClass=\"RenX_Coop.Rx_Game_Survival\",GameName=\"Defense Survival\",bIsTeamGame=true,MapListName=\"DEFMapList\",Options=\"\",Mutators=\"\",ExcludedMuts=\"\")\nMapReplayLimit=0\nPlayIndex=0\n\n[CNCMapList Rx_MapList]\nMaps=(Map=\"CNC-Field\")\nMaps=(Map=\"CNC-Walls\")\nMaps=(Map=\"CNC-GoldRush\")\nMaps=(Map=\"CNC-Whiteout\")\nMaps=(Map=\"CNC-Islands\")\nMaps=(Map=\"CNC-LakeSide\")\nMaps=(Map=\"CNC-Mesa\")\nMaps=(Map=\"CNC-Volcano\")\nMaps=(Map=\"CNC-Canyon\")\nMaps=(Map=\"CNC-Complex\")\nMaps=(Map=\"CNC-Under\")\nMaps=(Map=\"CNC-Oasis\")\nMaps=(Map=\"CNC-Xmountain\")\n\n[DEFMapList Rx_MapList]\nMaps=(Map=\"DEF-DarkNight\")\nMaps=(Map=\"DEF-HillSide\")"
         },
         "UDKRenegadeX.ini": {
           "path": "\\renx-data\\Config\\UDKRenegadeX.ini",
-          "info": "Renegade X-specific gameplay, voting, bot, RCON, and server-list settings. Existing INI vote values are preserved on restart and mirrored into runtime/default config before launch.",
+          "info": "Renegade X-specific gameplay, voting, bot, RCON, and server-list settings. These INI values are preserved and mirrored into runtime/default config before launch.",
           "disable_edit": "0",
-          "content": "[RenX_Game.Rx_Game]\nbListed={config_parameter id=\"listed\"}\nbFixedMapRotation={config_parameter id=\"fixed_map_rotation\"}\nbBotsDisabled={config_parameter id=\"bots_disabled\"}\nbLogRcon=true\nInitialCredits={config_parameter id=\"initial_credits\"}\nTimeLimit={config_parameter id=\"time_limit\"}\nCnCModeTimeLimit={config_parameter id=\"cnc_time_limit\"}\nDMModeTimeLimit={config_parameter id=\"dm_time_limit\"}\nbBuildingsRevive={config_parameter id=\"buildings_revive\"}\nbEnableAirdrops={config_parameter id=\"enable_airdrops\"}\nTeamMode={config_parameter id=\"team_mode\"}\nMaxMapVoteSize={config_parameter id=\"max_map_vote_size\"}\nRecentMapsToExclude={config_parameter id=\"recent_maps_to_exclude\"}\nMapVoteTime={config_parameter id=\"map_vote_time\"}\nChangeMapDisabledTime={config_parameter id=\"change_map_disabled_time\"}\nSurrenderLength={config_parameter id=\"surrender_length\"}\nSurrenderDisabledTime={config_parameter id=\"surrender_disabled_time\"}\nbAdminsStartMapVote={config_parameter id=\"admins_start_map_vote\"}\nbBotVotesDisabled={config_parameter id=\"bot_votes_disabled\"}\nbRemoveVariantMapsInVoteList={config_parameter id=\"remove_variant_maps_in_vote_list\"}\nSpawnCrates={config_parameter id=\"spawn_crates\"}\nNodDifficulty={config_parameter id=\"nod_bot_difficulty\"}\nGDIDifficulty={config_parameter id=\"gdi_bot_difficulty\"}\nNODAttackingValue={config_parameter id=\"nod_attack_percent\"}\nGDIAttackingValue={config_parameter id=\"gdi_attack_percent\"}\n\n[RenX_Game.Rx_Rcon]\nbEnableRcon={config_parameter id=\"enable_rcon\"}\nRconPort={gameserver.rcon_port}\nSubscriberLimit={config_parameter id=\"rcon_subscriber_limit\"}\n\n[RenX_Game.Rx_AccessControl]\nbRequireSteam={config_parameter id=\"require_steam\"}\nbSteamAuthAdmins={config_parameter id=\"steam_auth_admins\"}\nbBroadcastAdminIdentity={config_parameter id=\"broadcast_admin_identity\"}\nModPassword={config_parameter id=\"moderator_password\"}\n\n[RenX_Game.Rx_ServerListQueryHandler]\nMasterServerURL=https://serverlist-rx.totemarts.services/servers.jsp\n"
+          "content": "[RenX_Game.Rx_Game]\nbListed=true\nbFixedMapRotation=false\nbBotsDisabled=false\nbLogRcon=true\nInitialCredits=0\nTimeLimit=50\nCnCModeTimeLimit=50\nDMModeTimeLimit=15\nbBuildingsRevive=true\nbEnableAirdrops=false\nTeamMode=6\nMaxMapVoteSize=5\nRecentMapsToExclude=5\nMapVoteTime=35\nChangeMapDisabledTime=600\nSurrenderLength=120\nSurrenderDisabledTime=600\nbAdminsStartMapVote=false\nbBotVotesDisabled=false\nbRemoveVariantMapsInVoteList=true\nSpawnCrates=true\nNodDifficulty=1.0\nGDIDifficulty=1.0\nNODAttackingValue=50\nGDIAttackingValue=50\n\n[RenX_Game.Rx_Rcon]\nbEnableRcon=true\nRconPort={gameserver.rcon_port}\nSubscriberLimit=8\n\n[RenX_Game.Rx_AccessControl]\nbRequireSteam=false\nbSteamAuthAdmins=false\nbBroadcastAdminIdentity=false\nModPassword=\n\n[RenX_Game.Rx_ServerListQueryHandler]\nMasterServerURL=https://serverlist-rx.totemarts.services/servers.jsp"
         },
         "UDKSurvival.ini": {
           "path": "\\renx-data\\Config\\UDKSurvival.ini",
           "info": "Defense Survival gameplay and vote settings. Edit this normal INI when running DEF maps or the Survival game class.",
           "disable_edit": "0",
-          "content": "[RenX_Coop.Rx_Game_Survival]\nMinNetPlayers=40\nNetWait=30\nbWaitForNetPlayers=true\nbAllowPowerUpDrop=true\nDonationsDisabledTime=180\nInitialCredits=200\nSpawnCrates=true ; whether or not crates will spawn\nCrateRespawnAfterPickup=30.0000 ; respawn rate in seconds\nbIsCompetitive=false\nbReserveVehiclesToBuyer=True\nTimeLimit=0\nDMModeTimeLimit=12\nbFixedMapRotation=False\nRecentMapsToExclude=0\nMaxMapVoteSize=5\nTeamMode=3 ; 0 = static, 1 = swap, 2 = random swap, 3 = shuffle, 4 = traditional\nbAllowPrivateMessaging=True\nbPrivateMessageTeamOnly=False\nbListed=true\nbLogRcon=true\nbBotVotesDisabled=false\nSurrenderLength=300\nSurrenderDisabledTime=600\nRTC_DisableTime=0\nGameplayEventsWriterClassName=RenX_Game.Rx_GameplayEventsWriter\nbUsePedestal=False\n\nbEnableCommanders=true\nbUseStaticCommanders=false\nInitialCP=600\nMax_CP=3000\n\nbVehiclesAlwaysRelevant=true\nbInfantryAlwaysRelevant=true\n\n; CLEAR BONUS MECHANIC\nBaseWaveCreditsReward=100.f\nBaseWaveCPReward=100.f\nBaseWaveVPReward=5.f\n\n; FRUSTRATION MECHANIC\nbEnableFrustration=true\nFrustrationVentInterval=10.0\nFrustrationCoolOffTimer=30.0\nFrustrationFailureChance=0.7\nFrustrationBuildUpStartWave=4\nFrustrationBuildUpMult=0.5\nFrustrationBuildDownMult=5\nFrustrationInfKillIncrement=1\nFrustrationVehKillIncrement=5\nFrustrationPlayerKillDecrement=8\nFrustrationWaveClearIncrement=25.f\nFrustrationWaveClearDecrement=75.f\n"
+          "content": "[RenX_Coop.Rx_Game_Survival]\nMinNetPlayers=40\nNetWait=30\nbWaitForNetPlayers=true\nbAllowPowerUpDrop=true\nDonationsDisabledTime=180\nInitialCredits=200\nSpawnCrates=true\nCrateRespawnAfterPickup=30.0000\nbIsCompetitive=false\nbReserveVehiclesToBuyer=true\nTimeLimit=0\nDMModeTimeLimit=12\nbFixedMapRotation=false\nRecentMapsToExclude=0\nMaxMapVoteSize=5\nMapVoteTime=35\nChangeMapDisabledTime=600\nTeamMode=3\nbAllowPrivateMessaging=true\nbPrivateMessageTeamOnly=false\nbListed=true\nbLogRcon=true\nbBotVotesDisabled=false\nbRemoveVariantMapsInVoteList=true\nSurrenderLength=300\nSurrenderDisabledTime=600\nRTC_DisableTime=0\nGameplayEventsWriterClassName=RenX_Game.Rx_GameplayEventsWriter\nbUsePedestal=false\nbEnableCommanders=true\nbUseStaticCommanders=false\nInitialCP=600\nMax_CP=3000\nbVehiclesAlwaysRelevant=true\nbInfantryAlwaysRelevant=true\nBaseWaveCreditsReward=100.f\nBaseWaveCPReward=100.f\nBaseWaveVPReward=5.f\nbEnableFrustration=true\nFrustrationVentInterval=10.0\nFrustrationCoolOffTimer=30.0\nFrustrationFailureChance=0.7\nFrustrationBuildUpStartWave=4\nFrustrationBuildUpMult=0.5\nFrustrationBuildDownMult=5\nFrustrationInfKillIncrement=1\nFrustrationVehKillIncrement=5\nFrustrationPlayerKillDecrement=8\nFrustrationWaveClearIncrement=25.f\nFrustrationWaveClearDecrement=75.f"
         },
         "UDKWeb.ini": {
           "path": "\\renx-data\\Config\\UDKWeb.ini",
-          "info": "Optional Renegade X web server settings. ServerName uses the GSA game-server list name, and ListenPort uses GSA's automatically assigned other port. Leave disabled unless you are intentionally exposing it.",
+          "info": "Optional Renegade X web server settings. Leave disabled unless you are intentionally exposing it.",
           "disable_edit": "0",
-          "content": "[RenX_Game.Rx_WebServer]\nServerName={gameserver.list_name}\nApplicationss=\"RenX_Game.Rx_WebApplication_Stats\"\nApplicationPathss=\"/ServerInfo\"\nbEnabled={config_parameter id=\"web_enabled\"}\nListenPort={gameserver.other_port}\nMaxConnections={config_parameter id=\"web_max_connections\"}\nDefaultApplication=1\nExpirationSeconds=86400\n"
+          "content": "[RenX_Game.Rx_WebServer]\nServerName={gameserver.list_name}\nApplicationss=\"RenX_Game.Rx_WebApplication_Stats\"\nApplicationPathss=\"/ServerInfo\"\nbEnabled=false\nListenPort={gameserver.other_port}\nMaxConnections=32\nDefaultApplication=1\nExpirationSeconds=86400"
         }
       },
-      "parameters": {
-        "map": {
-          "name": "Starting Map",
-          "info": "Starting map. CNC-Field launches CNC-Field and writes LocalMap=CNC-Field.udk. Use the map name without .udk.",
-          "section": "Server Setup",
-          "type": "text",
-          "content": "CNC-Field"
-        },
-        "game_class": {
-          "name": "Game Class Override",
-          "info": "Normal / map prefix passes no override (none). Use Normal for CnC, AOW, and CnC Marathon. Survival passes RenX_Coop.Rx_Game_Survival as the game class override.",
-          "section": "Survival",
-          "type": "array",
-          "dropdown": "{\"Normal / map prefix\":\"none\",\"Survival\":\"RenX_Coop.Rx_Game_Survival\"}"
-        },
-        "map_cycle_class": {
-          "name": "Map Cycle Class",
-          "info": "Used only when no matching GameSpecificMapCycles entry already exists in UDKGame.ini. Standard CnC uses Rx_Game; Survival uses Rx_Game_Survival.",
-          "section": "Survival",
-          "type": "array",
-          "dropdown": "{\"Standard CnC\":\"Rx_Game\",\"Survival\":\"Rx_Game_Survival\"}"
-        },
-        "map_rotation": {
-          "name": "Map Rotation",
-          "info": "Fresh-install fallback map list. After UDKGame.ini contains GameSpecificMapCycles, edit that normal INI entry for map voting/rotation changes.",
-          "section": "Server Setup",
-          "type": "text",
-          "content": "CNC-Field,CNC-Walls,CNC-GoldRush,CNC-Whiteout,CNC-Islands,CNC-LakeSide,CNC-Mesa,CNC-Volcano,CNC-Canyon,CNC-Complex,CNC-Under,CNC-Oasis,CNC-Xmountain"
-        },
-        "server_payload_urls": {
-          "name": "Server Payload URLs",
-          "info": "Recovery URLs for the 20-map core runtime. The full image normally seeds this runtime without downloading it. If the seed is unavailable, FTP-preloaded matching files are reused before automatic download.",
-          "section": "Install",
-          "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.001;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.002;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.003;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.004;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.1.1094-r1/renx-core20-payload.zip.005"
-        },
-        "refresh_server_payload": {
-          "name": "Refresh Server Payload",
-          "info": "Off/false uses the cached runtime in renx-data. On/true redownloads and reinstalls the server payload on next start.",
-          "section": "Install",
-          "type": "boolean",
-          "content": "0"
-        },
-        "runtime_auto_update": {
-          "name": "Runtime Auto Update",
-          "info": "On/true checks the update manifest at container start. If the manifest advertises a newer Renegade X runtime, the payload is redownloaded and installed before launch.",
-          "section": "Install",
-          "type": "boolean",
-          "content": "1"
-        },
-        "update_manifest_url": {
-          "name": "Update Manifest URL",
-          "info": "Public JSON manifest that points to the current core payload and optional map packs. Leave blank to use only the payload URLs configured below.",
-          "section": "Install",
-          "type": "text",
-          "content": "https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/release-manifest.json"
-        },
-        "update_channel": {
-          "name": "Update Channel",
-          "info": "Manifest channel accepted by Runtime Auto Update. Stable is recommended for public servers.",
-          "section": "Install",
-          "type": "text",
-          "content": "stable"
-        },
-        "install_optional_map_pack_one": {
-          "name": "Install Optional Map Pack 1",
-          "info": "On/true downloads 9 maps: DarkSide, Desolation, Eyes, Field 2025, Forest Winter, HeXmountain, Hourglass, Reservoir, and Tomb. Off/false skips this approximately 619 MiB archive.",
-          "section": "Optional Maps",
-          "type": "boolean",
-          "content": "0"
-        },
-        "install_optional_map_pack_two": {
-          "name": "Install Optional Map Pack 2",
-          "info": "On/true downloads 9 maps: Arctic Stronghold, Field X, LakeSide Winter, Mines, Outposts, Reservoir Winter, Snow, Toxicity, and Walls Winter. Off/false skips this approximately 653 MiB archive.",
-          "section": "Optional Maps",
-          "type": "boolean",
-          "content": "0"
-        },
-        "install_optional_map_pack_three": {
-          "name": "Install Optional Map Pack 3",
-          "info": "On/true downloads 9 maps: City, CliffSide, Crash Site, Daybreak, Field Winter, Forest, Steppe, Tunnels, and Uphill. Off/false skips this approximately 624 MiB archive.",
-          "section": "Optional Maps",
-          "type": "boolean",
-          "content": "0"
-        },
-        "optional_map_pack_one_url": {
-          "name": "Optional Map Pack 1 URL",
-          "info": "Public archive URL used when Optional Map Pack 1 is enabled.",
-          "section": "Optional Maps",
-          "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.1.1094-r1/renx-optional-maps-01.zip"
-        },
-        "optional_map_pack_two_url": {
-          "name": "Optional Map Pack 2 URL",
-          "info": "Public archive URL used when Optional Map Pack 2 is enabled.",
-          "section": "Optional Maps",
-          "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.1.1094-r1/renx-optional-maps-02.zip"
-        },
-        "optional_map_pack_three_url": {
-          "name": "Optional Map Pack 3 URL",
-          "info": "Public archive URL used when Optional Map Pack 3 is enabled.",
-          "section": "Optional Maps",
-          "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.1.1094-r1/renx-optional-maps-03.zip"
-        },
-        "mutators": {
-          "name": "Mutators",
-          "info": "Comma-separated mutator classes. This becomes the launch setting ?mutator=YourMutator. Leave blank for none.",
-          "section": "Server Setup",
-          "type": "text",
-          "content": ""
-        },
-        "admin_password": {
-          "name": "Admin/RCON Password",
-          "info": "Writes AdminPassword=yourpassword in UDKGame.ini. Leave blank to avoid setting an admin password.",
-          "section": "Access",
-          "type": "text",
-          "content": ""
-        },
-        "server_password": {
-          "name": "Server Password",
-          "info": "Writes GamePassword=yourpassword. Blank means players can join without a server password.",
-          "section": "Access",
-          "type": "text",
-          "content": ""
-        },
-        "motd": {
-          "name": "Message Of The Day",
-          "info": "Writes MessageOfTheDay=your message. Some Renegade X builds may not display MOTD reliably.",
-          "section": "Access",
-          "type": "text",
-          "content": ""
-        },
-        "listed": {
-          "name": "List Server",
-          "info": "On/true writes bListed=1 so the server can appear in the launcher/server browser. Off/false writes bListed=0.",
-          "section": "Access",
-          "type": "boolean",
-          "content": "1"
-        },
-        "fixed_map_rotation": {
-          "name": "Fixed Map Rotation",
-          "info": "On/true writes bFixedMapRotation=1 to enforce the rotation list. Off/false writes bFixedMapRotation=0 for normal voting.",
-          "section": "Voting",
-          "type": "boolean",
-          "content": "0"
-        },
-        "surrender_length": {
-          "name": "Surrender Length Seconds",
-          "info": "Writes SurrenderLength=seconds for the surrender countdown.",
-          "section": "Voting",
-          "type": "text",
-          "content": "120"
-        },
-        "surrender_disabled_time": {
-          "name": "Surrender Lockout Seconds",
-          "info": "Writes SurrenderDisabledTime=seconds before surrender voting becomes available.",
-          "section": "Voting",
-          "type": "text",
-          "content": "600"
-        },
-        "change_map_disabled_time": {
-          "name": "Change Map Vote Lockout",
-          "info": "Writes ChangeMapDisabledTime=seconds before change-map voting becomes available.",
-          "section": "Voting",
-          "type": "text",
-          "content": "600"
-        },
-        "bots_disabled": {
-          "name": "Disable Bots",
-          "info": "On/true writes bBotsDisabled=1 to disable bots. Off/false writes bBotsDisabled=0 to allow bots.",
-          "section": "CnC AOW",
-          "type": "boolean",
-          "content": "0"
-        },
-        "gdi_bots": {
-          "name": "GDI Bot Count",
-          "info": "Adds ?GDIBotCount=number to the launch URL. Blank uses the game default.",
-          "section": "CnC AOW",
-          "type": "text",
-          "content": ""
-        },
-        "nod_bots": {
-          "name": "NOD Bot Count",
-          "info": "Adds ?NODBotCount=number to the launch URL. Blank uses the game default.",
-          "section": "CnC AOW",
-          "type": "text",
-          "content": ""
-        },
-        "gdi_bot_difficulty": {
-          "name": "GDI Bot Difficulty",
-          "info": "Easy writes GDIDifficulty=0.5, Normal writes 1.0, Hard writes 1.5, and Very Hard writes 2.0.",
-          "section": "CnC AOW",
-          "type": "array",
-          "dropdown": "{\"Easy\":\"0.5\",\"Normal\":\"1.0\",\"Hard\":\"1.5\",\"Very Hard\":\"2.0\"}"
-        },
-        "nod_bot_difficulty": {
-          "name": "NOD Bot Difficulty",
-          "info": "Easy writes NodDifficulty=0.5, Normal writes 1.0, Hard writes 1.5, and Very Hard writes 2.0.",
-          "section": "CnC AOW",
-          "type": "array",
-          "dropdown": "{\"Easy\":\"0.5\",\"Normal\":\"1.0\",\"Hard\":\"1.5\",\"Very Hard\":\"2.0\"}"
-        },
-        "gdi_attack_percent": {
-          "name": "GDI Attack Percent",
-          "info": "Defensive writes GDIAttackingValue=25, Balanced writes 50, Aggressive writes 75, and All Attack writes 100.",
-          "section": "CnC AOW",
-          "type": "array",
-          "dropdown": "{\"Defensive\":\"25\",\"Balanced\":\"50\",\"Aggressive\":\"75\",\"All Attack\":\"100\"}"
-        },
-        "nod_attack_percent": {
-          "name": "NOD Attack Percent",
-          "info": "Defensive writes NODAttackingValue=25, Balanced writes 50, Aggressive writes 75, and All Attack writes 100.",
-          "section": "CnC AOW",
-          "type": "array",
-          "dropdown": "{\"Defensive\":\"25\",\"Balanced\":\"50\",\"Aggressive\":\"75\",\"All Attack\":\"100\"}"
-        },
-        "allow_downloads": {
-          "name": "Allow Downloads",
-          "info": "On/true writes AllowDownloads=1 to allow fallback custom-content downloads. Off/false writes AllowDownloads=0.",
-          "section": "Content",
-          "type": "boolean",
-          "content": "1"
-        },
-        "redirect_url": {
-          "name": "HTTP Redirect URL",
-          "info": "Writes RedirectToURL=your URL for fast custom-content downloads. Use a trailing slash.",
-          "section": "Content",
-          "type": "text",
-          "content": "https://community-content.totemarts.services/"
-        },
-        "redirect_use_compression": {
-          "name": "Redirect Uses Compression",
-          "info": "On/true writes UseCompression=1 for compressed redirect files. Off/false writes UseCompression=0 for normal files.",
-          "section": "Content",
-          "type": "boolean",
-          "content": "0"
-        },
-        "required_content_urls": {
-          "name": "Required Content URLs",
-          "info": "Base game maps are expected to be included in the server payload above. Add separate required map/package URLs only for extra mandatory content. Use semicolon-separated public .zip, .udk, .u, .upk, .ini, or .int URLs; do not use line breaks.",
-          "section": "Content",
-          "type": "text",
-          "content": ""
-        },
-        "content_urls": {
-          "name": "Custom Content URLs",
-          "info": "Optional extra client-download content. Base maps should already come from the server payload. Use semicolon-separated public .zip, .udk, .u, .upk, .ini, or .int URLs; do not use line breaks.",
-          "section": "Content",
-          "type": "text",
-          "content": ""
-        },
-        "refresh_content_downloads": {
-          "name": "Refresh Content Downloads",
-          "info": "On/true sets RENX_REFRESH_CONTENT_DOWNLOADS=1 to redownload custom content. Off/false sets it to 0 and uses cached files.",
-          "section": "Content",
-          "type": "boolean",
-          "content": "0"
-        },
-        "web_enabled": {
-          "name": "Enable Web Server",
-          "info": "On/true writes bEnabled=1 in UDKWeb.ini to enable the optional web server. Off/false writes bEnabled=0.",
-          "section": "Remote Access",
-          "type": "boolean",
-          "content": "0"
-        },
-        "web_max_connections": {
-          "name": "Web Max Connections",
-          "info": "Writes MaxConnections=number in UDKWeb.ini for the optional web server.",
-          "section": "Remote Access",
-          "type": "text",
-          "content": "32"
-        },
-        "enable_rcon": {
-          "name": "Enable RCON",
-          "info": "On/true writes bEnableRcon=1. Off/false writes bEnableRcon=0. GSA RCON panel support is still unverified.",
-          "section": "Remote Access",
-          "type": "boolean",
-          "content": "1"
-        },
-        "rcon_subscriber_limit": {
-          "name": "RCON Subscriber Limit",
-          "info": "Writes SubscriberLimit=number under RenX_Game.Rx_Rcon.",
-          "section": "Remote Access",
-          "type": "text",
-          "content": "8"
-        },
-        "max_spectators": {
-          "name": "Max Spectators",
-          "info": "Writes MaxSpectators=number. Set 0 to effectively disable spectator slots.",
-          "section": "General Gameplay",
-          "type": "text",
-          "content": "2"
-        },
-        "admin_can_pause": {
-          "name": "Admins Can Pause",
-          "info": "On/true writes bAdminCanPause=1. Off/false writes bAdminCanPause=0.",
-          "section": "General Gameplay",
-          "type": "boolean",
-          "content": "0"
-        },
-        "force_respawn": {
-          "name": "Force Respawn",
-          "info": "On/true writes bForceRespawn=1. Off/false writes bForceRespawn=0.",
-          "section": "General Gameplay",
-          "type": "boolean",
-          "content": "1"
-        },
-        "players_must_be_ready": {
-          "name": "Players Must Be Ready",
-          "info": "On/true writes bPlayersMustBeReady=1. Off/false writes bPlayersMustBeReady=0.",
-          "section": "General Gameplay",
-          "type": "boolean",
-          "content": "0"
-        },
-        "wait_for_net_players": {
-          "name": "Wait For Net Players",
-          "info": "On/true writes bWaitForNetPlayers=1 and uses Minimum Net Players. Off/false writes bWaitForNetPlayers=0.",
-          "section": "General Gameplay",
-          "type": "boolean",
-          "content": "0"
-        },
-        "net_wait": {
-          "name": "Net Wait Seconds",
-          "info": "Writes NetWait=seconds. This controls how long the game waits during startup or match transition.",
-          "section": "General Gameplay",
-          "type": "text",
-          "content": "15"
-        },
-        "min_net_players": {
-          "name": "Minimum Net Players",
-          "info": "Writes MinNetPlayers=number. Used when Wait For Net Players is enabled.",
-          "section": "General Gameplay",
-          "type": "text",
-          "content": "1"
-        },
-        "restart_wait": {
-          "name": "Restart Wait Seconds",
-          "info": "Writes RestartWait=seconds. This is the in-game match transition delay, not GSA scheduled restarts.",
-          "section": "General Gameplay",
-          "type": "text",
-          "content": "30"
-        },
-        "client_processing_timeout": {
-          "name": "Client Processing Timeout",
-          "info": "Writes ClientProcessingTimeout=seconds for travel/loading timeout behavior.",
-          "section": "General Gameplay",
-          "type": "text",
-          "content": "30"
-        },
-        "initial_credits": {
-          "name": "Initial Credits",
-          "info": "Writes InitialCredits=number for player starting credits where the game mode supports it.",
-          "section": "CnC AOW",
-          "type": "text",
-          "content": "0"
-        },
-        "marathon_mode": {
-          "name": "Marathon Mode",
-          "info": "On/true forces TimeLimit=0 and CnCModeTimeLimit=0, disables building revival, and enables vehicle airdrops. Off/false uses the individual timing and gameplay settings below.",
-          "section": "CnC Marathon",
-          "type": "boolean",
-          "content": "0"
-        },
-        "time_limit": {
-          "name": "Overall Time Limit",
-          "info": "Writes TimeLimit=minutes for the generic Renegade X match limit. Set 0 to disable it. Marathon Mode forces this to 0.",
-          "section": "CnC Marathon",
-          "type": "text",
-          "content": "50"
-        },
-        "cnc_time_limit": {
-          "name": "CnC Time Limit",
-          "info": "Writes CnCModeTimeLimit=minutes for CnC matches. Set 0 to disable it. Marathon Mode forces this to 0.",
-          "section": "CnC Marathon",
-          "type": "text",
-          "content": "30"
-        },
-        "dm_time_limit": {
-          "name": "DM Time Limit",
-          "info": "Writes DMModeTimeLimit=minutes for deathmatch modes.",
-          "section": "CnC AOW",
-          "type": "text",
-          "content": "20"
-        },
-        "buildings_revive": {
-          "name": "Buildings Revive",
-          "info": "On/true writes bBuildingsRevive=1. Off/false writes bBuildingsRevive=0. Marathon Mode forces this off.",
-          "section": "CnC Marathon",
-          "type": "boolean",
-          "content": "1"
-        },
-        "enable_airdrops": {
-          "name": "Enable Airdrops",
-          "info": "On/true writes bEnableAirdrops=1. Off/false writes bEnableAirdrops=0. Marathon Mode forces this on.",
-          "section": "CnC Marathon",
-          "type": "boolean",
-          "content": "0"
-        },
-        "team_mode": {
-          "name": "Team Mode",
-          "info": "Writes the numeric Renegade X TeamMode value.",
-          "section": "CnC AOW",
-          "type": "array",
-          "dropdown": "{\"Random shuffle/scramble\":\"6\",\"Static teams\":\"0\",\"Swap teams\":\"1\",\"Random swap\":\"2\",\"Shuffle\":\"3\",\"Traditional assignment\":\"4\",\"Unrestricted traditional\":\"5\"}"
-        },
-        "max_map_vote_size": {
-          "name": "Number Of Maps Available In Vote",
-          "info": "Writes MaxMapVoteSize=number for how many map choices appear in the map vote.",
-          "section": "Voting",
-          "type": "text",
-          "content": "5"
-        },
-        "recent_maps_to_exclude": {
-          "name": "Recent Maps Excluded",
-          "info": "Writes RecentMapsToExclude=number to keep recently played maps out of the next vote. RenX 1.1 default is 5.",
-          "section": "Voting",
-          "type": "text",
-          "content": "5"
-        },
-        "map_vote_time": {
-          "name": "Map Vote Time Seconds",
-          "info": "Writes MapVoteTime=seconds for how long the map vote remains open.",
-          "section": "Voting",
-          "type": "text",
-          "content": "35"
-        },
-        "admins_start_map_vote": {
-          "name": "Admins Start Map Vote",
-          "info": "On/true writes bAdminsStartMapVote=1. Off/false writes bAdminsStartMapVote=0.",
-          "section": "Voting",
-          "type": "boolean",
-          "content": "0"
-        },
-        "bot_votes_disabled": {
-          "name": "Disable Bot Votes",
-          "info": "On/true writes bBotVotesDisabled=1 so bots do not affect votes. Off/false writes bBotVotesDisabled=0.",
-          "section": "Voting",
-          "type": "boolean",
-          "content": "0"
-        },
-        "remove_variant_maps_in_vote_list": {
-          "name": "Remove Variant Maps In Vote List",
-          "info": "On/true writes bRemoveVariantMapsInVoteList=1 to hide variant maps from voting. Off/false writes bRemoveVariantMapsInVoteList=0.",
-          "section": "Voting",
-          "type": "boolean",
-          "content": "1"
-        },
-        "spawn_crates": {
-          "name": "Spawn Crates",
-          "info": "On/true writes SpawnCrates=1. Off/false writes SpawnCrates=0.",
-          "section": "CnC AOW",
-          "type": "boolean",
-          "content": "1"
-        },
-        "max_client_rate": {
-          "name": "Max Client Rate",
-          "info": "Writes MaxClientRate=number under IpDrv.TcpNetDriver.",
-          "section": "Networking",
-          "type": "text",
-          "content": "15000"
-        },
-        "max_internet_client_rate": {
-          "name": "Max Internet Client Rate",
-          "info": "Writes MaxInternetClientRate=number under IpDrv.TcpNetDriver.",
-          "section": "Networking",
-          "type": "text",
-          "content": "10000"
-        },
-        "server_tick_rate": {
-          "name": "Server Tick Rate",
-          "info": "Writes NetServerMaxTickRate=number under IpDrv.TcpNetDriver.",
-          "section": "Networking",
-          "type": "text",
-          "content": "30"
-        },
-        "download_timeout": {
-          "name": "Download Timeout",
-          "info": "Writes ConnectionTimeout=seconds under IpDrv.HTTPDownload.",
-          "section": "Networking",
-          "type": "text",
-          "content": "30"
-        },
-        "enable_steam": {
-          "name": "Enable Steam",
-          "info": "On/true writes bEnableSteam=1. Off/false writes bEnableSteam=0.",
-          "section": "Networking",
-          "type": "boolean",
-          "content": "1"
-        },
-        "use_vac": {
-          "name": "Use VAC",
-          "info": "On/true writes bUseVAC=1 where supported by the Renegade X build. Off/false writes bUseVAC=0.",
-          "section": "Networking",
-          "type": "boolean",
-          "content": "0"
-        },
-        "require_steam": {
-          "name": "Require Steam",
-          "info": "On/true writes bRequireSteam=1 in access control. Off/false writes bRequireSteam=0.",
-          "section": "Networking",
-          "type": "boolean",
-          "content": "0"
-        },
-        "steam_auth_admins": {
-          "name": "Steam Auth Admins",
-          "info": "On/true writes bSteamAuthAdmins=1 where supported. Off/false writes bSteamAuthAdmins=0.",
-          "section": "Networking",
-          "type": "boolean",
-          "content": "0"
-        },
-        "broadcast_admin_identity": {
-          "name": "Broadcast Admin Identity",
-          "info": "On/true writes bBroadcastAdminIdentity=1. Off/false writes bBroadcastAdminIdentity=0.",
-          "section": "Networking",
-          "type": "boolean",
-          "content": "0"
-        },
-        "moderator_password": {
-          "name": "Moderator Password",
-          "info": "Writes ModPassword=yourpassword under RenX_Game.Rx_AccessControl. Blank disables this password.",
-          "section": "Networking",
-          "type": "text",
-          "content": ""
-        },
-        "multihome": {
-          "name": "Multihome IP",
-          "info": "Adds -MULTIHOME=ipaddress to the launch command. Blank lets the server bind normally.",
-          "section": "Networking",
-          "type": "text",
-          "content": ""
-        },
-        "extra_args": {
-          "name": "Extra Launch Args",
-          "info": "Appends raw UDK command-line arguments to the launch command. Blank is safest for normal servers.",
-          "section": "Networking",
-          "type": "text",
-          "content": ""
-        }
-      }
+      "parameters": {}
     }
   }
 }

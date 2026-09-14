@@ -6,11 +6,11 @@ on:
       payload_release:
         description: "GitHub release containing renx-core20-payload.zip parts"
         required: true
-        default: "renx-core20-1.1.1094-r1"
+        default: "renx-core20-1.2.1109-r1"
       image_tag:
         description: "Full container image tag to publish"
         required: true
-        default: "1.1.1094-core20-ltsc2022-r2"
+        default: "1.2.1109-core20-ltsc2022-r1"
       rolling_tag:
         description: "Optional rolling image tag to also publish"
         required: false
@@ -210,3 +210,4 @@ jobs:
             docker tag $image $rollingImage
             docker push $rollingImage
           }
+

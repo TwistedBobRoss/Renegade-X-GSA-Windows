@@ -17,7 +17,7 @@ on:
       image_tag:
         description: "Container image tag to publish"
         required: true
-        default: "1.1.1094-ltsc2022-r1"
+        default: "1.2.1109-ltsc2022-r1"
 
 permissions:
   contents: read
@@ -27,7 +27,7 @@ jobs:
   build:
     runs-on: windows-2022
     env:
-      IMAGE_TAG: ${{ github.event.inputs.image_tag || '1.1.1094-ltsc2022-r1' }}
+      IMAGE_TAG: ${{ github.event.inputs.image_tag || '1.2.1109-ltsc2022-r1' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -74,3 +74,4 @@ jobs:
           $repo = "${{ github.repository }}".ToLowerInvariant()
           $image = "ghcr.io/${repo}:$env:IMAGE_TAG"
           docker push $image
+
