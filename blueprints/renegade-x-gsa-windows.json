@@ -26,7 +26,7 @@
     },
     "image": {
       "name": "ghcr.io/twistedbobross/renegade-x-gsa-windows",
-      "tag": "stable-core20-ltsc2022"
+      "tag": "1.2.1109-core20-ltsc2022-r2"
     },
     "automatic_ports": true,
     "envs": {
@@ -236,6 +236,7 @@
           "info": "Release channel for the manifest check.",
           "section": "Install",
           "type": "array",
+          "content": "stable",
           "dropdown": "{\"Stable\":\"stable\"}"
         },
         "server_payload_urls": {
