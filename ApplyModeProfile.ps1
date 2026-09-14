@@ -11,10 +11,13 @@ function Get-Setting {
     return $value.Trim()
 }
 
-function Get-BoolSetting {
-    param([string]$Name, [bool]$Default)
+function ConvertTo-BoolString {
+    param([string]$Value, [string]$Default)
 
-    switch ((Get-Setting $Name ([string]$Default)).ToLowerInvariant()) {
+    $fallback = if ([string]::IsNullOrWhiteSpace($Default)) { "false" } else { $Default.Trim().ToLowerInvariant() }
+    $normalized = if ([string]::IsNullOrWhiteSpace($Value)) { $fallback } else { $Value.Trim().ToLowerInvariant() }
+
+    switch ($normalized) {
         "1" { return "true" }
         "true" { return "true" }
         "yes" { return "true" }
@@ -23,8 +26,14 @@ function Get-BoolSetting {
         "false" { return "false" }
         "no" { return "false" }
         "off" { return "false" }
-        default { return ([string]$Default).ToLowerInvariant() }
+        default { return $fallback }
     }
+}
+
+function Get-BoolSetting {
+    param([string]$Name, [bool]$Default)
+
+    return ConvertTo-BoolString (Get-Setting $Name ([string]$Default)) ([string]$Default)
 }
 
 function Set-IniValue {
@@ -86,17 +95,87 @@ function Set-IniValue {
     [System.IO.File]::WriteAllLines($Path, $lines)
 }
 
+function Get-IniValue {
+    param(
+        [string]$Path,
+        [string]$Section,
+        [string]$Key
+    )
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return $null
+    }
+
+    $sectionPattern = '^\s*\[' + [regex]::Escape($Section) + '\]\s*$'
+    $anySectionPattern = '^\s*\[.+\]\s*$'
+    $keyPattern = '^\s*' + [regex]::Escape($Key) + '\s*=(.*)$'
+    $insideSection = $false
+
+    foreach ($line in [System.IO.File]::ReadAllLines($Path)) {
+        if ($line -match $sectionPattern) {
+            $insideSection = $true
+            continue
+        }
+
+        if ($insideSection -and $line -match $anySectionPattern) {
+            break
+        }
+
+        if ($insideSection -and $line -match $keyPattern) {
+            return $Matches[1].Trim()
+        }
+    }
+
+    return $null
+}
+
+function Get-IniPreferredSetting {
+    param(
+        [string]$Path,
+        [string]$Section,
+        [string]$Key,
+        [string[]]$EnvironmentNames,
+        [string]$Default
+    )
+
+    $iniValue = Get-IniValue $Path $Section $Key
+    if (-not [string]::IsNullOrWhiteSpace($iniValue)) {
+        return $iniValue
+    }
+
+    foreach ($name in $EnvironmentNames) {
+        $value = [Environment]::GetEnvironmentVariable($name)
+        if (-not [string]::IsNullOrWhiteSpace($value)) {
+            return $value.Trim()
+        }
+    }
+
+    return $Default
+}
+
+function Get-IniPreferredBoolSetting {
+    param(
+        [string]$Path,
+        [string]$Section,
+        [string]$Key,
+        [string[]]$EnvironmentNames,
+        [string]$Default
+    )
+
+    return ConvertTo-BoolString (Get-IniPreferredSetting $Path $Section $Key $EnvironmentNames $Default) $Default
+}
+
 function Set-ModeVoteSettings {
     param([string]$Path, [string]$Section)
 
-    Set-IniValue $Path $Section "bFixedMapRotation" (Get-BoolSetting "RENX_VOTE_FIXED_ROTATION" $false)
-    Set-IniValue $Path $Section "MaxMapVoteSize" (Get-Setting "RENX_VOTE_MAX_CHOICES" "5")
-    Set-IniValue $Path $Section "RecentMapsToExclude" (Get-Setting "RENX_VOTE_RECENT_EXCLUDE" "2")
-    Set-IniValue $Path $Section "MapVoteTime" (Get-Setting "RENX_VOTE_DURATION" "35")
-    Set-IniValue $Path $Section "ChangeMapDisabledTime" (Get-Setting "RENX_VOTE_CHANGE_MAP_LOCKOUT" "600")
-    Set-IniValue $Path $Section "bAdminsStartMapVote" (Get-BoolSetting "RENX_VOTE_ADMINS_START" $false)
-    Set-IniValue $Path $Section "bBotVotesDisabled" (Get-BoolSetting "RENX_VOTE_BOTS_DISABLED" $true)
-    Set-IniValue $Path $Section "bRemoveVariantMapsInVoteList" (Get-BoolSetting "RENX_VOTE_REMOVE_VARIANTS" $true)
+    Set-IniValue $Path $Section "bFixedMapRotation" (Get-IniPreferredBoolSetting $Path $Section "bFixedMapRotation" @("RENX_VOTE_FIXED_ROTATION", "RENX_FIXED_MAP_ROTATION") "false")
+    Set-IniValue $Path $Section "MaxMapVoteSize" (Get-IniPreferredSetting $Path $Section "MaxMapVoteSize" @("RENX_VOTE_MAX_CHOICES", "RENX_MAX_MAP_VOTE_SIZE") "5")
+    Set-IniValue $Path $Section "RecentMapsToExclude" (Get-IniPreferredSetting $Path $Section "RecentMapsToExclude" @("RENX_VOTE_RECENT_EXCLUDE", "RENX_RECENT_MAPS_TO_EXCLUDE") "5")
+    Set-IniValue $Path $Section "MapVoteTime" (Get-IniPreferredSetting $Path $Section "MapVoteTime" @("RENX_VOTE_DURATION") "35")
+    Set-IniValue $Path $Section "ChangeMapDisabledTime" (Get-IniPreferredSetting $Path $Section "ChangeMapDisabledTime" @("RENX_VOTE_CHANGE_MAP_LOCKOUT") "600")
+    Set-IniValue $Path $Section "bAdminsStartMapVote" (Get-IniPreferredBoolSetting $Path $Section "bAdminsStartMapVote" @("RENX_VOTE_ADMINS_START") "false")
+    Set-IniValue $Path $Section "bBotVotesDisabled" (Get-IniPreferredBoolSetting $Path $Section "bBotVotesDisabled" @("RENX_VOTE_BOTS_DISABLED") "false")
+    Set-IniValue $Path $Section "bRemoveVariantMapsInVoteList" (Get-IniPreferredBoolSetting $Path $Section "bRemoveVariantMapsInVoteList" @("RENX_VOTE_REMOVE_VARIANTS") "true")
 }
 
 $root = Get-Setting "RENX_ROOT" "C:\renx-data\ServerFiles"

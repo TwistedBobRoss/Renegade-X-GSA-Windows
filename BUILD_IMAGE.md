@@ -3,7 +3,7 @@
 This repository builds a small Windows bootstrap image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r3
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.1.1094-ltsc2022-r1
 ```
 
 The image does not bake Renegade X game files into GHCR. It contains only:
@@ -23,7 +23,7 @@ C:\renx-data\ServerFiles
 Run the `Build Renegade X Bootstrap Windows Image` workflow and provide:
 
 ```text
-image_tag = 1.0.1022-ltsc2022-r3
+image_tag = 1.1.1094-ltsc2022-r1
 ```
 
 No payload release is required for the image build.
@@ -33,8 +33,8 @@ If you want to host the runtime zip parts on this repository's GitHub Releases, 
 ```powershell
 .\scripts\Publish-RenXPayloadAndBuild.ps1 `
   -PayloadPartsDir ".\payload-parts" `
-  -PayloadReleaseTag "renx-payload-1.0.1022" `
-  -ImageTag "1.0.1022-ltsc2022-r3"
+  -PayloadReleaseTag "renx-core20-1.1.1094-r1" `
+  -ImageTag "1.1.1094-ltsc2022-r1"
 ```
 
 The script uploads the payload release assets, dispatches the bootstrap image workflow, and prints release download URLs that can be pasted into GSA's `Server Payload URLs` field.

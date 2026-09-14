@@ -125,6 +125,8 @@ Runtime auto-update is controlled by `Runtime Auto Update` and `Update Manifest 
 
 The Docker image cannot replace itself while running. The blueprint uses the rolling image tag `stable-core20-ltsc2022`; after a new image is pushed to that tag, recreate or reinstall the GSA container to pull it while keeping `\renx-data`.
 
+Map voting and rotation settings are INI-first. Edit `\renx-data\Config\UDKGame.ini`, `UDKMapList.ini`, `UDKRenegadeX.ini`, or `UDKSurvival.ini`, then restart the server. On restart the wrapper mirrors those values into the runtime/default INIs before launch so UE3 config rebuilds do not drop them.
+
 ## Public Server Listing
 
 To appear in the Renegade X server browser:
@@ -157,7 +159,7 @@ ghcr.io/twistedbobross/renegade-x-gsa-windows:stable-core20-ltsc2022
 Bootstrap-only recovery image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-ltsc2022-r12
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.1.1094-ltsc2022-r1
 ```
 
 The primary image is recommended for GSA. It seeds the runtime into persistent storage and avoids downloading the core payload during a normal first start.
@@ -342,12 +344,14 @@ At startup the wrapper:
 
 1. Installs or validates the persistent runtime.
 2. Initializes persistent runtime INIs under `C:\renx-data\Config`.
-3. Applies GSA parameters to those INIs.
-4. Copies persistent configs into `ServerFiles\UDKGame\Config`.
-5. Installs optional maps and custom content.
-6. Launches `Binaries\Win64\UDK.com`.
+3. Applies GSA parameters for install, identity, ports, access, and common gameplay values.
+4. Preserves INI-first map voting/rotation values and syncs `GameSpecificMapCycles` with `UDKMapList.ini`.
+5. Copies persistent configs into `ServerFiles\UDKGame\Config`.
+6. Mirrors managed values into runtime/default INIs.
+7. Installs optional maps and custom content.
+8. Launches `Binaries\Win64\UDK.com`.
 
-Values controlled by GSA parameters are written again at every start. To make an advanced manual change persistent, do not edit a line that a GSA parameter intentionally manages unless you also change the corresponding parameter.
+For map voting and rotation, the persistent INI value wins after it exists. For non-map operational settings, values controlled by GSA parameters are written again at every start.
 
 ## GameServerApp Parameter Reference
 
@@ -357,8 +361,8 @@ Values controlled by GSA parameters are written again at every start. To make an
 | --- | --- | --- |
 | Starting Map | `CNC-Field` | Initial map name without `.udk`. |
 | Game Class Override | Normal / map prefix | Lets the map prefix choose the class, or explicitly launches Survival. |
-| Map Cycle Class | Standard CnC | Writes `Rx_Game` or `Rx_Game_Survival` into the generated map cycle. |
-| Map Rotation | Core CNC rotation | Comma-separated map names used to generate `GameSpecificMapCycles`. |
+| Map Cycle Class | Standard CnC | Fresh-install fallback for choosing the `GameSpecificMapCycles` entry. Existing INI map cycles are preserved. |
+| Map Rotation | Core CNC rotation | Fresh-install fallback list. After install, edit `GameSpecificMapCycles` in `UDKGame.ini`; the wrapper syncs the matching `UDKMapList.ini` section. |
 | Mutators | blank | Comma-separated mutator class names appended to the launch URL. |
 | Extra Launch Args | blank | Raw advanced UDK command-line arguments. |
 | Multihome IP | blank | Adds `-MULTIHOME=address` when binding to a specific local address. |
@@ -415,7 +419,7 @@ Values controlled by GSA parameters are written again at every start. To make an
 | Surrender Lockout Seconds | `600` | Time before surrender voting becomes available. |
 | Change Map Vote Lockout | `600` | Time before change-map voting becomes available. |
 | Number Of Maps Available In Vote | `5` | Maximum choices shown in the map vote. |
-| Recent Maps Excluded | `2` | Number of recently played maps removed from the vote. |
+| Recent Maps Excluded | `5` | Number of recently played maps removed from the vote. |
 | Map Vote Time Seconds | `35` | How long the map vote remains open. |
 | Admins Start Map Vote | Off | Controls administrator-started map voting behavior. |
 | Disable Bot Votes | Off | Prevents bots from affecting votes when enabled. |
@@ -492,7 +496,9 @@ The GSA configuration template directly exposes:
 ```text
 \renx-data\Config\UDKGame.ini
 \renx-data\Config\UDKEngine.ini
+\renx-data\Config\UDKMapList.ini
 \renx-data\Config\UDKRenegadeX.ini
+\renx-data\Config\UDKSurvival.ini
 \renx-data\Config\UDKWeb.ini
 ```
 
@@ -505,8 +511,6 @@ The persistent runtime also contains advanced files under:
 Important advanced files include:
 
 ```text
-UDKMapList.ini
-UDKSurvival.ini
 UDKPurchaseSystem.ini
 UDKRenegadeXAISetup.ini
 UDKFPSMonitor.ini
@@ -1269,6 +1273,7 @@ docker run -d --name renx-test `
 - Use map names without `.udk`.
 - Normal CnC should use `CNC-*` maps.
 - Survival should use `DEF-*`, `RenX_Coop.Rx_Game_Survival`, and `Rx_Game_Survival`.
+- Edit `\renx-data\Config\UDKGame.ini` for `GameSpecificMapCycles`; restart so the wrapper syncs `UDKMapList.ini`.
 - Confirm the map is installed in `UDKGame\CookedPC\Maps\RenX`.
 
 ### Server Name Is Missing Words Or Contains Quotes
@@ -1286,14 +1291,15 @@ docker run -d --name renx-test `
 
 ### Config Changes Do Not Stick
 
-- Check whether a GSA parameter controls the same key.
+- Map/vote changes should be made in the persistent INIs under `C:\renx-data\Config`; restart the server after editing.
+- For non-map settings, check whether a GSA parameter controls the same key.
 - Edit the persistent file under `C:\renx-data\Config`, not only the runtime copy.
 - Recreate the container after changing image tags or Docker environment variables.
 - Do not wipe the persistent mount during routine updates.
 
 ### Marathon Mode Still Ends The Match
 
-- Use image `1.0.1022-core20-ltsc2022-r8` or newer; older images only wrote `CnCModeTimeLimit`.
+- Use image `stable-core20-ltsc2022` or `1.0.1022-core20-ltsc2022-r8` or newer; older images only wrote `CnCModeTimeLimit`.
 - Set `Marathon Mode` to On, then restart the server.
 - Confirm `\renx-data\Config\UDKRenegadeX.ini` contains `TimeLimit=0` and `CnCModeTimeLimit=0`.
 - If staying on an older image, edit `\renx-data\Config\UDKRenegadeX.ini` manually and restart; do not wipe `renx-data`.

@@ -2,6 +2,21 @@
 
 All notable changes to the Renegade X GameServerApp Windows blueprint are tracked here.
 
+## 1.6.0 - 2026-09-14
+
+### Changed
+
+- Made map voting and rotation INI-first so edited `UDKGame.ini`, `UDKMapList.ini`, `UDKRenegadeX.ini`, and `UDKSurvival.ini` values are preserved across restarts.
+- Added normal `GameSpecificMapCycles` entries to the GSA blueprint's `UDKGame.ini` template and aligned the default recent-map vote exclusion with RenX 1.1.
+- Kept runtime auto-update enabled by default so the container checks the release manifest each time it starts.
+
+### Fixed
+
+- Preserved repeated `GameSpecificMapCycles` entries instead of replacing every map cycle with one generated line.
+- Synced the active map cycle into `UDKMapList.ini` so map travel and the voting list stay aligned.
+- Preserved Survival game-class selection through the final launcher handoff instead of clearing it when no separate mode-profile field was present.
+- Prevented the mode-profile helper from overwriting INI-sourced vote settings after startup.
+
 ## 1.5.4 - 2026-07-10
 
 ### Changed

@@ -10,7 +10,11 @@ set "RENX_RUNNER_SCRIPT=%RENX_BOOTSTRAP_ROOT%\RunRenX.ps1"
 
 if /I "%RENX_MODE_PROFILE%"=="survival" (
   set "RENX_GAME_CLASS=RenX_Coop.Rx_Game_Survival"
-) else (
+) else if /I "%RENX_MODE_PROFILE%"=="cnc" (
+  set "RENX_GAME_CLASS="
+) else if /I "%RENX_MODE_PROFILE%"=="aow" (
+  set "RENX_GAME_CLASS="
+) else if /I "%RENX_GAME_CLASS%"=="none" (
   set "RENX_GAME_CLASS="
 )
 

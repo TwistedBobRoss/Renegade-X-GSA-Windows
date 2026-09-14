@@ -19,14 +19,16 @@ function Get-Setting {
     return $value.Trim()
 }
 
-function Get-BoolSetting {
+function ConvertTo-BoolString {
     param(
-        [string]$Name,
+        [string]$Value,
         [string]$Default
     )
 
-    $value = (Get-Setting $Name $Default).ToLowerInvariant()
-    switch ($value) {
+    $fallback = if ([string]::IsNullOrWhiteSpace($Default)) { "false" } else { $Default.Trim().ToLowerInvariant() }
+    $normalized = if ([string]::IsNullOrWhiteSpace($Value)) { $fallback } else { $Value.Trim().ToLowerInvariant() }
+
+    switch ($normalized) {
         "1" { return "true" }
         "true" { return "true" }
         "yes" { return "true" }
@@ -35,8 +37,17 @@ function Get-BoolSetting {
         "false" { return "false" }
         "no" { return "false" }
         "off" { return "false" }
-        default { return $Default.ToLowerInvariant() }
+        default { return $fallback }
     }
+}
+
+function Get-BoolSetting {
+    param(
+        [string]$Name,
+        [string]$Default
+    )
+
+    return ConvertTo-BoolString (Get-Setting $Name $Default) $Default
 }
 
 function Set-IniValue {
@@ -48,7 +59,7 @@ function Set-IniValue {
     )
 
     if (-not (Test-Path -LiteralPath $Path)) {
-        return
+        New-Item -ItemType File -Force -Path $Path | Out-Null
     }
 
     $lines = [System.Collections.Generic.List[string]]::new()
@@ -134,6 +145,118 @@ function Get-IniValue {
     return $null
 }
 
+function Get-IniValueFromPaths {
+    param(
+        [string[]]$Paths,
+        [string]$Section,
+        [string]$Key
+    )
+
+    foreach ($path in $Paths) {
+        $value = Get-IniValue $path $Section $Key
+        if (-not [string]::IsNullOrWhiteSpace($value)) {
+            return $value.Trim()
+        }
+    }
+
+    return $null
+}
+
+function Get-FirstEnvironmentSetting {
+    param(
+        [string[]]$Names,
+        [string]$Default
+    )
+
+    foreach ($name in $Names) {
+        $value = [Environment]::GetEnvironmentVariable($name)
+        if (-not [string]::IsNullOrWhiteSpace($value)) {
+            return $value.Trim()
+        }
+    }
+
+    return $Default
+}
+
+function Get-IniPreferredSetting {
+    param(
+        [string[]]$Paths,
+        [string]$Section,
+        [string]$Key,
+        [string[]]$EnvironmentNames,
+        [string]$Default
+    )
+
+    $iniValue = Get-IniValueFromPaths $Paths $Section $Key
+    if (-not [string]::IsNullOrWhiteSpace($iniValue)) {
+        return $iniValue
+    }
+
+    return Get-FirstEnvironmentSetting $EnvironmentNames $Default
+}
+
+function Get-IniPreferredBoolSetting {
+    param(
+        [string[]]$Paths,
+        [string]$Section,
+        [string]$Key,
+        [string[]]$EnvironmentNames,
+        [string]$Default
+    )
+
+    return ConvertTo-BoolString (Get-IniPreferredSetting $Paths $Section $Key $EnvironmentNames $Default) $Default
+}
+
+function Get-MapRotationFromIni {
+    param(
+        [string]$Path,
+        [string]$CycleClass
+    )
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return $null
+    }
+
+    $sectionPattern = '^\s*\[UTGame\.UTGame\]\s*$'
+    $anySectionPattern = '^\s*\[.+\]\s*$'
+    $cyclePattern = '^\s*\+?GameSpecificMapCycles\s*=(.*)$'
+    $classPattern = 'GameClassName\s*=\s*"' + [regex]::Escape($CycleClass) + '"'
+    $insideSection = $false
+
+    foreach ($line in [System.IO.File]::ReadAllLines($Path)) {
+        if ($line -match $sectionPattern) {
+            $insideSection = $true
+            continue
+        }
+
+        if ($insideSection -and $line -match $anySectionPattern) {
+            break
+        }
+
+        if (-not $insideSection -or $line -notmatch $cyclePattern) {
+            continue
+        }
+
+        $cycleValue = $Matches[1]
+        if ($cycleValue -notmatch $classPattern -or $cycleValue -notmatch 'Maps\s*=\s*\((.*)\)') {
+            continue
+        }
+
+        $mapsText = $Matches[1]
+        $maps = @(
+            [regex]::Matches($mapsText, '"([^"]+)"') |
+                ForEach-Object { $_.Groups[1].Value.Trim() } |
+                Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+        )
+
+        if ($maps.Count -gt 0) {
+            return ($maps -join ",")
+        }
+    }
+
+    return $null
+}
+
 function Set-MapRotation {
     param(
         [string]$Path,
@@ -156,7 +279,159 @@ function Set-MapRotation {
     }
 
     $escapedMaps = @($maps | ForEach-Object { '"' + ($_ -replace '"', '') + '"' }) -join ","
-    Set-IniValue $Path "UTGame.UTGame" "GameSpecificMapCycles" "(GameClassName=`"$CycleClass`",Maps=($escapedMaps))"
+    $lineKey = if ((Split-Path -Leaf $Path) -like "Default*") { "+GameSpecificMapCycles" } else { "GameSpecificMapCycles" }
+    $newLine = "$lineKey=(GameClassName=`"$CycleClass`",Maps=($escapedMaps))"
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        New-Item -ItemType File -Force -Path $Path | Out-Null
+    }
+
+    $lines = [System.Collections.Generic.List[string]]::new()
+    $lines.AddRange([System.IO.File]::ReadAllLines($Path))
+
+    $sectionPattern = '^\s*\[UTGame\.UTGame\]\s*$'
+    $anySectionPattern = '^\s*\[.+\]\s*$'
+    $cyclePattern = '^\s*\+?GameSpecificMapCycles\s*=\s*\(.*GameClassName\s*=\s*"' + [regex]::Escape($CycleClass) + '"'
+
+    $sectionIndex = -1
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -match $sectionPattern) {
+            $sectionIndex = $i
+            break
+        }
+    }
+
+    if ($sectionIndex -lt 0) {
+        $lines.Add("")
+        $lines.Add("[UTGame.UTGame]")
+        $lines.Add($newLine)
+        [System.IO.File]::WriteAllLines($Path, $lines)
+        return
+    }
+
+    $insertIndex = $lines.Count
+    $matchingIndexes = [System.Collections.Generic.List[int]]::new()
+    for ($i = $sectionIndex + 1; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -match $anySectionPattern) {
+            $insertIndex = $i
+            break
+        }
+
+        if ($lines[$i] -match $cyclePattern) {
+            $matchingIndexes.Add($i)
+        }
+    }
+
+    if ($matchingIndexes.Count -eq 0) {
+        $lines.Insert($insertIndex, $newLine)
+    }
+    else {
+        $lines[$matchingIndexes[0]] = $newLine
+        for ($i = $matchingIndexes.Count - 1; $i -ge 1; $i--) {
+            $lines.RemoveAt($matchingIndexes[$i])
+        }
+    }
+
+    [System.IO.File]::WriteAllLines($Path, $lines)
+}
+
+function Get-MapListSectionForCycleClass {
+    param([string]$CycleClass)
+
+    switch ($CycleClass) {
+        "Rx_Game_Survival" { return "DEFMapList Rx_MapList" }
+        default { return "CNCMapList Rx_MapList" }
+    }
+}
+
+function Set-MapList {
+    param(
+        [string]$Path,
+        [string]$Section,
+        [string]$MapsCsv
+    )
+
+    if ([string]::IsNullOrWhiteSpace($MapsCsv) -or [string]::IsNullOrWhiteSpace($Section)) {
+        return
+    }
+
+    $maps = @(
+        $MapsCsv -split "," |
+            ForEach-Object { $_.Trim() } |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    )
+
+    if ($maps.Count -eq 0) {
+        return
+    }
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        New-Item -ItemType File -Force -Path $Path | Out-Null
+    }
+
+    $lines = [System.Collections.Generic.List[string]]::new()
+    $lines.AddRange([System.IO.File]::ReadAllLines($Path))
+
+    $sectionPattern = '^\s*\[' + [regex]::Escape($Section) + '\]\s*$'
+    $anySectionPattern = '^\s*\[.+\]\s*$'
+    $mapPattern = '^\s*Maps\s*='
+
+    $sectionIndex = -1
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -match $sectionPattern) {
+            $sectionIndex = $i
+            break
+        }
+    }
+
+    if ($sectionIndex -lt 0) {
+        $lines.Add("")
+        $lines.Add("[$Section]")
+        foreach ($mapName in $maps) {
+            $lines.Add('Maps=(Map="' + ($mapName -replace '"', '') + '")')
+        }
+        [System.IO.File]::WriteAllLines($Path, $lines)
+        return
+    }
+
+    $insertIndex = $lines.Count
+    $matchingIndexes = [System.Collections.Generic.List[int]]::new()
+    for ($i = $sectionIndex + 1; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -match $anySectionPattern) {
+            $insertIndex = $i
+            break
+        }
+
+        if ($lines[$i] -match $mapPattern) {
+            $matchingIndexes.Add($i)
+        }
+    }
+
+    for ($i = $matchingIndexes.Count - 1; $i -ge 0; $i--) {
+        $lines.RemoveAt($matchingIndexes[$i])
+        if ($matchingIndexes[$i] -lt $insertIndex) {
+            $insertIndex--
+        }
+    }
+
+    $newLines = @($maps | ForEach-Object { 'Maps=(Map="' + ($_ -replace '"', '') + '")' })
+    for ($i = 0; $i -lt $newLines.Count; $i++) {
+        $lines.Insert($insertIndex + $i, $newLines[$i])
+    }
+
+    [System.IO.File]::WriteAllLines($Path, $lines)
+}
+
+function Set-IniSectionValues {
+    param(
+        [string]$Path,
+        [string]$Section,
+        [System.Collections.IDictionary]$Values
+    )
+
+    foreach ($key in $Values.Keys) {
+        Set-IniValue $Path $Section $key ([string]$Values[$key])
+    }
 }
 
 function Split-SettingList {
@@ -756,6 +1031,7 @@ function Initialize-RuntimeConfig {
         @{ Runtime = "UDKEngine.ini"; Default = "DefaultEngine.ini" },
         @{ Runtime = "UDKMapList.ini"; Default = "DefaultMapList.ini" },
         @{ Runtime = "UDKRenegadeX.ini"; Default = "DefaultRenegadeX.ini" },
+        @{ Runtime = "UDKSurvival.ini"; Default = "DefaultSurvival.ini" },
         @{ Runtime = "UDKWeb.ini"; Default = "DefaultWeb.ini" }
     )
 
@@ -816,6 +1092,7 @@ $gameClass = Get-Setting "RENX_GAME_CLASS" ""
 if ($gameClass -eq "none") {
     $gameClass = ""
 }
+$modeProfile = Get-Setting "RENX_MODE_PROFILE" ""
 $mapCycleClass = Get-Setting "RENX_MAP_CYCLE_CLASS" "Rx_Game"
 $mapRotation = Get-Setting "RENX_MAP_ROTATION" ""
 $mutators = Get-Setting "RENX_MUTATORS" ""
@@ -869,7 +1146,7 @@ $buildingsRevive = Get-BoolSetting "RENX_BUILDINGS_REVIVE" "true"
 $enableAirdrops = Get-BoolSetting "RENX_ENABLE_AIRDROPS" "false"
 $teamMode = Get-Setting "RENX_TEAM_MODE" "6"
 $maxMapVoteSize = Get-Setting "RENX_MAX_MAP_VOTE_SIZE" (Get-Setting "RENX_VOTE_MAX_CHOICES" "5")
-$recentMapsToExclude = Get-Setting "RENX_RECENT_MAPS_TO_EXCLUDE" (Get-Setting "RENX_VOTE_RECENT_EXCLUDE" "2")
+$recentMapsToExclude = Get-Setting "RENX_RECENT_MAPS_TO_EXCLUDE" (Get-Setting "RENX_VOTE_RECENT_EXCLUDE" "5")
 $mapVoteTime = Get-Setting "RENX_VOTE_DURATION" "35"
 $changeMapDisabledTime = Get-Setting "RENX_VOTE_CHANGE_MAP_LOCKOUT" "600"
 $adminsStartMapVote = Get-BoolSetting "RENX_VOTE_ADMINS_START" "false"
@@ -921,8 +1198,80 @@ Sync-RuntimeVersionSettings $installConfigDir $configDir
 
 $udkGame = Join-Path $configDir "UDKGame.ini"
 $udkEngine = Join-Path $configDir "UDKEngine.ini"
+$udkMapList = Join-Path $configDir "UDKMapList.ini"
 $udkRenegadeX = Join-Path $configDir "UDKRenegadeX.ini"
+$udkSurvival = Join-Path $configDir "UDKSurvival.ini"
 $udkWeb = Join-Path $configDir "UDKWeb.ini"
+$runtimeGame = Join-Path $installConfigDir "UDKGame.ini"
+$defaultGame = Join-Path $installConfigDir "DefaultGame.ini"
+$runtimeEngine = Join-Path $installConfigDir "UDKEngine.ini"
+$defaultEngine = Join-Path $installConfigDir "DefaultEngine.ini"
+$runtimeMapList = Join-Path $installConfigDir "UDKMapList.ini"
+$defaultMapList = Join-Path $installConfigDir "DefaultMapList.ini"
+$runtimeRenegadeX = Join-Path $installConfigDir "UDKRenegadeX.ini"
+$defaultRenegadeX = Join-Path $installConfigDir "DefaultRenegadeX.ini"
+$runtimeSurvival = Join-Path $installConfigDir "UDKSurvival.ini"
+$defaultSurvival = Join-Path $installConfigDir "DefaultSurvival.ini"
+
+$iniLocalMap = Get-IniValueFromPaths @($udkEngine, $runtimeEngine, $defaultEngine) "URL" "LocalMap"
+if (-not [string]::IsNullOrWhiteSpace($iniLocalMap)) {
+    $iniMapName = [System.IO.Path]::GetFileNameWithoutExtension($iniLocalMap.Trim().Trim('"'))
+    if (-not [string]::IsNullOrWhiteSpace($iniMapName)) {
+        $map = $iniMapName
+        Write-Host "Using starting map from INI LocalMap: $map"
+    }
+}
+
+if (
+    $mapCycleClass -eq "Rx_Game" -and
+    (
+        $gameClass -eq "RenX_Coop.Rx_Game_Survival" -or
+        $map.StartsWith("DEF-", [System.StringComparison]::OrdinalIgnoreCase)
+    )
+) {
+    $mapCycleClass = "Rx_Game_Survival"
+}
+
+$isSurvivalMode = (
+    $gameClass -eq "RenX_Coop.Rx_Game_Survival" -or
+    $mapCycleClass -eq "Rx_Game_Survival" -or
+    $map.StartsWith("DEF-", [System.StringComparison]::OrdinalIgnoreCase)
+)
+if ([string]::IsNullOrWhiteSpace($modeProfile)) {
+    $modeProfile = if ($isSurvivalMode) { "survival" } else { "cnc" }
+}
+$mapListSection = Get-MapListSectionForCycleClass $mapCycleClass
+
+$iniMapRotation = Get-MapRotationFromIni $udkGame $mapCycleClass
+if (-not [string]::IsNullOrWhiteSpace($iniMapRotation)) {
+    $mapRotation = $iniMapRotation
+    Write-Host "Using $mapCycleClass map rotation from INI GameSpecificMapCycles."
+}
+
+$normalVoteSources = @($udkRenegadeX, $runtimeRenegadeX, $defaultRenegadeX)
+$survivalVoteSources = @($udkSurvival, $runtimeSurvival, $defaultSurvival)
+$voteSection = if ($isSurvivalMode) { "RenX_Coop.Rx_Game_Survival" } else { "RenX_Game.Rx_Game" }
+$voteSources = if ($isSurvivalMode) { $survivalVoteSources } else { $normalVoteSources }
+
+$fixedMapRotation = Get-IniPreferredBoolSetting $voteSources $voteSection "bFixedMapRotation" @("RENX_FIXED_MAP_ROTATION", "RENX_VOTE_FIXED_ROTATION") $fixedMapRotation
+$maxMapVoteSize = Get-IniPreferredSetting $voteSources $voteSection "MaxMapVoteSize" @("RENX_MAX_MAP_VOTE_SIZE", "RENX_VOTE_MAX_CHOICES") $maxMapVoteSize
+$recentMapsToExclude = Get-IniPreferredSetting $voteSources $voteSection "RecentMapsToExclude" @("RENX_RECENT_MAPS_TO_EXCLUDE", "RENX_VOTE_RECENT_EXCLUDE") $recentMapsToExclude
+$mapVoteTime = Get-IniPreferredSetting $voteSources $voteSection "MapVoteTime" @("RENX_VOTE_DURATION") $mapVoteTime
+$changeMapDisabledTime = Get-IniPreferredSetting $voteSources $voteSection "ChangeMapDisabledTime" @("RENX_VOTE_CHANGE_MAP_LOCKOUT") $changeMapDisabledTime
+$adminsStartMapVote = Get-IniPreferredBoolSetting $voteSources $voteSection "bAdminsStartMapVote" @("RENX_VOTE_ADMINS_START") $adminsStartMapVote
+$botVotesDisabled = Get-IniPreferredBoolSetting $voteSources $voteSection "bBotVotesDisabled" @("RENX_VOTE_BOTS_DISABLED") $botVotesDisabled
+$removeVariantMapsInVoteList = Get-IniPreferredBoolSetting $voteSources $voteSection "bRemoveVariantMapsInVoteList" @("RENX_VOTE_REMOVE_VARIANTS") $removeVariantMapsInVoteList
+
+$voteSettings = [ordered]@{
+    bFixedMapRotation = $fixedMapRotation
+    MaxMapVoteSize = $maxMapVoteSize
+    RecentMapsToExclude = $recentMapsToExclude
+    MapVoteTime = $mapVoteTime
+    ChangeMapDisabledTime = $changeMapDisabledTime
+    bAdminsStartMapVote = $adminsStartMapVote
+    bBotVotesDisabled = $botVotesDisabled
+    bRemoveVariantMapsInVoteList = $removeVariantMapsInVoteList
+}
 
 $surveyDate = [DateTime]::UtcNow.ToString("yyyyMMdd")
 Set-IniValue $udkEngine "HardwareSurvey" "LastSurveyVersion" "12791"
@@ -941,6 +1290,7 @@ Set-IniValue $udkGame "UTGame.UTGame" "MinNetPlayers" $minNetPlayers
 Set-IniValue $udkGame "UTGame.UTGame" "bWaitForNetPlayers" $waitForNetPlayers
 Set-IniValue $udkGame "UTGame.UTGame" "RestartWait" $restartWait
 Set-MapRotation $udkGame $mapCycleClass $mapRotation
+Set-MapList $udkMapList $mapListSection $mapRotation
 
 Set-IniValue $udkEngine "URL" "Port" $gamePort
 Set-IniValue $udkEngine "URL" "PeerPort" $peerPort
@@ -964,20 +1314,20 @@ Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "DMModeTimeLimit" $dmTimeLimit
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bBuildingsRevive" $buildingsRevive
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bEnableAirdrops" $enableAirdrops
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "TeamMode" $teamMode
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "MaxMapVoteSize" $maxMapVoteSize
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "RecentMapsToExclude" $recentMapsToExclude
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "MapVoteTime" $mapVoteTime
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "ChangeMapDisabledTime" $changeMapDisabledTime
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "SurrenderLength" $surrenderLength
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "SurrenderDisabledTime" $surrenderDisabledTime
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bAdminsStartMapVote" $adminsStartMapVote
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bBotVotesDisabled" $botVotesDisabled
-Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "bRemoveVariantMapsInVoteList" $removeVariantMapsInVoteList
+Set-IniSectionValues $udkRenegadeX "RenX_Game.Rx_Game" $voteSettings
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "SpawnCrates" $spawnCrates
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "NodDifficulty" $nodBotDifficulty
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "GDIDifficulty" $gdiBotDifficulty
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "NODAttackingValue" $nodAttackPercent
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Game" "GDIAttackingValue" $gdiAttackPercent
+
+if ($isSurvivalMode) {
+    Set-IniValue $udkSurvival "RenX_Coop.Rx_Game_Survival" "bListed" $listed
+    Set-IniSectionValues $udkSurvival "RenX_Coop.Rx_Game_Survival" $voteSettings
+}
+
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Rcon" "bEnableRcon" $enableRcon
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Rcon" "RconPort" $rconPort
 Set-IniValue $udkRenegadeX "RenX_Game.Rx_Rcon" "SubscriberLimit" $rconSubscriberLimit
@@ -991,36 +1341,40 @@ Copy-Item -Path (Join-Path $configDir "*") -Destination $installConfigDir -Force
 
 # Reinforce identity settings after the persistent config copy. UE3 may rebuild a
 # runtime config from DefaultGame.ini, so keep both sources aligned.
-Set-IniValue (Join-Path $installConfigDir "UDKGame.ini") "Engine.GameReplicationInfo" "ServerName" $serverName
-Set-IniValue (Join-Path $installConfigDir "UDKGame.ini") "Engine.GameReplicationInfo" "MessageOfTheDay" (Get-Setting "RENX_MOTD" "")
-Set-IniValue (Join-Path $installConfigDir "DefaultGame.ini") "Engine.GameReplicationInfo" "ServerName" $serverName
-Set-IniValue (Join-Path $installConfigDir "DefaultGame.ini") "Engine.GameReplicationInfo" "MessageOfTheDay" (Get-Setting "RENX_MOTD" "")
+Set-IniValue $runtimeGame "Engine.GameReplicationInfo" "ServerName" $serverName
+Set-IniValue $runtimeGame "Engine.GameReplicationInfo" "MessageOfTheDay" (Get-Setting "RENX_MOTD" "")
+Set-IniValue $defaultGame "Engine.GameReplicationInfo" "ServerName" $serverName
+Set-IniValue $defaultGame "Engine.GameReplicationInfo" "MessageOfTheDay" (Get-Setting "RENX_MOTD" "")
+foreach ($gameTarget in @($runtimeGame, $defaultGame)) {
+    Set-MapRotation $gameTarget $mapCycleClass $mapRotation
+}
+foreach ($mapListTarget in @($runtimeMapList, $defaultMapList)) {
+    Set-MapList $mapListTarget $mapListSection $mapRotation
+}
 
 # Keep the runtime and default Renegade X config aligned. UE3 may rebuild the
 # runtime config from defaults, so managed match-flow and voting values are
 # reinforced in both places before the game process starts.
-$runtimeRenegadeX = Join-Path $installConfigDir "UDKRenegadeX.ini"
-$defaultRenegadeX = Join-Path $installConfigDir "DefaultRenegadeX.ini"
 foreach ($renegadeXTarget in @($runtimeRenegadeX, $defaultRenegadeX)) {
     Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "TimeLimit" $timeLimit
     Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "CnCModeTimeLimit" $cncTimeLimit
     Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "DMModeTimeLimit" $dmTimeLimit
     Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "bBuildingsRevive" $buildingsRevive
     Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "bEnableAirdrops" $enableAirdrops
-    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "bFixedMapRotation" $fixedMapRotation
-    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "MaxMapVoteSize" $maxMapVoteSize
-    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "RecentMapsToExclude" $recentMapsToExclude
-    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "MapVoteTime" $mapVoteTime
-    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "ChangeMapDisabledTime" $changeMapDisabledTime
     Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "SurrenderLength" $surrenderLength
     Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "SurrenderDisabledTime" $surrenderDisabledTime
-    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "bAdminsStartMapVote" $adminsStartMapVote
-    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "bBotVotesDisabled" $botVotesDisabled
-    Set-IniValue $renegadeXTarget "RenX_Game.Rx_Game" "bRemoveVariantMapsInVoteList" $removeVariantMapsInVoteList
+    Set-IniSectionValues $renegadeXTarget "RenX_Game.Rx_Game" $voteSettings
 }
 
-$runtimeServerName = Get-IniValue (Join-Path $installConfigDir "UDKGame.ini") "Engine.GameReplicationInfo" "ServerName"
-$defaultServerName = Get-IniValue (Join-Path $installConfigDir "DefaultGame.ini") "Engine.GameReplicationInfo" "ServerName"
+if ($isSurvivalMode) {
+    foreach ($survivalTarget in @($runtimeSurvival, $defaultSurvival)) {
+        Set-IniValue $survivalTarget "RenX_Coop.Rx_Game_Survival" "bListed" $listed
+        Set-IniSectionValues $survivalTarget "RenX_Coop.Rx_Game_Survival" $voteSettings
+    }
+}
+
+$runtimeServerName = Get-IniValue $runtimeGame "Engine.GameReplicationInfo" "ServerName"
+$defaultServerName = Get-IniValue $defaultGame "Engine.GameReplicationInfo" "ServerName"
 if ($runtimeServerName -ne $serverName -or $defaultServerName -ne $serverName) {
     throw "Renegade X server-name configuration validation failed. Runtime='$runtimeServerName'; Default='$defaultServerName'; Expected='$serverName'."
 }
@@ -1050,6 +1404,7 @@ Sync-CustomContent $customContentDir $root
 
 $env:RENX_MAP = $map
 $env:RENX_GAME_CLASS = $gameClass
+$env:RENX_MODE_PROFILE = $modeProfile
 $env:RENX_MAX_PLAYERS = $maxPlayers
 $env:RENX_GAME_PORT = $gamePort
 $env:RENX_TIME_LIMIT = $timeLimit
