@@ -111,16 +111,16 @@ Changing only an editable INI value normally requires a server restart.
 Changing the image tag, Docker environment variables, mounts, or blueprint directory types requires GSA to recreate or reinstall the container. The persistent mount must remain:
 
 ```text
-\renx-data
+\serverfiles
 ```
 
-Do not wipe `renx-data` unless you intentionally want to remove the server runtime, configs, maps, downloads, and logs.
+Do not wipe `serverfiles` unless you intentionally want to remove the server runtime, configs, maps, downloads, and logs.
 
 Runtime auto-update is enabled in the blueprint. The container checks `release-manifest.json` on start. If the manifest has a higher Renegade X `version_number`, the launcher skips the baked seed, redownloads the manifest payload, replaces `C:\renx-data\ServerFiles`, and syncs `GameVersion` / `GameVersionNumber` into persistent config before launch.
 
-The Docker image cannot replace itself while running. The blueprint uses the rolling image tag `stable-core20-ltsc2022`; after a new image is pushed to that tag, recreate or reinstall the GSA container to pull it while keeping `\renx-data`.
+The Docker image cannot replace itself while running. The blueprint uses the rolling image tag `stable-core20-ltsc2022`; after a new image is pushed to that tag, recreate or reinstall the GSA container to pull it while keeping `\serverfiles`.
 
-Map voting and rotation settings are INI-first. In GSA, edit the exposed INIs under `\renx-data\ServerFiles\UDKGame\Config`. The launcher imports newer GSA-written INIs into `\renx-data\Config`, then mirrors those values into the runtime/default INIs before launch so UE3 config rebuilds do not drop them.
+Map voting and rotation settings are INI-first. In GSA, edit the exposed INIs under `\serverfiles\Config`. The container sees those same files as `C:\renx-data\Config` and mirrors them into the runtime/default INIs before launch so UE3 config rebuilds do not drop them.
 
 ## Public Server Listing
 
@@ -164,7 +164,7 @@ The primary image is recommended for GSA. It seeds the runtime into persistent s
 The blueprint mounts:
 
 ```text
-Host:      {container.home_root}/renx-data
+Host/GSA:  {container.home_root}/serverfiles
 Container: C:\renx-data
 ```
 
@@ -288,7 +288,7 @@ Each pack can be enabled independently. Downloads are cached. Turning a pack off
 Upload custom content through FTP into:
 
 ```text
-\renx-data\CustomContent
+\serverfiles\CustomContent
 ```
 
 Supported loose files:
@@ -338,20 +338,19 @@ Keep the redirect files synchronized with the packages installed on the server.
 At startup the wrapper:
 
 1. Installs or validates the persistent runtime.
-2. Imports newer GSA config-template INIs from `ServerFiles\UDKGame\Config` into `C:\renx-data\Config`.
-3. Initializes any missing persistent runtime INIs under `C:\renx-data\Config`.
-4. Applies the essential GSA values for identity, slots, ports, RCON password, and update sources.
-5. Preserves INI-first map voting/rotation values and syncs `GameSpecificMapCycles` with `UDKMapList.ini`.
-6. Copies persistent configs into `ServerFiles\UDKGame\Config`.
-7. Mirrors managed values into runtime/default INIs.
-8. Installs optional maps and custom content.
-9. Launches `Binaries\Win64\UDK.com`.
+2. Initializes any missing persistent runtime INIs under `C:\renx-data\Config`.
+3. Applies the essential GSA values for identity, slots, ports, RCON password, and update sources.
+4. Preserves INI-first map voting/rotation values and syncs `GameSpecificMapCycles` with `UDKMapList.ini`.
+5. Copies persistent configs into `ServerFiles\UDKGame\Config`.
+6. Mirrors managed values into runtime/default INIs.
+7. Installs optional maps and custom content.
+8. Launches `Binaries\Win64\UDK.com`.
 
 Persistent INI values win for map voting, rotation, and common gameplay settings after the files exist. GSA continues to supply server identity, slot limit, ports, and update source values.
 
 ## GameServerApp Blueprint Defaults
 
-The current blueprint keeps the install surface intentionally small but still includes a default config template so GSA can install the server cleanly. GSA supplies server name, slot limit, and ports; the small template supplies install, access, content, and update defaults. Day-to-day game settings live in the editable GSA INIs under `\renx-data\ServerFiles\UDKGame\Config` and are mirrored into persistent storage under `\renx-data\Config`.
+The current blueprint keeps the install surface intentionally small but still includes a default config template so GSA can install the server cleanly. GSA supplies server name, slot limit, and ports; the small template supplies install, access, content, and update defaults. Day-to-day game settings live in the editable GSA INIs under `\serverfiles\Config`, which is mounted inside the container as `C:\renx-data\Config`.
 
 To change maps, map voting, marathon timing, bots, Steam, web, RCON, or custom-content behavior, edit the matching INI and restart the server. The wrapper mirrors those INI values into the runtime/default game config before launch.
 
@@ -376,18 +375,18 @@ Standard Renegade X defaults to `6`. Defense Survival defaults to `3`.
 The GSA configuration template directly exposes:
 
 ```text
-\renx-data\ServerFiles\UDKGame\Config\UDKGame.ini
-\renx-data\ServerFiles\UDKGame\Config\UDKEngine.ini
-\renx-data\ServerFiles\UDKGame\Config\UDKMapList.ini
-\renx-data\ServerFiles\UDKGame\Config\UDKRenegadeX.ini
-\renx-data\ServerFiles\UDKGame\Config\UDKSurvival.ini
-\renx-data\ServerFiles\UDKGame\Config\UDKWeb.ini
+\serverfiles\Config\UDKGame.ini
+\serverfiles\Config\UDKEngine.ini
+\serverfiles\Config\UDKMapList.ini
+\serverfiles\Config\UDKRenegadeX.ini
+\serverfiles\Config\UDKSurvival.ini
+\serverfiles\Config\UDKWeb.ini
 ```
 
-The launcher mirrors those files into persistent config under:
+Inside the container, those same files are available under:
 
 ```text
-\renx-data\Config
+C:\renx-data\Config
 ```
 
 Important advanced files include:
@@ -1109,7 +1108,7 @@ docker run -d --name renx-test `
 
 - The image contains Windows Server layers and the 20-map Renegade X runtime, so the first pull is large.
 - Leave the installation running while Docker is downloading and extracting layers.
-- Confirm the host has enough free disk space for the image, Docker's layer cache, and `renx-data`.
+- Confirm the host has enough free disk space for the image, Docker's layer cache, and `serverfiles`.
 - Later installs are normally faster because Docker reuses cached layers.
 
 ### Installation Fails Immediately
@@ -1145,7 +1144,7 @@ docker run -d --name renx-test `
 
 ### Game Log Does Not Appear In GSA
 
-- Confirm the blueprint includes `\renx-data\Logs` as a directory with type `logs`.
+- Confirm the blueprint includes `\serverfiles\Logs` as a directory with type `logs`.
 - Confirm `C:\renx-data\Logs\RenegadeXServer.log` exists inside the container.
 - Restart the container after updating the blueprint's directory definitions.
 - The same live game output is also mirrored into the Docker container log.
@@ -1155,7 +1154,7 @@ docker run -d --name renx-test `
 - Use map names without `.udk`.
 - Normal CnC should use `CNC-*` maps.
 - Survival should use `DEF-*`, `RenX_Coop.Rx_Game_Survival`, and `Rx_Game_Survival`.
-- Edit the GSA-exposed `\renx-data\ServerFiles\UDKGame\Config\UDKGame.ini` for `GameSpecificMapCycles`; restart so the wrapper syncs `UDKMapList.ini`.
+- Edit the GSA-exposed `\serverfiles\Config\UDKGame.ini` for `GameSpecificMapCycles`; restart so the wrapper syncs `UDKMapList.ini`.
 - Confirm the map is installed in `UDKGame\CookedPC\Maps\RenX`.
 
 ### Server Name Is Missing Words Or Contains Quotes
@@ -1173,9 +1172,9 @@ docker run -d --name renx-test `
 
 ### Config Changes Do Not Stick
 
-- Map/vote changes should be made in the persistent INIs under `C:\renx-data\Config`; restart the server after editing.
+- Map/vote changes should be made in the GSA-exposed INIs under `\serverfiles\Config`; restart the server after editing.
 - For startup-critical settings, remember GSA still controls server name, slot limit, ports, and RCON password.
-- Edit the persistent file under `C:\renx-data\Config`, not only the runtime copy.
+- Inside the container, those files appear under `C:\renx-data\Config`; do not edit only the runtime copy under `ServerFiles\UDKGame\Config`.
 - Recreate the container after changing image tags or Docker environment variables.
 - Do not wipe the persistent mount during routine updates.
 
@@ -1183,8 +1182,8 @@ docker run -d --name renx-test `
 
 - Use image `stable-core20-ltsc2022` or `1.2.1109-core20-ltsc2022-r2` or newer.
 - Set `TimeLimit=0` and `CnCModeTimeLimit=0` in `UDKRenegadeX.ini`, then restart the server.
-- Confirm `\renx-data\Config\UDKRenegadeX.ini` contains `TimeLimit=0` and `CnCModeTimeLimit=0`.
-- If staying on an older image, edit `\renx-data\Config\UDKRenegadeX.ini` manually and restart; do not wipe `renx-data`.
+- Confirm `\serverfiles\Config\UDKRenegadeX.ini` contains `TimeLimit=0` and `CnCModeTimeLimit=0`.
+- If staying on an older image, edit `\serverfiles\Config\UDKRenegadeX.ini` manually and restart; do not wipe `serverfiles`.
 
 ### Server Stops After A Configuration Change
 

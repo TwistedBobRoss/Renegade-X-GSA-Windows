@@ -59,47 +59,47 @@
       "RENX_OPTIONAL_MAP_PACK_3_URL": "{config_parameter id=\"optional_map_pack_three_url\"}"
     },
     "mounts": {
-      "{container.home_root}/renx-data": "C:/renx-data"
+      "{container.home_root}/serverfiles": "C:/renx-data"
     }
   },
   "dir": {
     "RenX Data": {
-      "path": "\\renx-data",
+      "path": "\\serverfiles",
       "create": true,
       "type": "normal"
     },
     "RenX ServerFiles": {
-      "path": "\\renx-data\\ServerFiles",
+      "path": "\\serverfiles\\ServerFiles",
       "create": true,
       "type": "normal"
     },
     "RenX Payload Cache": {
-      "path": "\\renx-data\\PayloadCache",
+      "path": "\\serverfiles\\PayloadCache",
       "create": true,
       "type": "normal"
     },
     "RenX Payload Downloads": {
-      "path": "\\renx-data\\PayloadCache\\Downloads",
+      "path": "\\serverfiles\\PayloadCache\\Downloads",
       "create": true,
       "type": "normal"
     },
     "RenX Custom Content": {
-      "path": "\\renx-data\\CustomContent",
+      "path": "\\serverfiles\\CustomContent",
       "create": true,
       "type": "normal"
     },
     "RenX Optional Maps": {
-      "path": "\\renx-data\\CustomContent\\_OptionalMaps",
+      "path": "\\serverfiles\\CustomContent\\_OptionalMaps",
       "create": true,
       "type": "normal"
     },
     "RenX Logs": {
-      "path": "\\renx-data\\Logs",
+      "path": "\\serverfiles\\Logs",
       "create": true,
       "type": "logs"
     },
     "RenX Config": {
-      "path": "\\renx-data\\Config",
+      "path": "\\serverfiles\\Config",
       "create": true,
       "type": "normal"
     }
@@ -117,38 +117,38 @@
     "config": {
       "files": {
         "UDKGame.ini": {
-          "path": "\\renx-data\\ServerFiles\\UDKGame\\Config\\UDKGame.ini",
-          "info": "Primary Renegade X game settings. Edit this INI for server identity, player limits, and GameSpecificMapCycles map voting/rotation. The launcher mirrors this file into persistent config before startup.",
+          "path": "\\serverfiles\\Config\\UDKGame.ini",
+          "info": "Primary Renegade X game settings. Edit this INI for server identity, player limits, and GameSpecificMapCycles map voting/rotation. The launcher mirrors this persistent config into the runtime before startup.",
           "disable_edit": "0",
           "content": "[Engine.GameInfo]\nDefaultGameType=RenX_Game.Rx_Game\nDefaultGame=RenX_Game.Rx_Game\nDefaultServerGame=RenX_Game.Rx_Game\nPlayerControllerClassName=RenX_Game.Rx_Controller\nMaxPlayers={gameserver.slot_limit}\nMaxSpectators=2\nGameDifficulty=+1.0\nbAdminCanPause=false\n\n[Engine.GameReplicationInfo]\nServerName={gameserver.list_name}\nMessageOfTheDay={config_parameter id=\"motd\"}\n\n[Engine.AccessControl]\nAdminPassword={config_parameter id=\"admin_password\"}\nGamePassword={config_parameter id=\"server_password\"}\nIPPolicies=ACCEPT;*\n\n[UTGame.UTGame]\nbForceRespawn=true\nbPlayersMustBeReady=false\nNetWait=15\nMinNetPlayers=1\nbWaitForNetPlayers=false\nRestartWait=30\nClientProcessingTimeout=30\nGameSpecificMapCycles=(GameClassName=\"Rx_Game\",Maps=(\"CNC-Field\",\"CNC-Walls\",\"CNC-GoldRush\",\"CNC-Whiteout\",\"CNC-Islands\",\"CNC-LakeSide\",\"CNC-Mesa\",\"CNC-Volcano\",\"CNC-Canyon\",\"CNC-Complex\",\"CNC-Under\",\"CNC-Oasis\",\"CNC-Xmountain\"))\nGameSpecificMapCycles=(GameClassName=\"Rx_Game_Survival\",Maps=(\"DEF-DarkNight\",\"DEF-HillSide\"))"
         },
         "UDKEngine.ini": {
-          "path": "\\renx-data\\ServerFiles\\UDKGame\\Config\\UDKEngine.ini",
-          "info": "Network, Steam/query, starting map, and custom-content download settings. The launcher mirrors this file into persistent config before startup.",
+          "path": "\\serverfiles\\Config\\UDKEngine.ini",
+          "info": "Network, Steam/query, starting map, and custom-content download settings. The launcher mirrors this persistent config into the runtime before startup.",
           "disable_edit": "0",
           "content": "[URL]\nMapExt=udk\nMap=RenX-MenuMap.udk\nLocalMap={config_parameter id=\"map\"}.udk\nPort={gameserver.game_port}\nPeerPort={gameserver.raw_port}\n\n[IpDrv.TcpNetDriver]\nAllowDownloads={config_parameter id=\"allow_downloads\"}\nMaxClientRate=15000\nMaxInternetClientRate=10000\nNetServerMaxTickRate=30\n\n[IpDrv.HTTPDownload]\nConnectionTimeout=30\nRedirectToURL={config_parameter id=\"redirect_url\"}\nUseCompression={config_parameter id=\"redirect_use_compression\"}\n\n[OnlineSubsystemSteamworks.OnlineSubsystemSteamworks]\nbEnableSteam=true\nQueryPort={gameserver.query_port}\nbUseVAC=false\nRegion=255\nServerBrowserTimeout=10"
         },
         "UDKMapList.ini": {
-          "path": "\\renx-data\\ServerFiles\\UDKGame\\Config\\UDKMapList.ini",
-          "info": "Renegade X map-vote map lists. Keep this aligned with UDKGame.ini GameSpecificMapCycles when doing advanced rotation tuning. The launcher mirrors this file into persistent config before startup.",
+          "path": "\\serverfiles\\Config\\UDKMapList.ini",
+          "info": "Renegade X map-vote map lists. Keep this aligned with UDKGame.ini GameSpecificMapCycles when doing advanced rotation tuning. The launcher mirrors this persistent config into the runtime before startup.",
           "disable_edit": "0",
           "content": "[RenX_Game.Rx_MapListManager]\nGameProfiles=(GameClass=\"RenX_Game.Rx_Game\",GameName=\"Command and Conquer\",bIsTeamGame=true,MapListName=\"CNCMapList\",Options=\"\",Mutators=\"\",ExcludedMuts=\"\")\nGameProfiles=(GameClass=\"RenX_Coop.Rx_Game_Survival\",GameName=\"Defense Survival\",bIsTeamGame=true,MapListName=\"DEFMapList\",Options=\"\",Mutators=\"\",ExcludedMuts=\"\")\nMapReplayLimit=0\nPlayIndex=0\n\n[CNCMapList Rx_MapList]\nMaps=(Map=\"CNC-Field\")\nMaps=(Map=\"CNC-Walls\")\nMaps=(Map=\"CNC-GoldRush\")\nMaps=(Map=\"CNC-Whiteout\")\nMaps=(Map=\"CNC-Islands\")\nMaps=(Map=\"CNC-LakeSide\")\nMaps=(Map=\"CNC-Mesa\")\nMaps=(Map=\"CNC-Volcano\")\nMaps=(Map=\"CNC-Canyon\")\nMaps=(Map=\"CNC-Complex\")\nMaps=(Map=\"CNC-Under\")\nMaps=(Map=\"CNC-Oasis\")\nMaps=(Map=\"CNC-Xmountain\")\n\n[DEFMapList Rx_MapList]\nMaps=(Map=\"DEF-DarkNight\")\nMaps=(Map=\"DEF-HillSide\")"
         },
         "UDKRenegadeX.ini": {
-          "path": "\\renx-data\\ServerFiles\\UDKGame\\Config\\UDKRenegadeX.ini",
-          "info": "Renegade X-specific gameplay, voting, bot, RCON, and server-list settings. These INI values are preserved and mirrored into runtime/default config before launch.",
+          "path": "\\serverfiles\\Config\\UDKRenegadeX.ini",
+          "info": "Renegade X-specific gameplay, voting, bot, RCON, and server-list settings. These persistent INI values are preserved and mirrored into runtime/default config before launch.",
           "disable_edit": "0",
           "content": "[RenX_Game.Rx_Game]\nbListed={config_parameter id=\"listed\"}\nbFixedMapRotation=false\nbBotsDisabled=false\nbLogRcon=true\nInitialCredits=0\nTimeLimit=50\nCnCModeTimeLimit=50\nDMModeTimeLimit=15\nbBuildingsRevive=true\nbEnableAirdrops=false\nTeamMode=6\nMaxMapVoteSize=5\nRecentMapsToExclude=5\nMapVoteTime=35\nChangeMapDisabledTime=600\nSurrenderLength=120\nSurrenderDisabledTime=600\nbAdminsStartMapVote=false\nbBotVotesDisabled=false\nbRemoveVariantMapsInVoteList=true\nSpawnCrates=true\nNodDifficulty=1.0\nGDIDifficulty=1.0\nNODAttackingValue=50\nGDIAttackingValue=50\n\n[RenX_Game.Rx_Rcon]\nbEnableRcon={config_parameter id=\"enable_rcon\"}\nRconPort={gameserver.rcon_port}\nSubscriberLimit=8\n\n[RenX_Game.Rx_AccessControl]\nbRequireSteam=false\nbSteamAuthAdmins=false\nbBroadcastAdminIdentity=false\nModPassword=\n\n[RenX_Game.Rx_ServerListQueryHandler]\nMasterServerURL=https://serverlist-rx.totemarts.services/servers.jsp"
         },
         "UDKSurvival.ini": {
-          "path": "\\renx-data\\ServerFiles\\UDKGame\\Config\\UDKSurvival.ini",
-          "info": "Defense Survival gameplay and vote settings. Edit this normal INI when running DEF maps or the Survival game class. The launcher mirrors this file into persistent config before startup.",
+          "path": "\\serverfiles\\Config\\UDKSurvival.ini",
+          "info": "Defense Survival gameplay and vote settings. Edit this normal INI when running DEF maps or the Survival game class. The launcher mirrors this persistent config into the runtime before startup.",
           "disable_edit": "0",
           "content": "[RenX_Coop.Rx_Game_Survival]\nMinNetPlayers=40\nNetWait=30\nbWaitForNetPlayers=true\nbAllowPowerUpDrop=true\nDonationsDisabledTime=180\nInitialCredits=200\nSpawnCrates=true\nCrateRespawnAfterPickup=30.0000\nbIsCompetitive=false\nbReserveVehiclesToBuyer=true\nTimeLimit=0\nDMModeTimeLimit=12\nbFixedMapRotation=false\nRecentMapsToExclude=0\nMaxMapVoteSize=5\nMapVoteTime=35\nChangeMapDisabledTime=600\nTeamMode=3\nbAllowPrivateMessaging=true\nbPrivateMessageTeamOnly=false\nbListed=true\nbLogRcon=true\nbBotVotesDisabled=false\nbRemoveVariantMapsInVoteList=true\nSurrenderLength=300\nSurrenderDisabledTime=600\nRTC_DisableTime=0\nGameplayEventsWriterClassName=RenX_Game.Rx_GameplayEventsWriter\nbUsePedestal=false\nbEnableCommanders=true\nbUseStaticCommanders=false\nInitialCP=600\nMax_CP=3000\nbVehiclesAlwaysRelevant=true\nbInfantryAlwaysRelevant=true\nBaseWaveCreditsReward=100.f\nBaseWaveCPReward=100.f\nBaseWaveVPReward=5.f\nbEnableFrustration=true\nFrustrationVentInterval=10.0\nFrustrationCoolOffTimer=30.0\nFrustrationFailureChance=0.7\nFrustrationBuildUpStartWave=4\nFrustrationBuildUpMult=0.5\nFrustrationBuildDownMult=5\nFrustrationInfKillIncrement=1\nFrustrationVehKillIncrement=5\nFrustrationPlayerKillDecrement=8\nFrustrationWaveClearIncrement=25.f\nFrustrationWaveClearDecrement=75.f"
         },
         "UDKWeb.ini": {
-          "path": "\\renx-data\\ServerFiles\\UDKGame\\Config\\UDKWeb.ini",
-          "info": "Optional Renegade X web server settings. Leave disabled unless you are intentionally exposing it. The launcher mirrors this file into persistent config before startup.",
+          "path": "\\serverfiles\\Config\\UDKWeb.ini",
+          "info": "Optional Renegade X web server settings. Leave disabled unless you are intentionally exposing it. The launcher mirrors this persistent config into the runtime before startup.",
           "disable_edit": "0",
           "content": "[RenX_Game.Rx_WebServer]\nServerName={gameserver.list_name}\nApplicationss=\"RenX_Game.Rx_WebApplication_Stats\"\nApplicationPathss=\"/ServerInfo\"\nbEnabled=false\nListenPort={gameserver.other_port}\nMaxConnections=32\nDefaultApplication=1\nExpirationSeconds=86400"
         }

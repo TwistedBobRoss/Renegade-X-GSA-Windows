@@ -2,6 +2,13 @@
 
 All notable changes to the Renegade X GameServerApp Windows blueprint are tracked here.
 
+## 1.7.3 - 2026-09-14
+
+### Fixed
+
+- Switched the GSA-facing host mount and registered directories to the standard `\serverfiles` layout while keeping the container path at `C:\renx-data`.
+- Moved editable GSA INI templates back to `\serverfiles\Config` so the installer has default config files in a persistent path that exists before the Renegade X runtime is seeded.
+
 ## 1.7.2 - 2026-09-14
 
 ### Fixed
