@@ -351,7 +351,7 @@ Persistent INI values win for map voting, rotation, and common gameplay settings
 
 ## GameServerApp Blueprint Defaults
 
-The current blueprint keeps the install surface intentionally small. GSA supplies server name, slot limit, ports, RCON password, and update URLs through Docker environment variables. Day-to-day game settings live in the editable GSA INIs under `\renx-data\ServerFiles\UDKGame\Config` and are mirrored into persistent storage under `\renx-data\Config`.
+The current blueprint keeps the install surface intentionally small but still includes a default config template so GSA can install the server cleanly. GSA supplies server name, slot limit, and ports; the small template supplies install, access, content, and update defaults. Day-to-day game settings live in the editable GSA INIs under `\renx-data\ServerFiles\UDKGame\Config` and are mirrored into persistent storage under `\renx-data\Config`.
 
 To change maps, map voting, marathon timing, bots, Steam, web, RCON, or custom-content behavior, edit the matching INI and restart the server. The wrapper mirrors those INI values into the runtime/default game config before launch.
 

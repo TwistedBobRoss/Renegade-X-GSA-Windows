@@ -2,6 +2,13 @@
 
 All notable changes to the Renegade X GameServerApp Windows blueprint are tracked here.
 
+## 1.7.2 - 2026-09-14
+
+### Fixed
+
+- Restored a small default GSA config template for install/access/content/update basics, while keeping map voting and rotation INI-first.
+- Reconnected the startup map, Admin/RCON password, listing, content, runtime update, payload, and optional-map values to explicit config-template fields so GSA has defaults to render during install.
+
 ## 1.7.1 - 2026-09-14
 
 ### Fixed

@@ -31,30 +31,32 @@
     "automatic_ports": true,
     "envs": {
       "RENX_SERVER_NAME": "{gameserver.list_name}",
-      "RENX_MAP": "CNC-Field",
+      "RENX_MAP": "{config_parameter id=\"map\"}",
       "RENX_MAX_PLAYERS": "{gameserver.slot_limit}",
       "RENX_GAME_PORT": "{gameserver.game_port}",
       "RENX_PEER_PORT": "{gameserver.raw_port}",
       "RENX_QUERY_PORT": "{gameserver.query_port}",
       "RENX_RCON_PORT": "{gameserver.rcon_port}",
       "RENX_WEB_PORT": "{gameserver.other_port}",
-      "RENX_ADMIN_PASSWORD": "{gameserver.rcon_password}",
-      "RENX_LISTED": "true",
-      "RENX_ENABLE_RCON": "true",
-      "RENX_ALLOW_DOWNLOADS": "true",
-      "RENX_REDIRECT_URL": "https://community-content.totemarts.services/",
-      "RENX_REDIRECT_USE_COMPRESSION": "false",
-      "RENX_RUNTIME_AUTO_UPDATE": "true",
-      "RENX_UPDATE_MANIFEST_URL": "https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/release-manifest.json",
-      "RENX_UPDATE_CHANNEL": "stable",
-      "RENX_SERVER_PAYLOAD_URLS": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.001;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.002;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.003;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.004",
-      "RENX_REFRESH_SERVER_PAYLOAD": "false",
-      "RENX_INSTALL_OPTIONAL_MAP_PACK_1": "false",
-      "RENX_INSTALL_OPTIONAL_MAP_PACK_2": "false",
-      "RENX_INSTALL_OPTIONAL_MAP_PACK_3": "false",
-      "RENX_OPTIONAL_MAP_PACK_1_URL": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-01.zip",
-      "RENX_OPTIONAL_MAP_PACK_2_URL": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-02.zip",
-      "RENX_OPTIONAL_MAP_PACK_3_URL": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-03.zip"
+      "RENX_ADMIN_PASSWORD": "{config_parameter id=\"admin_password\"}",
+      "RENX_SERVER_PASSWORD": "{config_parameter id=\"server_password\"}",
+      "RENX_MOTD": "{config_parameter id=\"motd\"}",
+      "RENX_LISTED": "{config_parameter id=\"listed\"}",
+      "RENX_ENABLE_RCON": "{config_parameter id=\"enable_rcon\"}",
+      "RENX_ALLOW_DOWNLOADS": "{config_parameter id=\"allow_downloads\"}",
+      "RENX_REDIRECT_URL": "{config_parameter id=\"redirect_url\"}",
+      "RENX_REDIRECT_USE_COMPRESSION": "{config_parameter id=\"redirect_use_compression\"}",
+      "RENX_RUNTIME_AUTO_UPDATE": "{config_parameter id=\"runtime_auto_update\"}",
+      "RENX_UPDATE_MANIFEST_URL": "{config_parameter id=\"update_manifest_url\"}",
+      "RENX_UPDATE_CHANNEL": "{config_parameter id=\"update_channel\"}",
+      "RENX_SERVER_PAYLOAD_URLS": "{config_parameter id=\"server_payload_urls\"}",
+      "RENX_REFRESH_SERVER_PAYLOAD": "{config_parameter id=\"refresh_server_payload\"}",
+      "RENX_INSTALL_OPTIONAL_MAP_PACK_1": "{config_parameter id=\"install_optional_map_pack_one\"}",
+      "RENX_INSTALL_OPTIONAL_MAP_PACK_2": "{config_parameter id=\"install_optional_map_pack_two\"}",
+      "RENX_INSTALL_OPTIONAL_MAP_PACK_3": "{config_parameter id=\"install_optional_map_pack_three\"}",
+      "RENX_OPTIONAL_MAP_PACK_1_URL": "{config_parameter id=\"optional_map_pack_one_url\"}",
+      "RENX_OPTIONAL_MAP_PACK_2_URL": "{config_parameter id=\"optional_map_pack_two_url\"}",
+      "RENX_OPTIONAL_MAP_PACK_3_URL": "{config_parameter id=\"optional_map_pack_three_url\"}"
     },
     "mounts": {
       "{container.home_root}/renx-data": "C:/renx-data"
@@ -118,13 +120,13 @@
           "path": "\\renx-data\\ServerFiles\\UDKGame\\Config\\UDKGame.ini",
           "info": "Primary Renegade X game settings. Edit this INI for server identity, player limits, and GameSpecificMapCycles map voting/rotation. The launcher mirrors this file into persistent config before startup.",
           "disable_edit": "0",
-          "content": "[Engine.GameInfo]\nDefaultGameType=RenX_Game.Rx_Game\nDefaultGame=RenX_Game.Rx_Game\nDefaultServerGame=RenX_Game.Rx_Game\nPlayerControllerClassName=RenX_Game.Rx_Controller\nMaxPlayers={gameserver.slot_limit}\nMaxSpectators=2\nGameDifficulty=+1.0\nbAdminCanPause=false\n\n[Engine.GameReplicationInfo]\nServerName={gameserver.list_name}\nMessageOfTheDay=\n\n[Engine.AccessControl]\nAdminPassword={gameserver.rcon_password}\nGamePassword=\nIPPolicies=ACCEPT;*\n\n[UTGame.UTGame]\nbForceRespawn=true\nbPlayersMustBeReady=false\nNetWait=15\nMinNetPlayers=1\nbWaitForNetPlayers=false\nRestartWait=30\nClientProcessingTimeout=30\nGameSpecificMapCycles=(GameClassName=\"Rx_Game\",Maps=(\"CNC-Field\",\"CNC-Walls\",\"CNC-GoldRush\",\"CNC-Whiteout\",\"CNC-Islands\",\"CNC-LakeSide\",\"CNC-Mesa\",\"CNC-Volcano\",\"CNC-Canyon\",\"CNC-Complex\",\"CNC-Under\",\"CNC-Oasis\",\"CNC-Xmountain\"))\nGameSpecificMapCycles=(GameClassName=\"Rx_Game_Survival\",Maps=(\"DEF-DarkNight\",\"DEF-HillSide\"))"
+          "content": "[Engine.GameInfo]\nDefaultGameType=RenX_Game.Rx_Game\nDefaultGame=RenX_Game.Rx_Game\nDefaultServerGame=RenX_Game.Rx_Game\nPlayerControllerClassName=RenX_Game.Rx_Controller\nMaxPlayers={gameserver.slot_limit}\nMaxSpectators=2\nGameDifficulty=+1.0\nbAdminCanPause=false\n\n[Engine.GameReplicationInfo]\nServerName={gameserver.list_name}\nMessageOfTheDay={config_parameter id=\"motd\"}\n\n[Engine.AccessControl]\nAdminPassword={config_parameter id=\"admin_password\"}\nGamePassword={config_parameter id=\"server_password\"}\nIPPolicies=ACCEPT;*\n\n[UTGame.UTGame]\nbForceRespawn=true\nbPlayersMustBeReady=false\nNetWait=15\nMinNetPlayers=1\nbWaitForNetPlayers=false\nRestartWait=30\nClientProcessingTimeout=30\nGameSpecificMapCycles=(GameClassName=\"Rx_Game\",Maps=(\"CNC-Field\",\"CNC-Walls\",\"CNC-GoldRush\",\"CNC-Whiteout\",\"CNC-Islands\",\"CNC-LakeSide\",\"CNC-Mesa\",\"CNC-Volcano\",\"CNC-Canyon\",\"CNC-Complex\",\"CNC-Under\",\"CNC-Oasis\",\"CNC-Xmountain\"))\nGameSpecificMapCycles=(GameClassName=\"Rx_Game_Survival\",Maps=(\"DEF-DarkNight\",\"DEF-HillSide\"))"
         },
         "UDKEngine.ini": {
           "path": "\\renx-data\\ServerFiles\\UDKGame\\Config\\UDKEngine.ini",
           "info": "Network, Steam/query, starting map, and custom-content download settings. The launcher mirrors this file into persistent config before startup.",
           "disable_edit": "0",
-          "content": "[URL]\nMapExt=udk\nMap=RenX-MenuMap.udk\nLocalMap=CNC-Field.udk\nPort={gameserver.game_port}\nPeerPort={gameserver.raw_port}\n\n[IpDrv.TcpNetDriver]\nAllowDownloads=true\nMaxClientRate=15000\nMaxInternetClientRate=10000\nNetServerMaxTickRate=30\n\n[IpDrv.HTTPDownload]\nConnectionTimeout=30\nRedirectToURL=https://community-content.totemarts.services/\nUseCompression=false\n\n[OnlineSubsystemSteamworks.OnlineSubsystemSteamworks]\nbEnableSteam=true\nQueryPort={gameserver.query_port}\nbUseVAC=false\nRegion=255\nServerBrowserTimeout=10"
+          "content": "[URL]\nMapExt=udk\nMap=RenX-MenuMap.udk\nLocalMap={config_parameter id=\"map\"}.udk\nPort={gameserver.game_port}\nPeerPort={gameserver.raw_port}\n\n[IpDrv.TcpNetDriver]\nAllowDownloads={config_parameter id=\"allow_downloads\"}\nMaxClientRate=15000\nMaxInternetClientRate=10000\nNetServerMaxTickRate=30\n\n[IpDrv.HTTPDownload]\nConnectionTimeout=30\nRedirectToURL={config_parameter id=\"redirect_url\"}\nUseCompression={config_parameter id=\"redirect_use_compression\"}\n\n[OnlineSubsystemSteamworks.OnlineSubsystemSteamworks]\nbEnableSteam=true\nQueryPort={gameserver.query_port}\nbUseVAC=false\nRegion=255\nServerBrowserTimeout=10"
         },
         "UDKMapList.ini": {
           "path": "\\renx-data\\ServerFiles\\UDKGame\\Config\\UDKMapList.ini",
@@ -136,7 +138,7 @@
           "path": "\\renx-data\\ServerFiles\\UDKGame\\Config\\UDKRenegadeX.ini",
           "info": "Renegade X-specific gameplay, voting, bot, RCON, and server-list settings. These INI values are preserved and mirrored into runtime/default config before launch.",
           "disable_edit": "0",
-          "content": "[RenX_Game.Rx_Game]\nbListed=true\nbFixedMapRotation=false\nbBotsDisabled=false\nbLogRcon=true\nInitialCredits=0\nTimeLimit=50\nCnCModeTimeLimit=50\nDMModeTimeLimit=15\nbBuildingsRevive=true\nbEnableAirdrops=false\nTeamMode=6\nMaxMapVoteSize=5\nRecentMapsToExclude=5\nMapVoteTime=35\nChangeMapDisabledTime=600\nSurrenderLength=120\nSurrenderDisabledTime=600\nbAdminsStartMapVote=false\nbBotVotesDisabled=false\nbRemoveVariantMapsInVoteList=true\nSpawnCrates=true\nNodDifficulty=1.0\nGDIDifficulty=1.0\nNODAttackingValue=50\nGDIAttackingValue=50\n\n[RenX_Game.Rx_Rcon]\nbEnableRcon=true\nRconPort={gameserver.rcon_port}\nSubscriberLimit=8\n\n[RenX_Game.Rx_AccessControl]\nbRequireSteam=false\nbSteamAuthAdmins=false\nbBroadcastAdminIdentity=false\nModPassword=\n\n[RenX_Game.Rx_ServerListQueryHandler]\nMasterServerURL=https://serverlist-rx.totemarts.services/servers.jsp"
+          "content": "[RenX_Game.Rx_Game]\nbListed={config_parameter id=\"listed\"}\nbFixedMapRotation=false\nbBotsDisabled=false\nbLogRcon=true\nInitialCredits=0\nTimeLimit=50\nCnCModeTimeLimit=50\nDMModeTimeLimit=15\nbBuildingsRevive=true\nbEnableAirdrops=false\nTeamMode=6\nMaxMapVoteSize=5\nRecentMapsToExclude=5\nMapVoteTime=35\nChangeMapDisabledTime=600\nSurrenderLength=120\nSurrenderDisabledTime=600\nbAdminsStartMapVote=false\nbBotVotesDisabled=false\nbRemoveVariantMapsInVoteList=true\nSpawnCrates=true\nNodDifficulty=1.0\nGDIDifficulty=1.0\nNODAttackingValue=50\nGDIAttackingValue=50\n\n[RenX_Game.Rx_Rcon]\nbEnableRcon={config_parameter id=\"enable_rcon\"}\nRconPort={gameserver.rcon_port}\nSubscriberLimit=8\n\n[RenX_Game.Rx_AccessControl]\nbRequireSteam=false\nbSteamAuthAdmins=false\nbBroadcastAdminIdentity=false\nModPassword=\n\n[RenX_Game.Rx_ServerListQueryHandler]\nMasterServerURL=https://serverlist-rx.totemarts.services/servers.jsp"
         },
         "UDKSurvival.ini": {
           "path": "\\renx-data\\ServerFiles\\UDKGame\\Config\\UDKSurvival.ini",
@@ -151,7 +153,148 @@
           "content": "[RenX_Game.Rx_WebServer]\nServerName={gameserver.list_name}\nApplicationss=\"RenX_Game.Rx_WebApplication_Stats\"\nApplicationPathss=\"/ServerInfo\"\nbEnabled=false\nListenPort={gameserver.other_port}\nMaxConnections=32\nDefaultApplication=1\nExpirationSeconds=86400"
         }
       },
-      "parameters": {}
+      "parameters": {
+        "map": {
+          "name": "Starting Map",
+          "info": "Starting map. Use the map name without .udk. Map voting and rotation are controlled by the editable INI files.",
+          "section": "Server Setup",
+          "type": "text",
+          "content": "CNC-Field"
+        },
+        "admin_password": {
+          "name": "Admin/RCON Password",
+          "info": "Writes AdminPassword in UDKGame.ini and provides the RCON/admin password to the container.",
+          "section": "Access",
+          "type": "text",
+          "content": ""
+        },
+        "server_password": {
+          "name": "Server Password",
+          "info": "Writes GamePassword in UDKGame.ini. Leave blank for a public server.",
+          "section": "Access",
+          "type": "text",
+          "content": ""
+        },
+        "motd": {
+          "name": "Message Of The Day",
+          "info": "Writes MessageOfTheDay in UDKGame.ini.",
+          "section": "Access",
+          "type": "text",
+          "content": ""
+        },
+        "listed": {
+          "name": "List Server",
+          "info": "On/true lets the server list publicly when networking and firewall rules allow it.",
+          "section": "Access",
+          "type": "boolean",
+          "content": "1"
+        },
+        "enable_rcon": {
+          "name": "Enable RCON",
+          "info": "On/true enables Renegade X RCON.",
+          "section": "Access",
+          "type": "boolean",
+          "content": "1"
+        },
+        "allow_downloads": {
+          "name": "Allow Downloads",
+          "info": "On/true allows custom-content downloads where the game supports them.",
+          "section": "Content",
+          "type": "boolean",
+          "content": "1"
+        },
+        "redirect_url": {
+          "name": "HTTP Redirect URL",
+          "info": "Fast-download redirect URL. Use a trailing slash.",
+          "section": "Content",
+          "type": "text",
+          "content": "https://community-content.totemarts.services/"
+        },
+        "redirect_use_compression": {
+          "name": "Redirect Uses Compression",
+          "info": "Off/false uses normal redirect files.",
+          "section": "Content",
+          "type": "boolean",
+          "content": "0"
+        },
+        "runtime_auto_update": {
+          "name": "Runtime Auto Update",
+          "info": "On/true checks the manifest at server start and applies newer Totem Arts runtime payloads before launch.",
+          "section": "Install",
+          "type": "boolean",
+          "content": "1"
+        },
+        "update_manifest_url": {
+          "name": "Update Manifest URL",
+          "info": "Manifest used by Runtime Auto Update.",
+          "section": "Install",
+          "type": "text",
+          "content": "https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/release-manifest.json"
+        },
+        "update_channel": {
+          "name": "Update Channel",
+          "info": "Release channel for the manifest check.",
+          "section": "Install",
+          "type": "array",
+          "dropdown": "{\"Stable\":\"stable\"}"
+        },
+        "server_payload_urls": {
+          "name": "Server Payload URLs",
+          "info": "Fallback URLs for the Renegade X 20-map core runtime. Leave unchanged unless publishing a new payload.",
+          "section": "Install",
+          "type": "text",
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.001;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.002;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.003;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.004"
+        },
+        "refresh_server_payload": {
+          "name": "Refresh Server Payload",
+          "info": "Off/false uses the baked or cached runtime. On/true forces payload reinstall on next start.",
+          "section": "Install",
+          "type": "boolean",
+          "content": "0"
+        },
+        "install_optional_map_pack_one": {
+          "name": "Install Optional Map Pack 1",
+          "info": "On/true downloads optional map pack 1 on next start.",
+          "section": "Optional Maps",
+          "type": "boolean",
+          "content": "0"
+        },
+        "install_optional_map_pack_two": {
+          "name": "Install Optional Map Pack 2",
+          "info": "On/true downloads optional map pack 2 on next start.",
+          "section": "Optional Maps",
+          "type": "boolean",
+          "content": "0"
+        },
+        "install_optional_map_pack_three": {
+          "name": "Install Optional Map Pack 3",
+          "info": "On/true downloads optional map pack 3 on next start.",
+          "section": "Optional Maps",
+          "type": "boolean",
+          "content": "0"
+        },
+        "optional_map_pack_one_url": {
+          "name": "Optional Map Pack 1 URL",
+          "info": "Public archive URL used when Optional Map Pack 1 is enabled.",
+          "section": "Optional Maps",
+          "type": "text",
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-01.zip"
+        },
+        "optional_map_pack_two_url": {
+          "name": "Optional Map Pack 2 URL",
+          "info": "Public archive URL used when Optional Map Pack 2 is enabled.",
+          "section": "Optional Maps",
+          "type": "text",
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-02.zip"
+        },
+        "optional_map_pack_three_url": {
+          "name": "Optional Map Pack 3 URL",
+          "info": "Public archive URL used when Optional Map Pack 3 is enabled.",
+          "section": "Optional Maps",
+          "type": "text",
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-03.zip"
+        }
+      }
     }
   }
 }
