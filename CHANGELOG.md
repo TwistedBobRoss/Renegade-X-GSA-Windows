@@ -2,6 +2,14 @@
 
 All notable changes to the Renegade X GameServerApp Windows blueprint are tracked here.
 
+## 1.7.1 - 2026-09-14
+
+### Fixed
+
+- Moved the GSA-exposed INI files back under `\renx-data\ServerFiles\UDKGame\Config` so the installer sees a conventional server-files config path.
+- Imported newer GSA-written INIs into persistent config before seed install or runtime auto-update, preventing map/vote config from being overwritten during startup.
+- Bumped the full-image rebuild default to `1.2.1109-core20-ltsc2022-r2` while keeping the blueprint on the rolling `stable-core20-ltsc2022` tag.
+
 ## 1.7.0 - 2026-09-14
 
 ### Changed

@@ -1053,6 +1053,52 @@ function Initialize-RuntimeConfig {
     }
 }
 
+function Import-GsaRuntimeConfig {
+    param(
+        [string]$InstallConfigDir,
+        [string]$PersistentConfigDir
+    )
+
+    if (-not (Test-Path -LiteralPath $InstallConfigDir)) {
+        return
+    }
+
+    $configNames = @(
+        "UDKGame.ini",
+        "UDKEngine.ini",
+        "UDKMapList.ini",
+        "UDKRenegadeX.ini",
+        "UDKSurvival.ini",
+        "UDKWeb.ini"
+    )
+
+    New-Item -ItemType Directory -Force -Path $PersistentConfigDir | Out-Null
+
+    foreach ($name in $configNames) {
+        $source = Join-Path $InstallConfigDir $name
+        $target = Join-Path $PersistentConfigDir $name
+
+        if (-not (Test-Path -LiteralPath $source)) {
+            continue
+        }
+
+        $shouldImport = $false
+        if (-not (Test-Path -LiteralPath $target)) {
+            $shouldImport = $true
+        }
+        else {
+            $sourceInfo = Get-Item -LiteralPath $source
+            $targetInfo = Get-Item -LiteralPath $target
+            $shouldImport = $sourceInfo.LastWriteTimeUtc -gt $targetInfo.LastWriteTimeUtc.AddSeconds(1)
+        }
+
+        if ($shouldImport) {
+            Copy-Item -LiteralPath $source -Destination $target -Force
+            Write-Host "Imported GSA config template file: $name"
+        }
+    }
+}
+
 function Sync-RuntimeVersionSettings {
     param(
         [string]$InstallConfigDir,
@@ -1172,6 +1218,10 @@ if ($marathonMode) {
     $enableAirdrops = "true"
 }
 
+$installConfigDir = Join-Path $root "UDKGame\Config"
+$configDir = Join-Path $dataRoot "Config"
+Import-GsaRuntimeConfig $installConfigDir $configDir
+
 $runtimeUpdate = Resolve-RuntimeUpdate $runtimeAutoUpdate $runtimeUpdateManifestUrl $runtimeUpdateChannel $root $dataRoot $seedRoot $serverPayloadUrls $refreshServerPayload $optionalMapPack1Url $optionalMapPack2Url $optionalMapPack3Url
 $serverPayloadUrls = $runtimeUpdate.ServerPayloadUrls
 $refreshServerPayload = [bool]$runtimeUpdate.RefreshServerPayload
@@ -1184,8 +1234,6 @@ Install-SeedRuntime $seedRoot $root $bootstrapRoot
 Install-ServerPayload $serverPayloadUrls $root $dataRoot $bootstrapRoot $refreshServerPayload
 $launcher = Join-Path $root "LaunchRenegadeXServer.bat"
 
-$installConfigDir = Join-Path $root "UDKGame\Config"
-$configDir = Join-Path $dataRoot "Config"
 $customContentDir = Join-Path $dataRoot "CustomContent"
 $downloadedContentDir = Join-Path $customContentDir "_Downloaded"
 $requiredContentDir = Join-Path $customContentDir "_Required"
