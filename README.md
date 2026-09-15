@@ -12,7 +12,7 @@ This project packages a tested Renegade X `1.2.1109` headless runtime, persisten
 - Game developer: **Totem Arts**
 - Project type: unofficial community hosting integration
 - Host operating system: Windows Server 2022 with Windows containers
-- Blueprint image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-r2`
+- Blueprint image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-r3`
 - Raw blueprint: [renegade-x-gsa-windows.json](https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/blueprints/renegade-x-gsa-windows.json)
 - Repository: [TwistedBobRoss/Renegade-X-GSA-Windows](https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows)
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
@@ -118,7 +118,7 @@ Do not wipe `renx-data` unless you intentionally want to remove the server runti
 
 Runtime auto-update is enabled in the blueprint. The container checks `release-manifest.json` on start. If the manifest has a higher Renegade X `version_number`, the launcher skips the baked seed, redownloads the manifest payload, replaces `C:\renx-data\ServerFiles`, and syncs `GameVersion` / `GameVersionNumber` into persistent config before launch.
 
-The Docker image cannot replace itself while running. The blueprint pins the tested `1.2.1109-core20-ltsc2022-r2` image; official Renegade X runtime updates are still handled by the restart-time manifest check while keeping `\renx-data`.
+The Docker image cannot replace itself while running. The blueprint pins the tested `1.2.1109-core20-ltsc2022-r3` compatibility image; official Renegade X runtime updates are still handled by the restart-time manifest check while keeping `\renx-data`.
 
 Map voting and rotation settings are INI-first. In GSA, edit the exposed INIs under `\renx-data\Config`. The container sees those same files as `C:\renx-data\Config` and mirrors them into the runtime/default INIs before launch so UE3 config rebuilds do not drop them.
 
@@ -148,7 +148,7 @@ ServerName={gameserver.list_name}
 Primary 20-map image used by the blueprint:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-r2
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-r3
 ```
 
 Rolling 20-map alias:
@@ -1120,7 +1120,7 @@ docker run -d --name renx-test `
 ### Installation Fails Immediately
 
 - Confirm the host is running Windows Server 2022 with Docker set to Windows containers.
-- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-r2`.
+- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-r3`.
 - Reinstall the server after changing the image tag, Docker environment variables, mounts, or port definitions.
 - Check the Docker container log for an image pull, mount, or Windows container compatibility error.
 
@@ -1186,7 +1186,7 @@ docker run -d --name renx-test `
 
 ### Marathon Mode Still Ends The Match
 
-- Use image `stable-core20-ltsc2022` or `1.2.1109-core20-ltsc2022-r2` or newer.
+- Use image `stable-core20-ltsc2022` or `1.2.1109-core20-ltsc2022-r3` or newer.
 - Set `TimeLimit=0` and `CnCModeTimeLimit=0` in `UDKRenegadeX.ini`, then restart the server.
 - Confirm `\renx-data\Config\UDKRenegadeX.ini` contains `TimeLimit=0` and `CnCModeTimeLimit=0`.
 - If staying on an older image, edit `\renx-data\Config\UDKRenegadeX.ini` manually and restart; do not wipe `renx-data`.

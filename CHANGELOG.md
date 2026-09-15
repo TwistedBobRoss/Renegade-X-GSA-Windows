@@ -6,7 +6,7 @@ All notable changes to the Renegade X GameServerApp Windows blueprint are tracke
 
 ### Changed
 
-- Pinned the GSA blueprint image to the exact tested `1.2.1109-core20-ltsc2022-r2` tag instead of the rolling `stable-core20-ltsc2022` tag.
+- Pinned the GSA blueprint image to the exact tested `1.2.1109-core20-ltsc2022-r3` compatibility tag instead of the rolling `stable-core20-ltsc2022` tag.
 - Added an explicit `stable` default for the runtime update channel dropdown.
 - Added a build input for producing RenX 1.2 compatibility images from the last working `1.0.1022-core20-ltsc2022-r12` base.
 
