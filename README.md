@@ -12,7 +12,7 @@ This project packages a tested Renegade X `1.2.1109` headless runtime, persisten
 - Game developer: **Totem Arts**
 - Project type: unofficial community hosting integration
 - Host operating system: Windows Server 2022 with Windows containers
-- Blueprint image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-r3`
+- Blueprint image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-updater-r1`
 - Raw blueprint: [renegade-x-gsa-windows.json](https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/blueprints/renegade-x-gsa-windows.json)
 - Repository: [TwistedBobRoss/Renegade-X-GSA-Windows](https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows)
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
@@ -118,9 +118,9 @@ Do not wipe `renx-data` unless you intentionally want to remove the server runti
 
 Runtime auto-update is enabled in the blueprint. The container checks `release-manifest.json` on start. If the manifest has a higher Renegade X `version_number`, the launcher skips the baked seed, redownloads the manifest payload, replaces `C:\renx-data\ServerFiles`, and syncs `GameVersion` / `GameVersionNumber` into persistent config before launch.
 
-The Docker image cannot replace itself while running. The blueprint pins the tested `1.2.1109-core20-ltsc2022-r3` compatibility image; official Renegade X runtime updates are still handled by the restart-time manifest check while keeping `\renx-data`.
+The Docker image cannot replace itself while running. The blueprint pins the tested `1.2.1109-core20-ltsc2022-updater-r1` image, which starts from the last known GSA-installable r12 image and adds the newer restart-time update launcher.
 
-Map voting and rotation settings are INI-first. In GSA, edit the exposed INIs under `\renx-data\Config`. The container sees those same files as `C:\renx-data\Config` and mirrors them into the runtime/default INIs before launch so UE3 config rebuilds do not drop them.
+Map voting and rotation settings are still mirrored into the runtime/default INIs before launch. For the GSA-facing blueprint, the map and vote controls are restored to the older working template shape while the newer launcher keeps `UDKMapList.ini` aligned during startup.
 
 ## Public Server Listing
 
@@ -145,25 +145,25 @@ ServerName={gameserver.list_name}
 
 ## Container Images
 
-Primary 20-map image used by the blueprint:
+GSA blueprint updater image:
+
+```text
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-updater-r1
+```
+
+Rolling updater alias:
+
+```text
+ghcr.io/twistedbobross/renegade-x-gsa-windows:stable-updater-core20-ltsc2022
+```
+
+Full RenX 1.2 image:
 
 ```text
 ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-r3
 ```
 
-Rolling 20-map alias:
-
-```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:stable-core20-ltsc2022
-```
-
-Bootstrap-only recovery image:
-
-```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-ltsc2022-r1
-```
-
-The primary image is recommended for GSA. It seeds the runtime into persistent storage and avoids downloading the core payload during a normal first start.
+The updater image is recommended for GSA while install failures are being isolated. It uses the last known installable full image as its base, adds only the newer launcher scripts, and lets runtime auto-update pull newer Totem Arts payloads at server start.
 
 ## Persistent Storage
 
@@ -356,7 +356,7 @@ Persistent INI values win for map voting, rotation, and common gameplay settings
 
 ## GameServerApp Blueprint Defaults
 
-The current blueprint keeps the install surface intentionally small but still includes a default config template so GSA can install the server cleanly. GSA supplies server name, slot limit, and ports; the small template supplies install, access, content, and update defaults. Day-to-day game settings live in the editable GSA INIs under `\renx-data\Config`, which is mounted inside the container as `C:\renx-data\Config`.
+The current blueprint intentionally uses the last known GSA-installable template shape: four default INI files plus the restored map, vote, content, access, and networking controls. GSA supplies server name, slot limit, and ports; the update fields allow the newer launcher to check the release manifest at restart.
 
 To change maps, map voting, marathon timing, bots, Steam, web, RCON, or custom-content behavior, edit the matching INI and restart the server. The wrapper mirrors those INI values into the runtime/default game config before launch.
 
@@ -383,11 +383,11 @@ The GSA configuration template directly exposes:
 ```text
 \renx-data\Config\UDKGame.ini
 \renx-data\Config\UDKEngine.ini
-\renx-data\Config\UDKMapList.ini
 \renx-data\Config\UDKRenegadeX.ini
-\renx-data\Config\UDKSurvival.ini
 \renx-data\Config\UDKWeb.ini
 ```
+
+`UDKMapList.ini` and `UDKSurvival.ini` are initialized and synced inside the persistent config/runtime during startup rather than exposed as separate GSA template files.
 
 Inside the container, those same files are available under:
 
@@ -1105,7 +1105,7 @@ docker run -d --name renx-test `
   -e RENX_QUERY_PORT="27015" `
   -e RENX_LISTED="true" `
   -e RENX_TEAM_MODE="6" `
-  ghcr.io/twistedbobross/renegade-x-gsa-windows:stable-core20-ltsc2022
+  ghcr.io/twistedbobross/renegade-x-gsa-windows:stable-updater-core20-ltsc2022
 ```
 
 ## Troubleshooting
@@ -1120,7 +1120,7 @@ docker run -d --name renx-test `
 ### Installation Fails Immediately
 
 - Confirm the host is running Windows Server 2022 with Docker set to Windows containers.
-- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-r3`.
+- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-updater-r1`.
 - Reinstall the server after changing the image tag, Docker environment variables, mounts, or port definitions.
 - Check the Docker container log for an image pull, mount, or Windows container compatibility error.
 
@@ -1186,7 +1186,7 @@ docker run -d --name renx-test `
 
 ### Marathon Mode Still Ends The Match
 
-- Use image `stable-core20-ltsc2022` or `1.2.1109-core20-ltsc2022-r3` or newer.
+- Use image `stable-updater-core20-ltsc2022`, `1.2.1109-core20-ltsc2022-updater-r1`, or newer.
 - Set `TimeLimit=0` and `CnCModeTimeLimit=0` in `UDKRenegadeX.ini`, then restart the server.
 - Confirm `\renx-data\Config\UDKRenegadeX.ini` contains `TimeLimit=0` and `CnCModeTimeLimit=0`.
 - If staying on an older image, edit `\renx-data\Config\UDKRenegadeX.ini` manually and restart; do not wipe `renx-data`.

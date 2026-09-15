@@ -2,6 +2,19 @@
 
 All notable changes to the Renegade X GameServerApp Windows blueprint are tracked here.
 
+## 1.7.4 - 2026-09-15
+
+### Changed
+
+- Added a lightweight updater image build that starts from the last known GSA-installable `1.0.1022-core20-ltsc2022-r12` image and replaces only the launcher scripts.
+- Pointed the GSA blueprint at `1.2.1109-core20-ltsc2022-updater-r1` to avoid the oversized full compatibility image during install.
+- Restored the GSA blueprint to the last working four-config-file template shape while keeping restart-time runtime auto-update enabled.
+
+### Fixed
+
+- Reduced the likely GSA install failure surface by removing the experimental six-file INI template from the public blueprint.
+- Kept RenX 1.2.1109 payload URLs and the public release manifest wired into the restored template for restart-time updates.
+
 ## 1.7.3 - 2026-09-14
 
 ### Changed

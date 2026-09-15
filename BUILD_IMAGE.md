@@ -39,7 +39,7 @@ If you want to host the runtime zip parts on this repository's GitHub Releases, 
 
 The script uploads the payload release assets, dispatches the bootstrap image workflow, and prints release download URLs that can be pasted into GSA's `Server Payload URLs` field.
 
-For the full 20-map image, run `Build Renegade X Core 20 Windows Image` with the core payload release tag and a versioned image tag. Leave `rolling_tag` set to `stable-core20-ltsc2022` so the blueprint can pull the newest published image after a GSA recreate/reinstall.
+For the full 20-map image, run `Build Renegade X Core 20 Windows Image` with the core payload release tag and a versioned image tag. For the GSA install-friendly updater image, run `Build Renegade X Updater Windows Image`; the public blueprint currently pins the exact updater image tag instead of the full-image rolling tag.
 
 After publishing new payload assets, update `release-manifest.json` with the new `version_name`, numeric `version_number`, core payload URLs, and optional map-pack URLs. Servers with `Runtime Auto Update` enabled check that manifest on start and refresh `C:\renx-data\ServerFiles` when the manifest version is newer.
 
