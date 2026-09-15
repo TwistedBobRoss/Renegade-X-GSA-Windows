@@ -1,0 +1,28 @@
+# escape=`
+ARG BASE_IMAGE=ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r12
+FROM ${BASE_IMAGE}
+
+SHELL ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
+
+COPY Start.ps1 C:/renx-bootstrap/Start.ps1
+COPY RunRenX.ps1 C:/renx-bootstrap/RunRenX.ps1
+COPY ApplyModeProfile.ps1 C:/renx-bootstrap/ApplyModeProfile.ps1
+COPY LaunchRenegadeXServer.bat C:/renx-bootstrap/LaunchRenegadeXServer.bat
+
+RUN $parseErrors = $null; `
+    $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/Start.ps1), [ref]$parseErrors); `
+    if ($parseErrors) { throw ($parseErrors | Out-String) }; `
+    $parseErrors = $null; `
+    $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/RunRenX.ps1), [ref]$parseErrors); `
+    if ($parseErrors) { throw ($parseErrors | Out-String) }; `
+    $parseErrors = $null; `
+    $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw -LiteralPath C:/renx-bootstrap/ApplyModeProfile.ps1), [ref]$parseErrors); `
+    if ($parseErrors) { throw ($parseErrors | Out-String) }; `
+    if (-not (Test-Path C:/renx-seed/ServerFiles/Binaries/Win64/UDK.exe)) { throw 'Base image seed runtime is missing UDK.exe' }
+
+ENV RENX_BOOTSTRAP_ROOT=C:/renx-bootstrap
+ENV RENX_SEED_ROOT=C:/renx-seed/ServerFiles
+ENV RENX_ROOT=C:/renx-data/ServerFiles
+ENV RENX_DATA_ROOT=C:/renx-data
+
+ENTRYPOINT ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$launcher='C:/renx-data/ServerFiles/LaunchRenegadeXServer.bat'; New-Item -ItemType Directory -Force -Path (Split-Path -Parent $launcher) | Out-Null; Copy-Item -LiteralPath 'C:/renx-bootstrap/LaunchRenegadeXServer.bat' -Destination $launcher -Force; Write-Host \"Prepared Renegade X launcher: $launcher\"; & 'C:/renx-bootstrap/Start.ps1'; exit $LASTEXITCODE"]
