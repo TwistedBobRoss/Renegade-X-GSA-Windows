@@ -24,5 +24,9 @@ ENV RENX_BOOTSTRAP_ROOT=C:/renx-bootstrap
 ENV RENX_SEED_ROOT=C:/renx-seed/ServerFiles
 ENV RENX_ROOT=C:/renx-data/ServerFiles
 ENV RENX_DATA_ROOT=C:/renx-data
+ENV RENX_RUNTIME_AUTO_UPDATE=true
+ENV RENX_DEFER_FIRST_RUNTIME_UPDATE=true
+ENV RENX_UPDATE_MANIFEST_URL=https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/release-manifest.json
+ENV RENX_UPDATE_CHANNEL=stable
 
 ENTRYPOINT ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$launcher='C:/renx-data/ServerFiles/LaunchRenegadeXServer.bat'; New-Item -ItemType Directory -Force -Path (Split-Path -Parent $launcher) | Out-Null; Copy-Item -LiteralPath 'C:/renx-bootstrap/LaunchRenegadeXServer.bat' -Destination $launcher -Force; Write-Host \"Prepared Renegade X launcher: $launcher\"; & 'C:/renx-bootstrap/Start.ps1'; exit $LASTEXITCODE"]

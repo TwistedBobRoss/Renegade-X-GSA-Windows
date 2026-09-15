@@ -6,7 +6,7 @@ on:
       image_tag:
         description: "Updater container image tag to publish"
         required: true
-        default: "1.2.1109-core20-ltsc2022-updater-r1"
+        default: "1.2.1109-core20-ltsc2022-updater-r2"
       rolling_tag:
         description: "Optional rolling image tag to also publish"
         required: false
@@ -67,6 +67,23 @@ jobs:
             -t $image `
             .
 
+      - name: Verify updater image defaults
+        shell: powershell
+        run: |
+          $repo = "${{ github.repository }}".ToLowerInvariant()
+          $image = "ghcr.io/${repo}:${{ inputs.image_tag }}"
+          $imageEnv = docker image inspect $image --format '{{json .Config.Env}}' | ConvertFrom-Json
+          foreach ($expected in @(
+            "RENX_RUNTIME_AUTO_UPDATE=true",
+            "RENX_DEFER_FIRST_RUNTIME_UPDATE=true",
+            "RENX_UPDATE_MANIFEST_URL=https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/release-manifest.json",
+            "RENX_UPDATE_CHANNEL=stable"
+          )) {
+            if ($imageEnv -notcontains $expected) {
+              throw "Updater image is missing default environment value: $expected"
+            }
+          }
+
       - name: Smoke test updater image startup
         timeout-minutes: 8
         shell: powershell
@@ -74,13 +91,36 @@ jobs:
           $repo = "${{ github.repository }}".ToLowerInvariant()
           $image = "ghcr.io/${repo}:${{ inputs.image_tag }}"
           $name = "renx-updater-smoke"
+          $hostData = Join-Path $env:RUNNER_TEMP "renx-updater-smoke-data"
+          $hostConfig = Join-Path $hostData "Config"
 
           $existing = docker ps -aq --filter "name=^/${name}$"
           if ($existing) {
             docker rm -f $name | Out-Null
           }
+          Remove-Item -LiteralPath $hostData -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force -Path $hostConfig | Out-Null
+
+          @"
+[UTGame.UTGame]
+GameSpecificMapCycles=(GameClassName="Rx_Game",Maps=("CNC-Field","CNC-Walls","CNC-Mesa"))
+"@ | Set-Content -LiteralPath (Join-Path $hostConfig "UDKGame.ini") -Encoding UTF8
+
+          @"
+[RenX_Game.Rx_Game]
+MaxMapVoteSize=7
+RecentMapsToExclude=1
+MapVoteTime=42
+ChangeMapDisabledTime=123
+SurrenderLength=321
+SurrenderDisabledTime=654
+bAdminsStartMapVote=true
+bBotVotesDisabled=true
+bRemoveVariantMapsInVoteList=false
+"@ | Set-Content -LiteralPath (Join-Path $hostConfig "UDKRenegadeX.ini") -Encoding UTF8
 
           docker run -d --name $name `
+            -v "${hostData}:C:\renx-data" `
             -e RENX_SERVER_NAME="Updater Smoke Test" `
             -e RENX_MAP="CNC-Field" `
             -e RENX_MAX_PLAYERS="2" `
@@ -125,6 +165,39 @@ jobs:
               $gameLog -notmatch "-QueryPort=27015"
             ) {
               throw "Renegade X game log did not confirm internet mode and assigned ports."
+            }
+
+            $checks = [ordered]@{
+              MaxMapVoteSize = "7"
+              RecentMapsToExclude = "1"
+              MapVoteTime = "42"
+              ChangeMapDisabledTime = "123"
+              SurrenderLength = "321"
+              SurrenderDisabledTime = "654"
+              bAdminsStartMapVote = "true"
+              bBotVotesDisabled = "true"
+              bRemoveVariantMapsInVoteList = "false"
+            }
+            foreach ($target in @("C:\renx-data\ServerFiles\UDKGame\Config\UDKRenegadeX.ini", "C:\renx-data\ServerFiles\UDKGame\Config\DefaultRenegadeX.ini")) {
+              foreach ($key in $checks.Keys) {
+                $actual = docker exec $name powershell -NoProfile -Command "(Select-String -LiteralPath '$target' -Pattern '^$key=(.*)$').Matches.Groups[1].Value" | Out-String
+                $actual = $actual.Trim()
+                if ($actual -ne $checks[$key]) {
+                  throw "INI vote check failed for $key in $target. Expected '$($checks[$key])', got '$actual'."
+                }
+              }
+            }
+
+            foreach ($target in @("C:\renx-data\ServerFiles\UDKGame\Config\UDKGame.ini", "C:\renx-data\ServerFiles\UDKGame\Config\DefaultGame.ini")) {
+              $rotation = docker exec $name powershell -NoProfile -Command "(Select-String -LiteralPath '$target' -Pattern '^GameSpecificMapCycles=').Line" | Out-String
+              if ($rotation -notmatch "CNC-Mesa") {
+                throw "Map rotation check failed for $target. CNC-Mesa was not preserved."
+              }
+            }
+
+            $mapList = docker exec $name powershell -NoProfile -Command "Get-Content -Raw -LiteralPath 'C:\renx-data\ServerFiles\UDKGame\Config\UDKMapList.ini'" | Out-String
+            if ($mapList -notmatch 'Map="CNC-Mesa"') {
+              throw "UDKMapList.ini did not include the INI-sourced CNC-Mesa rotation."
             }
           }
           finally {

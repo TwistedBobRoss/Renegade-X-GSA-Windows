@@ -557,6 +557,7 @@ function Resolve-RuntimeUpdate {
         [string]$SeedRoot,
         [string]$ServerPayloadUrls,
         [bool]$RefreshServerPayload,
+        [bool]$DeferFirstRunUpdate,
         [string]$OptionalMapPack1Url,
         [string]$OptionalMapPack2Url,
         [string]$OptionalMapPack3Url
@@ -649,9 +650,14 @@ function Resolve-RuntimeUpdate {
 
     $installedVersionNumber = Get-RuntimeVersionNumber $InstallRoot $PersistentRoot
     $seedVersionNumber = Get-RuntimeVersionNumber $SeedRoot ""
+    $installRuntimePresent = Test-ServerRuntime $InstallRoot -RequireLauncher
+    $seedRuntimePresent = Test-ServerRuntime $SeedRoot
 
     if ($null -eq $installedVersionNumber) {
-        if ($null -ne $seedVersionNumber -and $seedVersionNumber -ge $manifestVersionNumber) {
+        if (-not $installRuntimePresent -and $DeferFirstRunUpdate -and $seedRuntimePresent) {
+            Write-Host "No installed runtime was found; deferring manifest payload update until after the first GSA install start."
+        }
+        elseif ($null -ne $seedVersionNumber -and $seedVersionNumber -ge $manifestVersionNumber) {
             Write-Host "Baked runtime seed version $seedVersionNumber satisfies manifest version $manifestVersionNumber."
         }
         else {
@@ -1159,6 +1165,7 @@ $redirectUseCompression = Get-BoolSetting "RENX_REDIRECT_USE_COMPRESSION" "false
 $serverPayloadUrls = Get-Setting "RENX_SERVER_PAYLOAD_URLS" ""
 $refreshServerPayload = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_REFRESH_SERVER_PAYLOAD" "false"))
 $runtimeAutoUpdate = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_RUNTIME_AUTO_UPDATE" "true"))
+$deferFirstRuntimeUpdate = [System.Convert]::ToBoolean((Get-BoolSetting "RENX_DEFER_FIRST_RUNTIME_UPDATE" "true"))
 $runtimeUpdateManifestUrl = Get-Setting "RENX_UPDATE_MANIFEST_URL" ""
 $runtimeUpdateChannel = Get-Setting "RENX_UPDATE_CHANNEL" "stable"
 $seedRoot = Get-Setting "RENX_SEED_ROOT" ""
@@ -1222,7 +1229,7 @@ $installConfigDir = Join-Path $root "UDKGame\Config"
 $configDir = Join-Path $dataRoot "Config"
 Import-GsaRuntimeConfig $installConfigDir $configDir
 
-$runtimeUpdate = Resolve-RuntimeUpdate $runtimeAutoUpdate $runtimeUpdateManifestUrl $runtimeUpdateChannel $root $dataRoot $seedRoot $serverPayloadUrls $refreshServerPayload $optionalMapPack1Url $optionalMapPack2Url $optionalMapPack3Url
+$runtimeUpdate = Resolve-RuntimeUpdate $runtimeAutoUpdate $runtimeUpdateManifestUrl $runtimeUpdateChannel $root $dataRoot $seedRoot $serverPayloadUrls $refreshServerPayload $deferFirstRuntimeUpdate $optionalMapPack1Url $optionalMapPack2Url $optionalMapPack3Url
 $serverPayloadUrls = $runtimeUpdate.ServerPayloadUrls
 $refreshServerPayload = [bool]$runtimeUpdate.RefreshServerPayload
 $seedRoot = $runtimeUpdate.SeedRoot
