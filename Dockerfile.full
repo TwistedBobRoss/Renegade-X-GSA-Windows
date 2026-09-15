@@ -1,5 +1,6 @@
 # escape=`
-FROM mcr.microsoft.com/windows/server:ltsc2022
+ARG BASE_IMAGE=mcr.microsoft.com/windows/server:ltsc2022
+FROM ${BASE_IMAGE}
 
 SHELL ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command"]
 
@@ -9,6 +10,7 @@ COPY Start.ps1 C:/renx-bootstrap/Start.ps1
 COPY RunRenX.ps1 C:/renx-bootstrap/RunRenX.ps1
 COPY ApplyModeProfile.ps1 C:/renx-bootstrap/ApplyModeProfile.ps1
 COPY LaunchRenegadeXServer.bat C:/renx-bootstrap/LaunchRenegadeXServer.bat
+RUN Remove-Item -LiteralPath C:/renx-seed/ServerFiles -Recurse -Force -ErrorAction SilentlyContinue
 COPY payload-runtime/ C:/renx-seed/ServerFiles/
 
 ARG VC2010_X64_URL=https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe

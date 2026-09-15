@@ -8,11 +8,12 @@ All notable changes to the Renegade X GameServerApp Windows blueprint are tracke
 
 - Pinned the GSA blueprint image to the exact tested `1.2.1109-core20-ltsc2022-r2` tag instead of the rolling `stable-core20-ltsc2022` tag.
 - Added an explicit `stable` default for the runtime update channel dropdown.
+- Added a build input for producing RenX 1.2 compatibility images from the last working `1.0.1022-core20-ltsc2022-r12` base.
 
 ### Fixed
 
-- Switched the GSA-facing host mount and registered directories to the standard `\serverfiles` layout while keeping the container path at `C:\renx-data`.
-- Moved editable GSA INI templates back to `\serverfiles\Config` so the installer has default config files in a persistent path that exists before the Renegade X runtime is seeded.
+- Restored the last working GSA-facing host mount and registered directory layout under `\renx-data`.
+- Moved editable GSA INI templates back to `\renx-data\Config` so the installer has default config files in a persistent path that exists before the Renegade X runtime is seeded.
 
 ## 1.7.2 - 2026-09-14
 
