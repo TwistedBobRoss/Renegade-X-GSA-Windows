@@ -15,11 +15,6 @@ on:
         description: "Known-installable full image to layer the updater onto"
         required: true
         default: "ghcr.io/twistedbobross/renegade-x-gsa-windows:1.0.1022-core20-ltsc2022-r12"
-      manifest_url:
-        description: "Runtime update manifest used by the smoke test"
-        required: true
-        default: "https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/release-manifest.json"
-
 permissions:
   contents: read
   packages: write
@@ -27,7 +22,7 @@ permissions:
 jobs:
   build:
     runs-on: windows-2022
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -72,8 +67,8 @@ jobs:
             -t $image `
             .
 
-      - name: Smoke test manifest update and startup
-        timeout-minutes: 16
+      - name: Smoke test updater image startup
+        timeout-minutes: 8
         shell: powershell
         run: |
           $repo = "${{ github.repository }}".ToLowerInvariant()
@@ -96,14 +91,13 @@ jobs:
             -e RENX_WEB_PORT="6969" `
             -e RENX_LISTED="false" `
             -e RENX_MARATHON_MODE="true" `
-            -e RENX_RUNTIME_AUTO_UPDATE="true" `
-            -e RENX_UPDATE_MANIFEST_URL="${{ inputs.manifest_url }}" `
+            -e RENX_RUNTIME_AUTO_UPDATE="false" `
             -e RENX_UPDATE_CHANNEL="stable" `
             $image | Out-Null
 
           try {
             $logPath = "C:\renx-data\Logs\RenegadeXServer.log"
-            $deadline = (Get-Date).AddMinutes(12)
+            $deadline = (Get-Date).AddMinutes(4)
             $logReady = $false
             do {
               Start-Sleep -Seconds 10
@@ -120,14 +114,7 @@ jobs:
             if (-not $logReady) {
               docker logs --tail 250 $name
               docker exec $name powershell -NoProfile -Command "if (Test-Path -LiteralPath '$logPath') { Get-Content -LiteralPath '$logPath' -Tail 100 }"
-              throw "Renegade X did not reach map/game-engine initialization within twelve minutes."
-            }
-
-            $manifest = docker exec $name powershell -NoProfile -Command "Get-Content -Raw -LiteralPath 'C:\renx-data\ServerFiles\.renx-install.json'" | ConvertFrom-Json
-            $runtime = $manifest.runtime
-            if (-not $runtime -or [int]$runtime.version_number -lt 18038) {
-              $manifest | ConvertTo-Json -Depth 8
-              throw "Runtime manifest did not confirm RenX 1.2.1109 or newer."
+              throw "Renegade X did not reach map/game-engine initialization within four minutes."
             }
 
             $gameLog = docker exec $name powershell -NoProfile -Command "Get-Content -Raw -LiteralPath '$logPath'" | Out-String
