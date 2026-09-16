@@ -72,7 +72,8 @@ jobs:
         run: |
           $repo = "${{ github.repository }}".ToLowerInvariant()
           $image = "ghcr.io/${repo}:${{ inputs.image_tag }}"
-          $imageEnv = docker image inspect $image --format '{{json .Config.Env}}' | ConvertFrom-Json
+          $imageInfo = docker image inspect $image | ConvertFrom-Json
+          $imageEnv = @($imageInfo[0].Config.Env)
           foreach ($expected in @(
             "RENX_RUNTIME_AUTO_UPDATE=true",
             "RENX_DEFER_FIRST_RUNTIME_UPDATE=true",
@@ -101,23 +102,23 @@ jobs:
           Remove-Item -LiteralPath $hostData -Recurse -Force -ErrorAction SilentlyContinue
           New-Item -ItemType Directory -Force -Path $hostConfig | Out-Null
 
-          @"
-[UTGame.UTGame]
-GameSpecificMapCycles=(GameClassName="Rx_Game",Maps=("CNC-Field","CNC-Walls","CNC-Mesa"))
-"@ | Set-Content -LiteralPath (Join-Path $hostConfig "UDKGame.ini") -Encoding UTF8
+          Set-Content -LiteralPath (Join-Path $hostConfig "UDKGame.ini") -Encoding UTF8 -Value @(
+            "[UTGame.UTGame]",
+            'GameSpecificMapCycles=(GameClassName="Rx_Game",Maps=("CNC-Field","CNC-Walls","CNC-Mesa"))'
+          )
 
-          @"
-[RenX_Game.Rx_Game]
-MaxMapVoteSize=7
-RecentMapsToExclude=1
-MapVoteTime=42
-ChangeMapDisabledTime=123
-SurrenderLength=321
-SurrenderDisabledTime=654
-bAdminsStartMapVote=true
-bBotVotesDisabled=true
-bRemoveVariantMapsInVoteList=false
-"@ | Set-Content -LiteralPath (Join-Path $hostConfig "UDKRenegadeX.ini") -Encoding UTF8
+          Set-Content -LiteralPath (Join-Path $hostConfig "UDKRenegadeX.ini") -Encoding UTF8 -Value @(
+            "[RenX_Game.Rx_Game]",
+            "MaxMapVoteSize=7",
+            "RecentMapsToExclude=1",
+            "MapVoteTime=42",
+            "ChangeMapDisabledTime=123",
+            "SurrenderLength=321",
+            "SurrenderDisabledTime=654",
+            "bAdminsStartMapVote=true",
+            "bBotVotesDisabled=true",
+            "bRemoveVariantMapsInVoteList=false"
+          )
 
           docker run -d --name $name `
             -v "${hostData}:C:\renx-data" `
