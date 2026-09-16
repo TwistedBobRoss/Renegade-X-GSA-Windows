@@ -26,7 +26,7 @@
     },
     "image": {
       "name": "ghcr.io/twistedbobross/renegade-x-gsa-windows",
-      "tag": "1.2.1109-core20-ltsc2022-updater-r1"
+      "tag": "1.2.1109-core20-ltsc2022-updater-r2"
     },
     "automatic_ports": true,
     "envs": {
@@ -103,10 +103,7 @@
       "RENX_MAX_INTERNET_CLIENT_RATE": "{config_parameter id=\"max_internet_client_rate\"}",
       "RENX_SERVER_TICK_RATE": "{config_parameter id=\"server_tick_rate\"}",
       "RENX_MULTIHOME": "{config_parameter id=\"multihome\"}",
-      "RENX_EXTRA_ARGS": "{config_parameter id=\"extra_args\"}",
-      "RENX_RUNTIME_AUTO_UPDATE": "{config_parameter id=\"runtime_auto_update\"}",
-      "RENX_UPDATE_MANIFEST_URL": "{config_parameter id=\"update_manifest_url\"}",
-      "RENX_UPDATE_CHANNEL": "{config_parameter id=\"update_channel\"}"
+      "RENX_EXTRA_ARGS": "{config_parameter id=\"extra_args\"}"
     },
     "mounts": {
       "{container.home_root}/renx-data": "C:/renx-data"
@@ -217,14 +214,14 @@
         },
         "server_payload_urls": {
           "name": "Server Payload URLs",
-          "info": "Fallback URLs for the Renegade X 1.2.1109 core runtime. Runtime Auto Update normally reads the manifest and only downloads when the installed runtime is behind.",
+          "info": "Recovery URLs for the 20-map core runtime. The full image normally seeds this runtime without downloading it. If the seed is unavailable, FTP-preloaded matching files are reused before automatic download.",
           "section": "Install",
           "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.001;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.002;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.003;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-r1/renx-core20-payload.zip.004"
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.001;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.002;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.003;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.004"
         },
         "refresh_server_payload": {
           "name": "Refresh Server Payload",
-          "info": "Off/false lets Runtime Auto Update decide when a payload refresh is needed. On/true forces a redownload and reinstall on next start.",
+          "info": "Off/false uses the cached runtime in renx-data. On/true redownloads and reinstalls the server payload on next start.",
           "section": "Install",
           "type": "boolean",
           "content": "0"
@@ -255,21 +252,21 @@
           "info": "Public archive URL used when Optional Map Pack 1 is enabled.",
           "section": "Optional Maps",
           "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-01.zip"
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.0.1022-r1/renx-optional-maps-01.zip"
         },
         "optional_map_pack_two_url": {
           "name": "Optional Map Pack 2 URL",
           "info": "Public archive URL used when Optional Map Pack 2 is enabled.",
           "section": "Optional Maps",
           "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-02.zip"
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.0.1022-r1/renx-optional-maps-02.zip"
         },
         "optional_map_pack_three_url": {
           "name": "Optional Map Pack 3 URL",
           "info": "Public archive URL used when Optional Map Pack 3 is enabled.",
           "section": "Optional Maps",
           "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-r1/renx-optional-maps-03.zip"
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.0.1022-r1/renx-optional-maps-03.zip"
         },
         "mutators": {
           "name": "Mutators",
@@ -704,27 +701,6 @@
           "section": "Networking",
           "type": "text",
           "content": ""
-        },
-        "runtime_auto_update": {
-          "name": "Runtime Auto Update",
-          "info": "On/true checks the public release manifest at server start and installs newer Totem Arts runtime payloads before launch.",
-          "section": "Install",
-          "type": "boolean",
-          "content": "1"
-        },
-        "update_manifest_url": {
-          "name": "Update Manifest URL",
-          "info": "Public manifest used by Runtime Auto Update.",
-          "section": "Install",
-          "type": "text",
-          "content": "https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/release-manifest.json"
-        },
-        "update_channel": {
-          "name": "Update Channel",
-          "info": "Release channel for the manifest check.",
-          "section": "Install",
-          "type": "array",
-          "dropdown": "{\"Stable\":\"stable\"}"
         }
       }
     }
