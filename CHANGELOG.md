@@ -2,6 +2,19 @@
 
 All notable changes to the Renegade X GameServerApp Windows blueprint are tracked here.
 
+## 1.7.5 - 2026-09-16
+
+### Changed
+
+- Retired restart-time runtime auto-update and its updater-image workflow.
+- Returned to versioned static images containing the complete Renegade X runtime.
+- Set the next GSA image to `1.2.1109-core20-ltsc2022-votefix-r1` for manual reinstall-based updates.
+
+### Fixed
+
+- Kept the INI-first map rotation and voting fixes while removing release-manifest downloads from the startup path.
+- Added full-image smoke coverage proving edited vote settings, map cycles, and map-list entries reach both runtime and default INI files.
+
 ## 1.7.4 - 2026-09-15
 
 ### Changed

@@ -116,9 +116,9 @@ Changing the image tag, Docker environment variables, mounts, or blueprint direc
 
 Do not wipe `renx-data` unless you intentionally want to remove the server runtime, configs, maps, downloads, and logs.
 
-Runtime auto-update is enabled in the blueprint. The container checks `release-manifest.json` on start. If the manifest has a higher Renegade X `version_number`, the launcher skips the baked seed, redownloads the manifest payload, replaces `C:\renx-data\ServerFiles`, and syncs `GameVersion` / `GameVersionNumber` into persistent config before launch.
+Runtime auto-update is intentionally disabled. Official Renegade X updates are packaged into a new versioned image, the blueprint is updated to that exact tag, and each GSA server is reinstalled manually.
 
-The Docker image cannot replace itself while running. The blueprint pins the tested `1.2.1109-core20-ltsc2022-updater-r1` image, which starts from the last known GSA-installable r12 image and adds the newer restart-time update launcher.
+The blueprint pins the tested `1.2.1109-core20-ltsc2022-votefix-r1` image. It contains the RenX 1.2.1109 runtime and does not contact an update manifest during startup.
 
 Map voting and rotation settings are still mirrored into the runtime/default INIs before launch. For the GSA-facing blueprint, the map and vote controls are restored to the older working template shape while the newer launcher keeps `UDKMapList.ini` aligned during startup.
 
@@ -145,25 +145,19 @@ ServerName={gameserver.list_name}
 
 ## Container Images
 
-GSA blueprint updater image:
+GSA static image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-updater-r1
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-votefix-r1
 ```
 
-Rolling updater alias:
+Rolling static alias:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:stable-updater-core20-ltsc2022
+ghcr.io/twistedbobross/renegade-x-gsa-windows:stable-core20-ltsc2022
 ```
 
-Full RenX 1.2 image:
-
-```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-r3
-```
-
-The updater image is recommended for GSA while install failures are being isolated. It uses the last known installable full image as its base, adds only the newer launcher scripts, and lets runtime auto-update pull newer Totem Arts payloads at server start.
+This image is based on the last known GSA-installable Windows Server 2022 image, replaces its baked runtime with RenX 1.2.1109, and applies the INI-first map/vote corrections. Future game releases require a new image build and manual GSA reinstall.
 
 ## Persistent Storage
 
@@ -1003,7 +997,7 @@ bTiersForced
 
 ## Container Environment Variables
 
-The lean GSA blueprint supplies only the essential values automatically: server name, slot limit, ports, RCON password, payload fallback URLs, and update manifest settings. The wrapper also supports these variables for custom blueprint variants or direct Docker use:
+The GSA blueprint supplies server settings, ports, payload recovery URLs, and common gameplay values. The wrapper also supports these variables for custom blueprint variants or direct Docker use:
 
 ```text
 RENX_SERVER_NAME
@@ -1105,7 +1099,7 @@ docker run -d --name renx-test `
   -e RENX_QUERY_PORT="27015" `
   -e RENX_LISTED="true" `
   -e RENX_TEAM_MODE="6" `
-  ghcr.io/twistedbobross/renegade-x-gsa-windows:stable-updater-core20-ltsc2022
+  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-votefix-r1
 ```
 
 ## Troubleshooting
@@ -1186,7 +1180,7 @@ docker run -d --name renx-test `
 
 ### Marathon Mode Still Ends The Match
 
-- Use image `stable-updater-core20-ltsc2022`, `1.2.1109-core20-ltsc2022-updater-r1`, or newer.
+- Use image `1.2.1109-core20-ltsc2022-votefix-r1` or a newer versioned static image.
 - Set `TimeLimit=0` and `CnCModeTimeLimit=0` in `UDKRenegadeX.ini`, then restart the server.
 - Confirm `\renx-data\Config\UDKRenegadeX.ini` contains `TimeLimit=0` and `CnCModeTimeLimit=0`.
 - If staying on an older image, edit `\renx-data\Config\UDKRenegadeX.ini` manually and restart; do not wipe `renx-data`.
