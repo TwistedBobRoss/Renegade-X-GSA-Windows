@@ -190,15 +190,17 @@ jobs:
             }
 
             foreach ($target in @("C:\renx-data\ServerFiles\UDKGame\Config\UDKGame.ini", "C:\renx-data\ServerFiles\UDKGame\Config\DefaultGame.ini")) {
-              $rotation = docker exec $name powershell -NoProfile -Command "(Select-String -LiteralPath '$target' -Pattern '^GameSpecificMapCycles=').Line" | Out-String
+              $rotation = docker exec $name powershell -NoProfile -Command "(Select-String -LiteralPath '$target' -Pattern '^\+?GameSpecificMapCycles=').Line" | Out-String
               if ($rotation -notmatch "CNC-Mesa") {
                 throw "Map rotation check failed for $target. CNC-Mesa was not preserved."
               }
             }
 
-            $mapList = docker exec $name powershell -NoProfile -Command "Get-Content -Raw -LiteralPath 'C:\renx-data\ServerFiles\UDKGame\Config\UDKMapList.ini'" | Out-String
-            if ($mapList -notmatch 'Map="CNC-Mesa"') {
-              throw "UDKMapList.ini did not include the INI-sourced CNC-Mesa rotation."
+            foreach ($target in @("C:\renx-data\ServerFiles\UDKGame\Config\UDKMapList.ini", "C:\renx-data\ServerFiles\UDKGame\Config\DefaultMapList.ini")) {
+              $mapList = docker exec $name powershell -NoProfile -Command "Get-Content -Raw -LiteralPath '$target'" | Out-String
+              if ($mapList -notmatch 'Map="CNC-Mesa"') {
+                throw "$target did not include the INI-sourced CNC-Mesa rotation."
+              }
             }
           }
           finally {
