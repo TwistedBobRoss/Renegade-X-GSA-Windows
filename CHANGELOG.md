@@ -2,6 +2,15 @@
 
 All notable changes to the Renegade X GameServerApp Windows blueprint are tracked here.
 
+## 1.7.6 - 2026-11-25
+
+### Changed
+
+- Rebuilt all 20 core and 27 optional map payloads from the current installed Renegade X client files.
+- Published the payloads as immutable `renx-core20-1.2.1109-maps-r2` and `renx-optional-maps-1.2.1109-maps-r2` revisions.
+- Pointed the full-image workflow and GSA blueprint at `1.2.1109-core20-ltsc2022-votefix-maps-r2`.
+- Updated the blueprint recovery and optional-map URLs to the current 1.2.1109 payload releases.
+
 ## 1.7.5 - 2026-09-16
 
 ### Changed

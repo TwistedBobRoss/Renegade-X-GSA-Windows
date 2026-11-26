@@ -33,8 +33,8 @@ If you want to host the runtime zip parts on this repository's GitHub Releases, 
 ```powershell
 .\scripts\Publish-RenXPayloadAndBuild.ps1 `
   -PayloadPartsDir ".\payload-parts" `
-  -PayloadReleaseTag "renx-core20-1.2.1109-r1" `
-  -ImageTag "1.2.1109-ltsc2022-r1"
+  -PayloadReleaseTag "renx-core20-1.2.1109-maps-r2" `
+  -ImageTag "1.2.1109-core20-ltsc2022-votefix-maps-r2"
 ```
 
 The script uploads the payload release assets, dispatches the bootstrap image workflow, and prints release download URLs that can be pasted into GSA's `Server Payload URLs` field.

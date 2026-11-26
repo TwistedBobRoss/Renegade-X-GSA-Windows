@@ -26,7 +26,7 @@
     },
     "image": {
       "name": "ghcr.io/twistedbobross/renegade-x-gsa-windows",
-      "tag": "1.2.1109-core20-ltsc2022-votefix-r1"
+      "tag": "1.2.1109-core20-ltsc2022-votefix-maps-r2"
     },
     "automatic_ports": true,
     "envs": {
@@ -217,7 +217,7 @@
           "info": "Recovery URLs for the 20-map core runtime. The full image normally seeds this runtime without downloading it. If the seed is unavailable, FTP-preloaded matching files are reused before automatic download.",
           "section": "Install",
           "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.001;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.002;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.003;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.0.1022-r1/renx-core20-payload.zip.004"
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-maps-r2/renx-core20-payload.zip.001;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-maps-r2/renx-core20-payload.zip.002;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-maps-r2/renx-core20-payload.zip.003;https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-core20-1.2.1109-maps-r2/renx-core20-payload.zip.004"
         },
         "refresh_server_payload": {
           "name": "Refresh Server Payload",
@@ -252,21 +252,21 @@
           "info": "Public archive URL used when Optional Map Pack 1 is enabled.",
           "section": "Optional Maps",
           "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.0.1022-r1/renx-optional-maps-01.zip"
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-maps-r2/renx-optional-maps-01.zip"
         },
         "optional_map_pack_two_url": {
           "name": "Optional Map Pack 2 URL",
           "info": "Public archive URL used when Optional Map Pack 2 is enabled.",
           "section": "Optional Maps",
           "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.0.1022-r1/renx-optional-maps-02.zip"
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-maps-r2/renx-optional-maps-02.zip"
         },
         "optional_map_pack_three_url": {
           "name": "Optional Map Pack 3 URL",
           "info": "Public archive URL used when Optional Map Pack 3 is enabled.",
           "section": "Optional Maps",
           "type": "text",
-          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.0.1022-r1/renx-optional-maps-03.zip"
+          "content": "https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows/releases/download/renx-optional-maps-1.2.1109-maps-r2/renx-optional-maps-03.zip"
         },
         "mutators": {
           "name": "Mutators",

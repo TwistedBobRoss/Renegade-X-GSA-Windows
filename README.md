@@ -12,7 +12,7 @@ This project packages a tested Renegade X `1.2.1109` headless runtime, persisten
 - Game developer: **Totem Arts**
 - Project type: unofficial community hosting integration
 - Host operating system: Windows Server 2022 with Windows containers
-- Blueprint image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-updater-r1`
+- Blueprint image: `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-votefix-maps-r2`
 - Raw blueprint: [renegade-x-gsa-windows.json](https://raw.githubusercontent.com/TwistedBobRoss/Renegade-X-GSA-Windows/main/blueprints/renegade-x-gsa-windows.json)
 - Repository: [TwistedBobRoss/Renegade-X-GSA-Windows](https://github.com/TwistedBobRoss/Renegade-X-GSA-Windows)
 - Release notes: [CHANGELOG.md](CHANGELOG.md)
@@ -118,7 +118,7 @@ Do not wipe `renx-data` unless you intentionally want to remove the server runti
 
 Runtime auto-update is intentionally disabled. Official Renegade X updates are packaged into a new versioned image, the blueprint is updated to that exact tag, and each GSA server is reinstalled manually.
 
-The blueprint pins the tested `1.2.1109-core20-ltsc2022-votefix-r1` image. It contains the RenX 1.2.1109 runtime and does not contact an update manifest during startup.
+The blueprint pins the tested `1.2.1109-core20-ltsc2022-votefix-maps-r2` image. It contains the RenX 1.2.1109 runtime with all 47 maps rebuilt from the current installed client files and does not contact an update manifest during startup.
 
 Map voting and rotation settings are still mirrored into the runtime/default INIs before launch. For the GSA-facing blueprint, the map and vote controls are restored to the older working template shape while the newer launcher keeps `UDKMapList.ini` aligned during startup.
 
@@ -148,7 +148,7 @@ ServerName={gameserver.list_name}
 GSA static image:
 
 ```text
-ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-votefix-r1
+ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-votefix-maps-r2
 ```
 
 Rolling static alias:
@@ -1099,7 +1099,7 @@ docker run -d --name renx-test `
   -e RENX_QUERY_PORT="27015" `
   -e RENX_LISTED="true" `
   -e RENX_TEAM_MODE="6" `
-  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-votefix-r1
+  ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-votefix-maps-r2
 ```
 
 ## Troubleshooting
@@ -1114,7 +1114,7 @@ docker run -d --name renx-test `
 ### Installation Fails Immediately
 
 - Confirm the host is running Windows Server 2022 with Docker set to Windows containers.
-- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-updater-r1`.
+- Confirm the blueprint image is `ghcr.io/twistedbobross/renegade-x-gsa-windows:1.2.1109-core20-ltsc2022-votefix-maps-r2`.
 - Reinstall the server after changing the image tag, Docker environment variables, mounts, or port definitions.
 - Check the Docker container log for an image pull, mount, or Windows container compatibility error.
 
@@ -1180,7 +1180,7 @@ docker run -d --name renx-test `
 
 ### Marathon Mode Still Ends The Match
 
-- Use image `1.2.1109-core20-ltsc2022-votefix-r1` or a newer versioned static image.
+- Use image `1.2.1109-core20-ltsc2022-votefix-maps-r2` or a newer versioned static image.
 - Set `TimeLimit=0` and `CnCModeTimeLimit=0` in `UDKRenegadeX.ini`, then restart the server.
 - Confirm `\renx-data\Config\UDKRenegadeX.ini` contains `TimeLimit=0` and `CnCModeTimeLimit=0`.
 - If staying on an older image, edit `\renx-data\Config\UDKRenegadeX.ini` manually and restart; do not wipe `renx-data`.
